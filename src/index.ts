@@ -89,6 +89,41 @@ export {
   isVine
 } from './movements/MovementClimb';
 
+// Elytra flight controller and utilities
+export {
+  ElytraController,
+  ElytraState,
+  hasElytraEquipped,
+  hasFireworkRockets,
+  planElytraPath,
+  isElytraViable,
+  type ElytraPathSegment
+} from './movements/MovementElytra';
+
+// Boat travel controller and utilities
+export {
+  BoatController,
+  BoatState,
+  isInBoat,
+  findNearbyBoat,
+  hasBoatItem,
+  planBoatPath,
+  isBoatViable,
+  type BoatPathSegment
+} from './movements/MovementBoat';
+
+// Path smoothing utilities
+export {
+  smoothPath,
+  simplifyPath,
+  calculatePathCost,
+  calculatePathDistance,
+  pathContains,
+  findInPath,
+  getPathSegment,
+  mergePaths
+} from './pathing/PathSmoother';
+
 // Async pathfinding
 export {
   AsyncPathfinder,
