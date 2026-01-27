@@ -454,3 +454,182 @@ export function pathfinder(bot: Bot, options: ContextOptions = {}): void {
 
 // Default export
 export default pathfinder;
+
+// ============================================================================
+// AltoClef/BaritonePlus Feature Exports
+// ============================================================================
+// Hierarchical task system, survival chains, trackers, and utilities
+// Based on architectural patterns from AltoClef and BaritonePlus Java projects
+
+// ---- Task System ----
+export {
+  // Interfaces
+  type ITask,
+  type ITaskChain,
+  type ITaskCanForce,
+  type ITaskRequiresGrounded,
+  type ITaskOverridesGrounded,
+  // Utilities
+  taskOverridesGrounded,
+  isGroundedOrSafe,
+  defaultGroundedShouldForce,
+  // Task classes
+  Task,
+  WrapperTask,
+  GroundedTask,
+  // Chain classes
+  TaskChain,
+  SingleTaskChain,
+  UserTaskChain,
+  ChainPriority,
+  // Task runner
+  TaskRunner,
+  createTaskRunner,
+  type TaskRunnerEvents,
+  // Resource tasks
+  ResourceTask,
+  CollectItemTask,
+  GatherItemTask,
+  MineAndCollectTask,
+  ITEM_SOURCE_BLOCKS,
+  createSourceBlockMap,
+  type ResourceTaskConfig,
+  // Task catalogue
+  TaskCatalogue,
+  createTaskCatalogue,
+  getAcquisitionChain,
+  SMELTING_RECIPES,
+  getSmeltingRecipe,
+  type TaskProvider,
+  type SmeltingRecipe,
+} from './tasks';
+
+// ---- Tracker System ----
+export {
+  // Base trackers
+  Tracker,
+  AsyncTracker,
+  // Tracker manager
+  TrackerManager,
+  createTrackerManager,
+  // Block tracker
+  BlockTracker,
+  type BlockTrackerConfig,
+  // Entity tracker
+  EntityTracker,
+  EntityCategory,
+  type CachedProjectile,
+  type ThreatInfo,
+  // Storage tracker
+  ItemStorageTracker,
+  ContainerType,
+  type ContainerCache,
+  type CachedItem,
+  type StorageTrackerConfig,
+} from './trackers';
+
+// ---- Chain System ----
+export {
+  FoodChain,
+  type FoodChainConfig,
+  WorldSurvivalChain,
+  type WorldSurvivalConfig,
+  MLGBucketChain,
+  type MLGConfig,
+  MobDefenseChain,
+  type MobDefenseConfig,
+} from './chains';
+
+// ---- Event System ----
+export {
+  EventBus,
+  HandlerPriority,
+  createEventBus,
+  createBotEventBridge,
+  getGlobalEventBus,
+  type EventTypes,
+  type EventHandler,
+} from './events';
+
+// ---- Crafting System ----
+export {
+  CraftingRecipe,
+  RecipeTarget,
+  CraftingGridSize,
+  COMMON_RECIPES,
+  getRecipe,
+  isCraftable,
+  registerRecipe,
+} from './crafting';
+
+// ---- Settings System ----
+export {
+  type BotSettings,
+  type PathfindingSettings,
+  type CombatSettings,
+  type FoodSettings,
+  type SafetySettings,
+  type MiningSettings,
+  type StorageSettings,
+  type MiscSettings,
+  DEFAULT_SETTINGS,
+  DEFAULT_PATHFINDING,
+  DEFAULT_COMBAT,
+  DEFAULT_FOOD,
+  DEFAULT_SAFETY,
+  DEFAULT_MINING,
+  DEFAULT_STORAGE,
+  DEFAULT_MISC,
+  mergeSettings,
+  validateSettings,
+  SettingsManager,
+  createSettingsManager,
+  getGlobalSettingsManager,
+  setGlobalSettingsManager,
+  type SettingsChangeCallback,
+  type SettingsManagerConfig,
+} from './settings';
+
+// ---- Utility System (AltoClef additions) ----
+export {
+  // Item Target
+  ItemTarget,
+  ItemTargets,
+  // Storage Helper
+  StorageHelper,
+  SlotType,
+  SLOT_MAPPINGS,
+  // Slot Handler
+  SlotHandler,
+  ClickType,
+  Slot,
+  PlayerInventorySlot,
+  ArmorSlot,
+  OffhandSlot,
+  ContainerSlot,
+  createSlotHandler,
+  type SlotHandlerConfig,
+  // Look Helper
+  LookHelper,
+  createLookHelper,
+  calculateLookRotation,
+  getEyeDistance,
+  type LookRotation,
+  type LookConfig,
+  // Timers
+  BaseTimer,
+  TimerGame,
+  TimerReal,
+  Stopwatch,
+  createGameTimer,
+  createRealTimer,
+  // Progress Checkers
+  type IProgressChecker,
+  withRetry,
+  LinearProgressChecker,
+  DistanceProgressChecker,
+  createApproachChecker,
+  createMovementChecker,
+  MovementProgressChecker,
+  ProgressCheckerRetry,
+} from './utils';

@@ -35,3 +35,12 @@ export {
   createSourceBlockMap,
   type ResourceTaskConfig,
 } from './ResourceTask';
+export {
+  TaskCatalogue,
+  createTaskCatalogue,
+  getAcquisitionChain,
+  SMELTING_RECIPES,
+  getSmeltingRecipe,
+  type TaskProvider,
+  type SmeltingRecipe,
+} from './TaskCatalogue';
