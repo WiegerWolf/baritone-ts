@@ -85,5 +85,8 @@ export {
   CollectWoodTask,
   GetToolTask,
   ensureTool,
+  GatherResourcesTask,
+  gatherResources,
   type ToolType,
+  type GatherConfig,
 } from './composite';

@@ -7,3 +7,8 @@
 
 export { CollectWoodTask } from './CollectWoodTask';
 export { GetToolTask, ensureTool, type ToolType } from './GetToolTask';
+export {
+  GatherResourcesTask,
+  gatherResources,
+  type GatherConfig,
+} from './GatherResourcesTask';

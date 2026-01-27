@@ -144,13 +144,17 @@ src/tasks/concrete/
 - [x] GetToolTask - Ensure bot has required tool, crafting if necessary
 - [x] ensureTool() - Convenience function for tool acquisition
 - [x] ToolType type - 'pickaxe' | 'axe' | 'shovel' | 'sword' | 'hoe'
+- [x] GatherResourcesTask - Flexible multi-item gathering with multiple methods
+- [x] gatherResources() - Convenience function for resource gathering
+- [x] GatherConfig - Configuration for gather behavior
 
 ## New Files (Iteration 10)
 ```
 src/tasks/composite/
-├── index.ts           # Exports all composite tasks
-├── CollectWoodTask.ts # Wood collection workflow
-└── GetToolTask.ts     # Tool acquisition with crafting
+├── index.ts              # Exports all composite tasks
+├── CollectWoodTask.ts    # Wood collection workflow
+├── GetToolTask.ts        # Tool acquisition with crafting
+└── GatherResourcesTask.ts # Multi-item resource gathering
 ```
 
 ## Updated Architecture Overview
@@ -173,8 +177,9 @@ src/
 │   │   ├── InventoryTask.ts   # Item management
 │   │   └── InteractTask.ts    # Block/entity interaction
 │   └── composite/        # High-level orchestrating tasks
-│       ├── CollectWoodTask.ts # Wood gathering workflow
-│       └── GetToolTask.ts     # Tool acquisition
+│       ├── CollectWoodTask.ts    # Wood gathering workflow
+│       ├── GetToolTask.ts        # Tool acquisition
+│       └── GatherResourcesTask.ts # Multi-item gathering
 ├── chains/          # Priority chains
 │   ├── FoodChain.ts
 │   ├── WorldSurvivalChain.ts
@@ -203,9 +208,9 @@ src/
 ## Next Steps (Future Iterations)
 
 1. **More Composite Tasks**
-   - GatherResourcesTask (flexible multi-item gathering)
    - MineOresTask (find and mine ore deposits)
    - BuildShelterTask (create basic shelter)
+   - FarmTask (plant/harvest crops)
 
 2. **Testing and Polish**
    - Integration tests for concrete tasks
