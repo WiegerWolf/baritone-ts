@@ -1,5 +1,8 @@
 import { PathNode, MovementStatus, BlockPos, CalculationContext } from '../types';
 import { Movement, MovementTraverse, MovementAscend, MovementDescend, MovementDiagonal, MovementPillar, MovementParkour } from '../movements/Movement';
+import { MovementFall } from '../movements/MovementFall';
+import { getMovementHelper } from '../movements/MovementHelper';
+import { getChunkLoadingHelper, ChunkLoadingHelper } from './ChunkLoadingHelper';
 
 /**
  * PathExecutor handles the execution of a calculated path
@@ -28,6 +31,18 @@ export class PathExecutor {
 
   private currentMovementEstimate: number = 0;
 
+  // Fall override state
+  private fallOverrideActive: boolean = false;
+  private fallStartY: number = 0;
+  private fallTargetMovements: number[] = []; // Indices of movements that can be skipped during fall
+
+  // Chunk loading
+  private chunkHelper: ChunkLoadingHelper;
+  private waitingForChunk: boolean = false;
+
+  // Failure tracking
+  private failureMode: PathFailureMode = PathFailureMode.NONE;
+
   constructor(
     bot: any,
     ctx: CalculationContext,
@@ -37,6 +52,7 @@ export class PathExecutor {
     this.ctx = ctx;
     this.path = path;
     this.movements = this.buildMovements(path);
+    this.chunkHelper = getChunkLoadingHelper(bot);
 
     if (this.movements.length > 0) {
       this.currentMovementEstimate = this.movements[0].calculateCost(ctx);
@@ -83,9 +99,14 @@ export class PathExecutor {
       return new MovementAscend(src, dest);
     }
 
-    // Descend (diagonal down)
-    if (dy < 0 && (Math.abs(dx) === 1 || Math.abs(dz) === 1)) {
+    // Descend (diagonal down, small fall)
+    if (dy < 0 && dy >= -3 && (Math.abs(dx) === 1 || Math.abs(dz) === 1)) {
       return new MovementDescend(src, dest);
+    }
+
+    // Fall (diagonal down, large fall requiring water bucket or taking damage)
+    if (dy < -3 && (Math.abs(dx) <= 1 && Math.abs(dz) <= 1)) {
+      return new MovementFall(src, dest);
     }
 
     // Diagonal (same level, diagonal)
@@ -103,9 +124,14 @@ export class PathExecutor {
       return new MovementTraverse(src, dest);
     }
 
-    // Down (straight down)
-    if (dx === 0 && dz === 0 && dy < 0) {
+    // Straight down (small)
+    if (dx === 0 && dz === 0 && dy < 0 && dy >= -3) {
       return new MovementDescend(src, dest);
+    }
+
+    // Straight down (large fall)
+    if (dx === 0 && dz === 0 && dy < -3) {
+      return new MovementFall(src, dest);
     }
 
     return null;
@@ -125,8 +151,8 @@ export class PathExecutor {
     // Handle lag teleport detection (server moved us back)
     this.handleLagTeleport();
 
-    // Check for off-path drift
-    if (!this.checkOnPath()) {
+    // Check for off-path drift (but allow during fall override)
+    if (!this.fallOverrideActive && !this.checkOnPath()) {
       this.ticksAway++;
       if (this.ticksAway > PathExecutor.MAX_TICKS_AWAY) {
         this.cancel();
@@ -136,9 +162,38 @@ export class PathExecutor {
       this.ticksAway = 0;
     }
 
-    // Execute current movement
+    // Handle fall override - skip movements while falling
+    if (this.fallOverrideActive) {
+      const handled = this.handleFallOverride();
+      if (handled) {
+        return false; // Continue falling, don't execute current movement
+      }
+    }
+
+    // Check chunk loading before executing movement
     const movement = this.movements[this.pathPosition];
+    if (!this.chunkHelper.canExecuteMovement(movement.src, movement.dest)) {
+      // Chunk not loaded - wait or fail
+      if (!this.waitingForChunk) {
+        this.waitingForChunk = true;
+        // Try to wait for chunk load
+        this.chunkHelper.waitForChunkLoad(movement.dest.x, movement.dest.z, 3000).then(loaded => {
+          this.waitingForChunk = false;
+          if (!loaded) {
+            // Chunk didn't load in time - cancel path
+            this.failureMode = PathFailureMode.UNLOADED_CHUNK;
+          }
+        });
+      }
+      return false; // Wait for chunk
+    }
+    this.waitingForChunk = false;
+
+    // Execute current movement
     const status = movement.tick(this.ctx, this.bot);
+
+    // Check for fall override trigger
+    this.checkFallOverrideTrigger(movement, status);
 
     // Handle movement completion
     if (status === MovementStatus.SUCCESS) {
@@ -170,6 +225,111 @@ export class PathExecutor {
     }
 
     return false;
+  }
+
+  /**
+   * Check if we should trigger fall override
+   * This happens when a descend movement starts falling and subsequent movements
+   * can accept the fall override
+   */
+  private checkFallOverrideTrigger(movement: Movement, status: MovementStatus): void {
+    // Only trigger from descend or fall movements when we start falling
+    if (!(movement instanceof MovementDescend) && !(movement instanceof MovementFall)) {
+      return;
+    }
+
+    // Only trigger when movement enters waiting state (falling)
+    if (status !== MovementStatus.WAITING) {
+      return;
+    }
+
+    // Check if already in fall override
+    if (this.fallOverrideActive) {
+      return;
+    }
+
+    // Look ahead to find consecutive movements that can accept fall override
+    this.fallTargetMovements = [];
+    const pos = this.bot.entity.position;
+    this.fallStartY = pos.y;
+
+    for (let i = this.pathPosition + 1; i < this.movements.length; i++) {
+      const nextMovement = this.movements[i];
+
+      // Check if movement can accept fall override
+      if (nextMovement.canAcceptFall()) {
+        this.fallTargetMovements.push(i);
+
+        // Continue if this is also a descend
+        if (nextMovement instanceof MovementDescend) {
+          continue;
+        }
+      }
+
+      // Stop checking if we hit a non-fall-compatible movement
+      break;
+    }
+
+    // Activate fall override if we have targets
+    if (this.fallTargetMovements.length > 0) {
+      this.fallOverrideActive = true;
+    }
+  }
+
+  /**
+   * Handle fall override - skip movements while the bot is falling through them
+   * Returns true if fall override is handling this tick
+   */
+  private handleFallOverride(): boolean {
+    const pos = this.bot.entity.position;
+    const currentY = Math.floor(pos.y);
+
+    // Check if we've landed
+    if (this.bot.entity.onGround) {
+      // Find which movement we landed on
+      for (let i = this.fallTargetMovements.length - 1; i >= 0; i--) {
+        const movementIdx = this.fallTargetMovements[i];
+        const movement = this.movements[movementIdx];
+
+        if (Math.abs(pos.y - movement.dest.y) < 1 &&
+            Math.abs(pos.x - (movement.dest.x + 0.5)) < 0.5 &&
+            Math.abs(pos.z - (movement.dest.z + 0.5)) < 0.5) {
+          // Landed at this movement's destination
+          this.pathPosition = movementIdx + 1;
+          this.fallOverrideActive = false;
+          this.fallTargetMovements = [];
+          this.ticksOnCurrent = 0;
+          return false; // Let normal execution continue
+        }
+      }
+
+      // Landed but not at a target - fall override failed
+      this.fallOverrideActive = false;
+      this.fallTargetMovements = [];
+      return false;
+    }
+
+    // Still falling - guide toward final destination
+    if (this.fallTargetMovements.length > 0) {
+      const finalIdx = this.fallTargetMovements[this.fallTargetMovements.length - 1];
+      const finalMovement = this.movements[finalIdx];
+
+      // Move toward final destination while falling
+      const helper = getMovementHelper(this.bot, this.ctx);
+      helper.moveToward(finalMovement.dest, 0.3, false, false);
+
+      // Skip movements we're falling past
+      while (this.pathPosition < finalIdx) {
+        const movement = this.movements[this.pathPosition];
+        if (currentY <= movement.dest.y) {
+          this.pathPosition++;
+        } else {
+          break;
+        }
+      }
+    }
+
+    return true;
   }
 
   /**
@@ -341,6 +501,20 @@ export class PathExecutor {
    */
   getCurrentMovement(): Movement | null {
     return this.movements[this.pathPosition] ?? null;
+  }
+
+  /**
+   * Get the current failure mode
+   */
+  getFailureMode(): PathFailureMode {
+    return this.failureMode;
+  }
+
+  /**
+   * Check if path has failed
+   */
+  hasFailed(): boolean {
+    return this.failureMode !== PathFailureMode.NONE;
   }
 
   /**

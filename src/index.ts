@@ -6,10 +6,40 @@ import { AStar } from './pathing/AStar';
 import { PathExecutor } from './pathing/PathExecutor';
 import { Favoring, buildFavoring, createAvoidances } from './pathing/Favoring';
 
-// Re-export types and classes
-export * from './types';
+// Re-export types and classes (excluding COST_INF to avoid conflict with ActionCosts)
+export {
+  BlockPos,
+  PathNode,
+  MovementStatus,
+  Passability,
+  PathingBlockType,
+  PathResult,
+  CalculationContext as CalculationContextInterface,
+  Goal,
+  Movement as MovementInterface,
+  MutableMoveResult
+} from './types';
 export * from './goals';
-export * from './core/ActionCosts';
+export {
+  WALK_ONE_BLOCK_COST,
+  SPRINT_ONE_BLOCK_COST,
+  SPRINT_MULTIPLIER,
+  SNEAK_ONE_BLOCK_COST,
+  WALK_ONE_IN_WATER_COST,
+  WALK_ONE_OVER_SOUL_SAND_COST,
+  LADDER_UP_ONE_COST,
+  LADDER_DOWN_ONE_COST,
+  JUMP_ONE_BLOCK_COST,
+  WALK_OFF_BLOCK_COST,
+  CENTER_AFTER_FALL_COST,
+  SQRT_2,
+  FALL_N_BLOCKS_COST,
+  getFallCost,
+  getBreakCost,
+  getTerrainCost,
+  PLACE_ONE_BLOCK_COST,
+  BACKPLACE_ADDITIONAL_PENALTY
+} from './core/ActionCosts';
 export { CalculationContextImpl as CalculationContext } from './core/CalculationContext';
 export { AStar } from './pathing/AStar';
 export { PathExecutor } from './pathing/PathExecutor';

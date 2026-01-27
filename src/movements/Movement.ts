@@ -16,6 +16,7 @@ import {
   PLACE_ONE_BLOCK_COST,
   BACKPLACE_ADDITIONAL_PENALTY
 } from '../core/ActionCosts';
+import { MovementHelper, getMovementHelper } from './MovementHelper';
 
 /**
  * Base class for all movement types
@@ -33,9 +34,23 @@ export abstract class Movement {
   protected state: MovementState = MovementState.NOT_STARTED;
   protected ticksOnCurrent: number = 0;
 
+  // Helper instance (set during execution)
+  protected helper: MovementHelper | null = null;
+
+  // Fall override - allows fall to continue into this movement
+  public canAcceptFallOverride: boolean = false;
+  public fallOverrideActive: boolean = false;
+
   constructor(src: BlockPos, dest: BlockPos) {
     this.src = src;
     this.dest = dest;
+  }
+
+  /**
+   * Initialize helper for execution
+   */
+  initHelper(bot: any, ctx: CalculationContext): void {
+    this.helper = getMovementHelper(bot, ctx);
   }
 
   /**
@@ -55,6 +70,68 @@ export abstract class Movement {
   reset(): void {
     this.state = MovementState.NOT_STARTED;
     this.ticksOnCurrent = 0;
+    this.fallOverrideActive = false;
+    if (this.helper) {
+      this.helper.clear();
+    }
+  }
+
+  /**
+   * Start movement with fall override (bot is already falling toward this movement)
+   */
+  startWithFallOverride(): void {
+    this.fallOverrideActive = true;
+    this.state = MovementState.WAITING; // Skip to waiting for landing
+  }
+
+  /**
+   * Check if this movement can accept a fall override from a previous movement
+   */
+  canAcceptFall(): boolean {
+    return this.canAcceptFallOverride;
+  }
+
+  /**
+   * Common execution for breaking blocks
+   * Returns true when breaking is complete
+   */
+  protected async tickBreaking(): Promise<boolean> {
+    if (!this.helper) return true;
+
+    if (!this.helper.hasBlocksToBreak()) {
+      // Initialize break queue if not done
+      if (this.toBreak.length > 0) {
+        this.helper.setToBreak(this.toBreak);
+      } else {
+        return true;
+      }
+    }
+
+    const status = await this.helper.tickBreaking();
+    return status === MovementStatus.SUCCESS;
+  }
+
+  /**
+   * Common execution for placing blocks
+   * Returns true when placing is complete
+   */
+  protected async tickPlacing(): Promise<boolean> {
+    if (!this.helper) return true;
+
+    if (!this.helper.hasBlocksToPlace()) {
+      // Initialize place queue if not done
+      if (this.toPlace.length > 0) {
+        this.helper.setToPlace(this.toPlace);
+      } else {
+        return true;
+      }
+    }
+
+    const status = await this.helper.tickPlacing();
+    if (status === MovementStatus.FAILED) {
+      return true; // Failed but still "complete" - will be handled by movement
+    }
+    return status === MovementStatus.SUCCESS;
   }
 
   /**
@@ -206,16 +283,19 @@ export class MovementTraverse extends Movement {
 
   tick(ctx: CalculationContext, bot: any): MovementStatus {
     this.ticksOnCurrent++;
+    if (!this.helper) this.initHelper(bot, ctx);
 
     switch (this.state) {
       case MovementState.NOT_STARTED:
         // Check if we need to break blocks
         if (this.toBreak.length > 0) {
+          this.helper!.setToBreak(this.toBreak);
           this.state = MovementState.BREAKING;
           return MovementStatus.PREPPING;
         }
         // Check if we need to place blocks
         if (this.toPlace.length > 0) {
+          this.helper!.setToPlace(this.toPlace);
           this.state = MovementState.PLACING;
           return MovementStatus.PREPPING;
         }
@@ -223,35 +303,41 @@ export class MovementTraverse extends Movement {
         return MovementStatus.RUNNING;
 
       case MovementState.BREAKING:
-        // TODO: Implement block breaking
-        if (this.toBreak.length === 0) {
-          this.state = MovementState.MOVING;
-        }
+        // Use helper for breaking
+        this.helper!.tickBreaking().then(status => {
+          if (status === MovementStatus.SUCCESS) {
+            if (this.toPlace.length > 0) {
+              this.helper!.setToPlace(this.toPlace);
+              this.state = MovementState.PLACING;
+            } else {
+              this.state = MovementState.MOVING;
+            }
+          }
+        });
         return MovementStatus.RUNNING;
 
       case MovementState.PLACING:
-        // TODO: Implement block placing
-        if (this.toPlace.length === 0) {
-          this.state = MovementState.MOVING;
-        }
+        // Use helper for placing (bridging)
+        this.helper!.tickPlacing().then(status => {
+          if (status === MovementStatus.SUCCESS || status === MovementStatus.FAILED) {
+            this.state = MovementState.MOVING;
+          }
+        });
+        // While placing, sneak to avoid falling
+        bot.setControlState('sneak', true);
         return MovementStatus.RUNNING;
 
       case MovementState.MOVING:
-        // Check if we've reached destination
-        const pos = bot.entity.position;
-        const dx = Math.abs(pos.x - (this.dest.x + 0.5));
-        const dz = Math.abs(pos.z - (this.dest.z + 0.5));
+        bot.setControlState('sneak', false);
 
-        if (dx < 0.25 && dz < 0.25) {
+        // Check if we've reached destination
+        if (this.helper!.isAtPosition(this.dest)) {
           this.state = MovementState.FINISHED;
           return MovementStatus.SUCCESS;
         }
 
         // Move toward destination
-        const yaw = Math.atan2(-(this.dest.x + 0.5 - pos.x), -(this.dest.z + 0.5 - pos.z));
-        bot.look(yaw, 0);
-        bot.setControlState('forward', true);
-
+        this.helper!.moveToward(this.dest, 0.25, ctx.allowSprint);
         return MovementStatus.RUNNING;
 
       case MovementState.FINISHED:
@@ -267,6 +353,8 @@ export class MovementTraverse extends Movement {
  * MovementAscend: Jump up one block
  */
 export class MovementAscend extends Movement {
+  private jumped: boolean = false;
+
   constructor(src: BlockPos, dest: BlockPos) {
     super(src, dest);
   }
@@ -308,37 +396,67 @@ export class MovementAscend extends Movement {
 
   tick(ctx: CalculationContext, bot: any): MovementStatus {
     this.ticksOnCurrent++;
+    if (!this.helper) this.initHelper(bot, ctx);
 
     switch (this.state) {
       case MovementState.NOT_STARTED:
         if (this.toBreak.length > 0) {
+          this.helper!.setToBreak(this.toBreak);
           this.state = MovementState.BREAKING;
           return MovementStatus.PREPPING;
         }
         if (this.toPlace.length > 0) {
+          this.helper!.setToPlace(this.toPlace);
           this.state = MovementState.PLACING;
           return MovementStatus.PREPPING;
         }
         this.state = MovementState.MOVING;
         return MovementStatus.RUNNING;
 
-      case MovementState.MOVING:
-        const pos = bot.entity.position;
-        const dx = Math.abs(pos.x - (this.dest.x + 0.5));
-        const dy = pos.y - this.dest.y;
-        const dz = Math.abs(pos.z - (this.dest.z + 0.5));
+      case MovementState.BREAKING:
+        this.helper!.tickBreaking().then(status => {
+          if (status === MovementStatus.SUCCESS) {
+            if (this.toPlace.length > 0) {
+              this.helper!.setToPlace(this.toPlace);
+              this.state = MovementState.PLACING;
+            } else {
+              this.state = MovementState.MOVING;
+            }
+          }
+        });
+        return MovementStatus.RUNNING;
 
-        if (dx < 0.25 && dz < 0.25 && Math.abs(dy) < 0.5) {
+      case MovementState.PLACING:
+        this.helper!.tickPlacing().then(status => {
+          if (status === MovementStatus.SUCCESS || status === MovementStatus.FAILED) {
+            this.state = MovementState.MOVING;
+          }
+        });
+        return MovementStatus.RUNNING;
+
+      case MovementState.MOVING:
+        // Check if we've reached destination
+        if (this.helper!.isAtPosition(this.dest, 0.3)) {
           this.state = MovementState.FINISHED;
+          bot.setControlState('jump', false);
           return MovementStatus.SUCCESS;
         }
 
-        // Jump and move
-        const yaw = Math.atan2(-(this.dest.x + 0.5 - pos.x), -(this.dest.z + 0.5 - pos.z));
-        bot.look(yaw, 0);
-        bot.setControlState('forward', true);
-        bot.setControlState('jump', true);
+        // Jump and move toward destination
+        const pos = bot.entity.position;
+        const atSrc = Math.abs(pos.x - (this.src.x + 0.5)) < 0.4 &&
+                      Math.abs(pos.z - (this.src.z + 0.5)) < 0.4;
 
+        // Only jump when at source and on ground
+        if (atSrc && bot.entity.onGround && !this.jumped) {
+          bot.setControlState('jump', true);
+          this.jumped = true;
+        } else if (this.jumped && !bot.entity.onGround) {
+          bot.setControlState('jump', false);
+        }
+
+        // Move toward destination
+        this.helper!.moveToward(this.dest, 0.25, false, false);
         return MovementStatus.RUNNING;
 
       case MovementState.FINISHED:
@@ -348,10 +466,16 @@ export class MovementAscend extends Movement {
         return MovementStatus.FAILED;
     }
   }
+
+  reset(): void {
+    super.reset();
+    this.jumped = false;
+  }
 }
 
 /**
  * MovementDescend: Drop down one or more blocks
+ * Supports fall override for continuous falling
  */
 export class MovementDescend extends Movement {
   private readonly fallHeight: number;
@@ -359,6 +483,8 @@ export class MovementDescend extends Movement {
   constructor(src: BlockPos, dest: BlockPos) {
     super(src, dest);
     this.fallHeight = src.y - dest.y;
+    // Descend can accept fall override - bot can fall through without stopping
+    this.canAcceptFallOverride = true;
   }
 
   calculateCost(ctx: CalculationContext): number {
@@ -390,6 +516,7 @@ export class MovementDescend extends Movement {
 
   tick(ctx: CalculationContext, bot: any): MovementStatus {
     this.ticksOnCurrent++;
+    if (!this.helper) this.initHelper(bot, ctx);
 
     switch (this.state) {
       case MovementState.NOT_STARTED:
@@ -397,14 +524,8 @@ export class MovementDescend extends Movement {
         return MovementStatus.RUNNING;
 
       case MovementState.MOVING:
-        const pos = bot.entity.position;
-        const dx = Math.abs(pos.x - (this.dest.x + 0.5));
-        const dz = Math.abs(pos.z - (this.dest.z + 0.5));
-
-        // Walk toward destination
-        const yaw = Math.atan2(-(this.dest.x + 0.5 - pos.x), -(this.dest.z + 0.5 - pos.z));
-        bot.look(yaw, 0);
-        bot.setControlState('forward', true);
+        // Walk toward edge
+        this.helper!.moveToward(this.dest, 0.3, false, false);
 
         // Check if we're falling
         if (!bot.entity.onGround) {
@@ -414,21 +535,16 @@ export class MovementDescend extends Movement {
         return MovementStatus.RUNNING;
 
       case MovementState.WAITING:
+        // Continue moving toward destination while falling
+        this.helper!.moveToward(this.dest, 0.3, false, false);
+
         // Wait for landing
         if (bot.entity.onGround) {
-          const pos = bot.entity.position;
-          const dy = Math.abs(pos.y - this.dest.y);
-
-          if (dy < 0.5) {
+          if (this.helper!.isAtPosition(this.dest, 0.5)) {
             this.state = MovementState.FINISHED;
             return MovementStatus.SUCCESS;
           }
         }
-
-        // Continue moving toward destination while falling
-        const fallPos = bot.entity.position;
-        const fallYaw = Math.atan2(-(this.dest.x + 0.5 - fallPos.x), -(this.dest.z + 0.5 - fallPos.z));
-        bot.look(fallYaw, 0);
 
         return MovementStatus.WAITING;
 
@@ -438,6 +554,18 @@ export class MovementDescend extends Movement {
       default:
         return MovementStatus.FAILED;
     }
+  }
+
+  /**
+   * Get the y-level we expect to be falling through
+   * Used by fall override system
+   */
+  getFallPath(): number[] {
+    const path: number[] = [];
+    for (let y = this.src.y; y >= this.dest.y; y--) {
+      path.push(y);
+    }
+    return path;
   }
 }
 
@@ -487,19 +615,13 @@ export class MovementDiagonal extends Movement {
 
   tick(ctx: CalculationContext, bot: any): MovementStatus {
     this.ticksOnCurrent++;
+    if (!this.helper) this.initHelper(bot, ctx);
 
-    const pos = bot.entity.position;
-    const dx = Math.abs(pos.x - (this.dest.x + 0.5));
-    const dz = Math.abs(pos.z - (this.dest.z + 0.5));
-
-    if (dx < 0.25 && dz < 0.25) {
+    if (this.helper!.isAtPosition(this.dest)) {
       return MovementStatus.SUCCESS;
     }
 
-    const yaw = Math.atan2(-(this.dest.x + 0.5 - pos.x), -(this.dest.z + 0.5 - pos.z));
-    bot.look(yaw, 0);
-    bot.setControlState('forward', true);
-
+    this.helper!.moveToward(this.dest, 0.25, ctx.allowSprint, false);
     return MovementStatus.RUNNING;
   }
 }
@@ -508,6 +630,9 @@ export class MovementDiagonal extends Movement {
  * MovementPillar: Jump straight up (tower)
  */
 export class MovementPillar extends Movement {
+  private hasPlacedBlock: boolean = false;
+  private jumpStartY: number = 0;
+
   constructor(src: BlockPos, dest: BlockPos) {
     super(src, dest);
   }
@@ -543,26 +668,56 @@ export class MovementPillar extends Movement {
 
   tick(ctx: CalculationContext, bot: any): MovementStatus {
     this.ticksOnCurrent++;
+    if (!this.helper) this.initHelper(bot, ctx);
 
     switch (this.state) {
       case MovementState.NOT_STARTED:
         if (this.toBreak.length > 0) {
+          this.helper!.setToBreak(this.toBreak);
           this.state = MovementState.BREAKING;
           return MovementStatus.PREPPING;
         }
+        this.jumpStartY = bot.entity.position.y;
         this.state = MovementState.PLACING;
         return MovementStatus.RUNNING;
 
+      case MovementState.BREAKING:
+        this.helper!.tickBreaking().then(status => {
+          if (status === MovementStatus.SUCCESS) {
+            this.jumpStartY = bot.entity.position.y;
+            this.state = MovementState.PLACING;
+          }
+        });
+        return MovementStatus.RUNNING;
+
       case MovementState.PLACING:
-        // Jump and place
-        bot.setControlState('jump', true);
-
-        // TODO: Implement block placement timing
-
         const pos = bot.entity.position;
-        if (pos.y >= this.dest.y) {
+
+        // Check if we're at destination
+        if (pos.y >= this.dest.y && bot.entity.onGround) {
+          bot.setControlState('jump', false);
           this.state = MovementState.FINISHED;
           return MovementStatus.SUCCESS;
+        }
+
+        // Jump to make room for block placement
+        if (bot.entity.onGround) {
+          bot.setControlState('jump', true);
+          this.jumpStartY = pos.y;
+        }
+
+        // Place block when at peak of jump
+        if (!this.hasPlacedBlock && pos.y > this.jumpStartY + 0.8) {
+          // Look down and place
+          bot.look(bot.entity.yaw, Math.PI / 2);
+
+          // Place block below
+          this.helper!.setToPlace([this.src]);
+          this.helper!.tickPlacing().then(status => {
+            if (status === MovementStatus.SUCCESS) {
+              this.hasPlacedBlock = true;
+            }
+          });
         }
 
         return MovementStatus.RUNNING;
@@ -574,6 +729,12 @@ export class MovementPillar extends Movement {
         return MovementStatus.FAILED;
     }
   }
+
+  reset(): void {
+    super.reset();
+    this.hasPlacedBlock = false;
+    this.jumpStartY = 0;
+  }
 }
 
 /**
@@ -581,6 +742,7 @@ export class MovementPillar extends Movement {
  */
 export class MovementParkour extends Movement {
   private readonly distance: number;
+  private hasJumped: boolean = false;
 
   constructor(src: BlockPos, dest: BlockPos) {
     super(src, dest);
@@ -624,22 +786,39 @@ export class MovementParkour extends Movement {
 
   tick(ctx: CalculationContext, bot: any): MovementStatus {
     this.ticksOnCurrent++;
+    if (!this.helper) this.initHelper(bot, ctx);
 
-    const pos = bot.entity.position;
-    const dx = Math.abs(pos.x - (this.dest.x + 0.5));
-    const dz = Math.abs(pos.z - (this.dest.z + 0.5));
-
-    if (dx < 0.4 && dz < 0.4 && bot.entity.onGround) {
+    // Check if we've landed at destination
+    if (this.helper!.isAtPosition(this.dest, 0.4) && bot.entity.onGround) {
+      bot.setControlState('sprint', false);
+      bot.setControlState('jump', false);
       return MovementStatus.SUCCESS;
     }
 
-    // Sprint jump toward destination
-    const yaw = Math.atan2(-(this.dest.x + 0.5 - pos.x), -(this.dest.z + 0.5 - pos.z));
-    bot.look(yaw, 0);
-    bot.setControlState('forward', true);
-    bot.setControlState('sprint', this.distance > 3);
-    bot.setControlState('jump', bot.entity.onGround);
+    const pos = bot.entity.position;
+    const needsSprint = this.distance > 3;
+
+    // Move toward destination
+    this.helper!.moveToward(this.dest, 0.2, needsSprint, false);
+
+    // Jump at edge of source block
+    const distFromSrc = Math.sqrt(
+      Math.pow(pos.x - (this.src.x + 0.5), 2) +
+      Math.pow(pos.z - (this.src.z + 0.5), 2)
+    );
+
+    if (bot.entity.onGround && distFromSrc >= 0.3 && !this.hasJumped) {
+      bot.setControlState('jump', true);
+      this.hasJumped = true;
+    } else if (!bot.entity.onGround) {
+      bot.setControlState('jump', false);
+    }
 
     return MovementStatus.RUNNING;
+  }
+
+  reset(): void {
+    super.reset();
+    this.hasJumped = false;
   }
 }

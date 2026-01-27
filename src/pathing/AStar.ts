@@ -1,4 +1,4 @@
-import { PathNode, PathResult, Goal, CalculationContext, COST_INF } from '../types';
+import { PathNode, PathResult, Goal, CalculationContext, COST_INF, BlockPos } from '../types';
 import { BinaryHeap } from './BinaryHeap';
 
 /**
@@ -196,8 +196,8 @@ export class AStar {
       existingNode.cost = tentativeCost;
       existingNode.combinedCost = tentativeCost + existingNode.estimatedCostToGoal;
       existingNode.previous = current;
-      existingNode.toBreak = neighbor.toBreak || [];
-      existingNode.toPlace = neighbor.toPlace || [];
+      existingNode.toBreak = neighbor.toBreak?.map(p => new BlockPos(p.x, p.y, p.z)) || [];
+      existingNode.toPlace = neighbor.toPlace?.map(p => new BlockPos(p.x, p.y, p.z)) || [];
 
       // Update multi-coefficient tracking for graceful degradation
       for (let i = 0; i < AStar.COEFFICIENTS.length; i++) {

@@ -5,6 +5,7 @@ import {
   getFallCost,
   PLACE_ONE_BLOCK_COST
 } from '../core/ActionCosts';
+import { getMovementHelper } from './MovementHelper';
 
 /**
  * MovementFall handles extended falls with optional water bucket cushioning
@@ -20,6 +21,8 @@ export class MovementFall extends Movement {
   constructor(src: BlockPos, dest: BlockPos) {
     super(src, dest);
     this.fallHeight = src.y - dest.y;
+    // MovementFall can accept fall override from previous movements
+    this.canAcceptFallOverride = true;
   }
 
   calculateCost(ctx: CalculationContext): number {
@@ -83,22 +86,21 @@ export class MovementFall extends Movement {
 
   tick(ctx: CalculationContext, bot: any): MovementStatus {
     this.ticksOnCurrent++;
+    if (!this.helper) this.initHelper(bot, ctx);
 
     switch (this.state) {
       case MovementState.NOT_STARTED:
+        // If fall override is active, we're already falling
+        if (this.fallOverrideActive) {
+          this.state = MovementState.WAITING;
+          return MovementStatus.WAITING;
+        }
         this.state = MovementState.MOVING;
         return MovementStatus.RUNNING;
 
       case MovementState.MOVING:
         // Walk toward edge
-        const pos = bot.entity.position;
-        const dx = Math.abs(pos.x - (this.dest.x + 0.5));
-        const dz = Math.abs(pos.z - (this.dest.z + 0.5));
-
-        // Look toward destination
-        const yaw = Math.atan2(-(this.dest.x + 0.5 - pos.x), -(this.dest.z + 0.5 - pos.z));
-        bot.look(yaw, 0);
-        bot.setControlState('forward', true);
+        this.helper!.moveToward(this.dest, 0.3, false, false);
 
         // Check if we're over the edge (falling)
         if (!bot.entity.onGround) {
@@ -127,8 +129,12 @@ export class MovementFall extends Movement {
     const heightAboveGround = pos.y - this.dest.y;
 
     // Continue moving toward destination while falling
-    const yaw = Math.atan2(-(this.dest.x + 0.5 - pos.x), -(this.dest.z + 0.5 - pos.z));
-    bot.look(yaw, this.useWaterBucket ? Math.PI / 2 : 0); // Look down if using bucket
+    this.helper!.moveToward(this.dest, 0.3, false, false);
+
+    // Adjust look for water bucket
+    if (this.useWaterBucket) {
+      bot.look(bot.entity.yaw, Math.PI / 2); // Look down
+    }
 
     // Water bucket logic
     if (this.useWaterBucket && !this.waterBucketPlaced) {
@@ -143,11 +149,7 @@ export class MovementFall extends Movement {
       this.ticksSinceLanding++;
 
       // Check if we're at destination
-      const dy = Math.abs(pos.y - this.dest.y);
-      const dx = Math.abs(pos.x - (this.dest.x + 0.5));
-      const dz = Math.abs(pos.z - (this.dest.z + 0.5));
-
-      if (dy < 1 && dx < 0.5 && dz < 0.5) {
+      if (this.helper!.isAtPosition(this.dest, 0.5)) {
         // Pick up water if we placed it
         if (this.waterBucketPlaced && !this.waterBucketPickedUp) {
           if (this.ticksSinceLanding >= 3) { // Wait a moment
@@ -236,6 +238,16 @@ export class MovementFall extends Movement {
     positions.push(this.dest);
     return positions;
   }
+
+  /**
+   * Reset movement state
+   */
+  reset(): void {
+    super.reset();
+    this.waterBucketPlaced = false;
+    this.waterBucketPickedUp = false;
+    this.ticksSinceLanding = 0;
+  }
 }
 
 /**
@@ -254,7 +266,8 @@ export function dynamicFallCost(
   let currentY = startY - 1;
   let fallDistance = 1;
 
-  while (currentY >= ctx.bot.game?.minY ?? -64 && fallDistance <= maxFall) {
+  const minY = (ctx.bot.game as any)?.minY ?? -64;
+  while (currentY >= minY && fallDistance <= maxFall) {
     const block = ctx.getBlock(destX, currentY, destZ);
     const blockAbove = ctx.getBlock(destX, currentY + 1, destZ);
 
