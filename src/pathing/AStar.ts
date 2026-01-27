@@ -258,6 +258,8 @@ export class AStar {
       // Parkour (long jump)
       if (this.ctx.allowParkour) {
         this.checkParkour(x, y, z, dir.dx, dir.dz, neighbors);
+        // Parkour ascend (long jump + climb)
+        this.checkParkourAscend(x, y, z, dir.dx, dir.dz, neighbors);
       }
     }
 
@@ -698,6 +700,85 @@ export class AStar {
         z: destZ,
         moveCost: cost,
         hash: `${destX},${y},${destZ}`,
+        parkour: true
+      });
+
+      break; // Only consider first valid landing
+    }
+  }
+
+  /**
+   * Check parkour ascend movement (long jump with +1 Y)
+   * More difficult than standard parkour, requires sprint
+   */
+  private checkParkourAscend(
+    x: number, y: number, z: number,
+    dx: number, dz: number,
+    neighbors: NeighborMove[]
+  ): void {
+    // Must be able to sprint for parkour ascend
+    if (!this.ctx.allowSprint) return;
+
+    // Check we're not starting from water
+    const currentBlock = this.ctx.getBlock(x, y, z);
+    if (this.ctx.isWater(currentBlock)) return;
+
+    // Check head clearance at source (need extra space)
+    const headSpace1 = this.ctx.getBlock(x, y + 2, z);
+    if (!this.ctx.canWalkThrough(headSpace1)) return;
+
+    // Check there's a gap (not just ascending via blocks)
+    const gap1 = this.ctx.getBlock(x + dx, y, z + dz);
+    const gap2 = this.ctx.getBlock(x + dx, y - 1, z + dz);
+    const gap3 = this.ctx.getBlock(x + dx, y + 1, z + dz);
+
+    // There should be no floor in the gap for parkour
+    if (this.ctx.canWalkOn(gap2) || this.ctx.canWalkOn(gap1)) return;
+
+    // Max horizontal distance for parkour ascend is 3 blocks
+    const maxDist = 3;
+
+    for (let dist = 2; dist <= maxDist; dist++) {
+      const destX = x + dx * dist;
+      const destZ = z + dz * dist;
+      const destY = y + 1; // Ascending by 1
+
+      // Check landing at destination (one block higher)
+      const landing = this.ctx.getBlock(destX, destY - 1, destZ);
+      if (!this.ctx.canWalkOn(landing)) continue;
+
+      // Check body space at elevated destination
+      const body1 = this.ctx.getBlock(destX, destY, destZ);
+      const body2 = this.ctx.getBlock(destX, destY + 1, destZ);
+      if (!this.ctx.canWalkThrough(body1) || !this.ctx.canWalkThrough(body2)) continue;
+
+      // Check trajectory clearance (jump arc)
+      let clearPath = true;
+      for (let d = 1; d < dist; d++) {
+        const midX = x + dx * d;
+        const midZ = z + dz * d;
+        // Check at source height and above (jump arc)
+        const mid1 = this.ctx.getBlock(midX, y, midZ);
+        const mid2 = this.ctx.getBlock(midX, y + 1, midZ);
+        const mid3 = this.ctx.getBlock(midX, y + 2, midZ);
+        if (!this.ctx.canWalkThrough(mid1) || !this.ctx.canWalkThrough(mid2) || !this.ctx.canWalkThrough(mid3)) {
+          clearPath = false;
+          break;
+        }
+      }
+
+      if (!clearPath) break;
+
+      // Calculate cost: sprint cost + jump penalty + ascend penalty
+      // Higher cost than regular parkour due to difficulty
+      const cost = 3.564 * dist + this.ctx.jumpPenalty * 1.5 + 2.0;
+
+      neighbors.push({
+        x: destX,
+        y: destY,
+        z: destZ,
+        moveCost: cost,
+        hash: `${destX},${destY},${destZ}`,
         parkour: true
       });
 

@@ -9,7 +9,8 @@ export {
   MovementDescend,
   MovementDiagonal,
   MovementPillar,
-  MovementParkour
+  MovementParkour,
+  MovementParkourAscend
 } from './Movement';
 
 export { MovementFall, dynamicFallCost } from './MovementFall';

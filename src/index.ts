@@ -54,7 +54,8 @@ export {
   MovementDescend,
   MovementDiagonal,
   MovementPillar,
-  MovementParkour
+  MovementParkour,
+  MovementParkourAscend
 } from './movements/Movement';
 
 // Swimming movements
