@@ -26,6 +26,10 @@ import {
   RepairMethod,
   StorageTask,
   StorageOperation,
+  ElytraTask,
+  FlightPhase,
+  PortalTask,
+  PortalType,
 } from '../src/tasks/composite';
 import { Vec3 } from 'vec3';
 
@@ -512,6 +516,84 @@ describe('Composite Tasks', () => {
         targetItems: ['cobblestone', 'dirt'],
       });
       expect(task.displayName).toContain('DEPOSIT');
+    });
+  });
+
+  describe('ElytraTask', () => {
+    it('should create with target coordinates', () => {
+      const bot = createMockBot();
+      const task = new ElytraTask(bot, 1000, 1000);
+      expect(task.displayName).toContain('ElytraFlight');
+      expect(task.displayName).toContain('1000');
+    });
+
+    it('should create with custom altitude', () => {
+      const bot = createMockBot();
+      const task = new ElytraTask(bot, 500, 500, { cruiseAltitude: 300 });
+      expect(task.displayName).toContain('ElytraFlight');
+    });
+
+    it('should start in PREPARING phase', () => {
+      const bot = createMockBot();
+      const task = new ElytraTask(bot, 100, 100);
+      task.onStart();
+      expect(task.getFlightPhase()).toBe(FlightPhase.PREPARING);
+    });
+
+    it('should track fireworks used', () => {
+      const bot = createMockBot();
+      const task = new ElytraTask(bot, 100, 100);
+      task.onStart();
+      expect(task.getFireworksUsed()).toBe(0);
+    });
+
+    it('should not be finished at start', () => {
+      const bot = createMockBot();
+      const task = new ElytraTask(bot, 100, 100);
+      task.onStart();
+      expect(task.isFinished()).toBe(false);
+    });
+  });
+
+  describe('PortalTask', () => {
+    it('should create for nether portal', () => {
+      const bot = createMockBot();
+      const task = new PortalTask(bot, { portalType: PortalType.NETHER });
+      expect(task.displayName).toContain('NETHER');
+    });
+
+    it('should create for end portal', () => {
+      const bot = createMockBot();
+      const task = new PortalTask(bot, { portalType: PortalType.END });
+      expect(task.displayName).toContain('END');
+    });
+
+    it('should start in FINDING_PORTAL state', () => {
+      const bot = createMockBot();
+      const task = new PortalTask(bot);
+      task.onStart();
+      expect(task.isFinished()).toBe(false);
+    });
+
+    it('should convert overworld to nether coordinates', () => {
+      const result = PortalTask.overworldToNether(800, 800);
+      expect(result.x).toBe(100);
+      expect(result.z).toBe(100);
+    });
+
+    it('should convert nether to overworld coordinates', () => {
+      const result = PortalTask.netherToOverworld(100, 100);
+      expect(result.x).toBe(800);
+      expect(result.z).toBe(800);
+    });
+
+    it('should create with build option', () => {
+      const bot = createMockBot();
+      const task = new PortalTask(bot, {
+        portalType: PortalType.NETHER,
+        buildIfNeeded: true,
+      });
+      expect(task.displayName).toContain('NETHER');
     });
   });
 });

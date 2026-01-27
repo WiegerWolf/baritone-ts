@@ -324,25 +324,80 @@ src/tasks/composite/
 └── StorageTask.ts      # Container storage management
 ```
 
+### Phase 17: Movement and Navigation Tasks (Iteration 18)
+- [x] ElytraTask - Elytra flight automation with takeoff, cruising, landing
+- [x] FlightPhase enum (PREPARING, TAKING_OFF, ASCENDING, CRUISING, DESCENDING, LANDING)
+- [x] PortalTask - Dimension portal navigation (nether, end)
+- [x] PortalType enum (NETHER, END)
+- [x] Coordinate conversion utilities (overworldToNether, netherToOverworld)
+- [x] Tests for ElytraTask, PortalTask (11 new tests)
+
+## New Files (Iteration 18)
+```
+src/tasks/composite/
+├── ElytraTask.ts       # Elytra flight automation
+└── PortalTask.ts       # Dimension portal navigation
+```
+
 ## Test Results
-All 391 tests passing:
+All 402 tests passing:
 - TaskSystem.test.ts: 24 tests
 - ItemTarget.test.ts: 23 tests
 - Timers.test.ts: 15 tests
 - CraftingRecipe.test.ts: 34 tests
 - EventBus.test.ts: 24 tests
-- CompositeTasks.test.ts: 61 tests (44 + 17 new)
+- CompositeTasks.test.ts: 72 tests (61 + 11 new)
 - ConcreteTasks.test.ts: 40 tests
 - Plus existing pathfinding tests
 
+## Implementation Summary
+
+The baritone-ts project now includes a comprehensive implementation of features from AltoClef and BaritonePlus:
+
+### Core Systems
+- Hierarchical Task System with lifecycle management
+- Priority-based Chain System (FoodChain, WorldSurvivalChain, MLGBucketChain, MobDefenseChain)
+- Tracker System (BlockTracker, EntityTracker, ItemStorageTracker)
+- Timer System (TimerGame, TimerReal, Stopwatch)
+- Progress Checkers (Linear, Distance, Movement)
+- Event Bus for decoupled communication
+- Settings System for configuration
+
+### Concrete Tasks (Low-level atomic operations)
+- Navigation: GoToBlockTask, GetToBlockTask, GoToNearTask, GoToXZTask, FollowEntityTask
+- Mining: MineBlockTask, MineBlockTypeTask
+- Placement: PlaceBlockTask, PlaceAgainstTask
+- Crafting: CraftTask, EnsureItemTask
+- Smelting: SmeltTask
+- Inventory: PickupItemTask, EquipTask, DropItemTask, MoveItemTask
+- Interaction: InteractBlockTask, InteractEntityTask, AttackEntityTask, UseItemTask
+
+### Composite Tasks (High-level orchestrating workflows)
+- Resource Gathering: CollectWoodTask, GatherResourcesTask, MineOresTask
+- Tools: GetToolTask
+- Agriculture: FarmTask (harvest, plant, maintain)
+- Exploration: ExploreTask (spiral, cardinal, random patterns)
+- Construction: BuildShelterTask, BuildTask
+- Combat: CombatTask (melee, ranged, hit-and-run, defensive)
+- Survival: SurviveTask (automated survival gameplay)
+- Trading: TradingTask (villager trading)
+- Enchanting: EnchantTask
+- Brewing: BrewingTask
+- Repair: RepairTask (anvil, grindstone)
+- Storage: StorageTask (deposit, withdraw, organize)
+- Flight: ElytraTask (takeoff, cruise, land)
+- Portals: PortalTask (nether, end navigation)
+
 ## Next Steps (Future Iterations)
 
-1. **Advanced Movement Features**
-   - Elytra flight handling
+1. **Advanced Features**
+   - Schematic-based building from files
    - Advanced parkour (4-block jumps, ladder climbing)
-   - Dimension portal navigation
+   - Boat/vehicle handling
+   - Fishing automation
 
 2. **Performance and Polish**
    - Performance optimization
    - Error handling improvements
    - Documentation updates
+   - Integration testing

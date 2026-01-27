@@ -119,3 +119,22 @@ export {
   depositKeepMinimum,
   type StorageConfig,
 } from './StorageTask';
+export {
+  ElytraTask,
+  FlightPhase,
+  flyToXZ,
+  flyToPosition,
+  flyHighAltitude,
+  flyLowAltitude,
+  type ElytraConfig,
+} from './ElytraTask';
+export {
+  PortalTask,
+  PortalType,
+  Dimension,
+  enterNether,
+  enterEnd,
+  buildAndEnterNether,
+  findNearestPortal,
+  type PortalConfig,
+} from './PortalTask';
