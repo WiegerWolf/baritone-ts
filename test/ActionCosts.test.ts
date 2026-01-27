@@ -54,12 +54,14 @@ describe('ActionCosts', () => {
 
   describe('climbing costs', () => {
     it('should have ladder up cost', () => {
-      expect(LADDER_UP_ONE_COST).toBeCloseTo(5.0, 1);
+      // 20 / 3.0 = 6.667 ticks
+      expect(LADDER_UP_ONE_COST).toBeCloseTo(6.667, 1);
     });
 
     it('should have ladder down cost less than up', () => {
       expect(LADDER_DOWN_ONE_COST).toBeLessThan(LADDER_UP_ONE_COST);
-      expect(LADDER_DOWN_ONE_COST).toBeCloseTo(1.43, 1);
+      // 20 / 5.0 = 4.0 ticks
+      expect(LADDER_DOWN_ONE_COST).toBeCloseTo(4.0, 1);
     });
   });
 
@@ -76,7 +78,8 @@ describe('ActionCosts', () => {
 
   describe('jumping costs', () => {
     it('should have jump cost', () => {
-      expect(JUMP_ONE_BLOCK_COST).toBeCloseTo(2.5, 1);
+      // FALL_1_25_BLOCKS_COST - FALL_0_25_BLOCKS_COST = 4.0 - 2.0 = 2.0
+      expect(JUMP_ONE_BLOCK_COST).toBeCloseTo(2.0, 1);
     });
 
     it('should have walk off block cost', () => {
@@ -104,8 +107,9 @@ describe('ActionCosts', () => {
   });
 
   describe('getFallCost', () => {
-    it('should return 0 for 0 blocks', () => {
-      expect(getFallCost(0, false)).toBe(0);
+    it('should return center cost for 0 blocks', () => {
+      // getFallCost always adds CENTER_AFTER_FALL_COST
+      expect(getFallCost(0, false)).toBeCloseTo(CENTER_AFTER_FALL_COST, 1);
     });
 
     it('should return cost for small falls', () => {

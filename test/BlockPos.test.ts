@@ -40,8 +40,8 @@ describe('BlockPos', () => {
       const pos1 = new BlockPos(10, 64, 20);
       const pos2 = new BlockPos(10, 64, 20);
 
-      map.set(pos1.hash, 1);
-      expect(map.get(pos2.hash)).toBe(1);
+      map.set(pos1.hashString, 1);
+      expect(map.get(pos2.hashString)).toBe(1);
     });
   });
 
@@ -107,16 +107,16 @@ describe('BlockPos', () => {
     });
   });
 
-  describe('manhattanDistance', () => {
+  describe('distanceSquared', () => {
     it('should return 0 for same position', () => {
       const pos = new BlockPos(10, 64, 20);
-      expect(pos.manhattanDistance(pos)).toBe(0);
+      expect(pos.distanceSquared(pos)).toBe(0);
     });
 
-    it('should calculate manhattan distance', () => {
+    it('should calculate squared distance', () => {
       const pos1 = new BlockPos(0, 64, 0);
-      const pos2 = new BlockPos(3, 66, 4);
-      expect(pos1.manhattanDistance(pos2)).toBe(3 + 2 + 4);
+      const pos2 = new BlockPos(3, 64, 4);
+      expect(pos1.distanceSquared(pos2)).toBe(25); // 3^2 + 0^2 + 4^2 = 25
     });
   });
 });
@@ -128,7 +128,7 @@ describe('PathNode', () => {
       expect(node.x).toBe(10);
       expect(node.y).toBe(64);
       expect(node.z).toBe(20);
-      expect(node.heuristic).toBe(100);
+      expect(node.estimatedCostToGoal).toBe(100);
     });
 
     it('should initialize cost to infinity', () => {
@@ -136,33 +136,32 @@ describe('PathNode', () => {
       expect(node.cost).toBe(Infinity);
     });
 
-    it('should initialize parent to null', () => {
+    it('should initialize previous to null', () => {
       const node = new PathNode(10, 64, 20, 100);
-      expect(node.parent).toBeNull();
+      expect(node.previous).toBeNull();
     });
   });
 
   describe('hash', () => {
     it('should match BlockPos hash format', () => {
       const node = new PathNode(10, 64, 20, 0);
-      const pos = new BlockPos(10, 64, 20);
-      // Both should use same hash format
+      // Should use string hash format
       expect(node.hash).toBe(`${10},${64},${20}`);
     });
   });
 
-  describe('parent chain', () => {
-    it('should allow building parent chain', () => {
+  describe('previous chain', () => {
+    it('should allow building previous chain', () => {
       const node1 = new PathNode(0, 64, 0, 100);
       const node2 = new PathNode(1, 64, 0, 90);
       const node3 = new PathNode(2, 64, 0, 80);
 
-      node2.parent = node1;
-      node3.parent = node2;
+      node2.previous = node1;
+      node3.previous = node2;
 
-      expect(node3.parent).toBe(node2);
-      expect(node3.parent!.parent).toBe(node1);
-      expect(node3.parent!.parent!.parent).toBeNull();
+      expect(node3.previous).toBe(node2);
+      expect(node3.previous!.previous).toBe(node1);
+      expect(node3.previous!.previous!.previous).toBeNull();
     });
   });
 

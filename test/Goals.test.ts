@@ -10,6 +10,7 @@ import {
   GoalRunAway,
   GoalAABB
 } from '../src/goals';
+import { BlockPos } from '../src/types';
 
 describe('Goals', () => {
   describe('GoalBlock', () => {
@@ -99,8 +100,11 @@ describe('Goals', () => {
       expect(goal.isEnd(10, 64, 20)).toBe(false);
     });
 
-    it('should not match diagonal positions', () => {
-      expect(goal.isEnd(11, 64, 21)).toBe(false);
+    it('should match diagonal positions within reach', () => {
+      // GoalGetToBlock allows adjacent including diagonal (within 1 block on each axis)
+      expect(goal.isEnd(11, 64, 21)).toBe(true);
+      // But not 2 blocks away
+      expect(goal.isEnd(12, 64, 20)).toBe(false);
     });
   });
 
@@ -126,16 +130,18 @@ describe('Goals', () => {
   describe('GoalTwoBlocks', () => {
     const goal = new GoalTwoBlocks(10, 64, 20);
 
-    it('should match position at feet', () => {
+    it('should match position at feet (y=64)', () => {
       expect(goal.isEnd(10, 64, 20)).toBe(true);
     });
 
-    it('should match position at head', () => {
-      expect(goal.isEnd(10, 65, 20)).toBe(true);
+    it('should match one block below (feet at y-1, head at y)', () => {
+      // When feet are at y=63, head is at y=64 (the target)
+      expect(goal.isEnd(10, 63, 20)).toBe(true);
     });
 
     it('should not match other positions', () => {
-      expect(goal.isEnd(10, 63, 20)).toBe(false);
+      expect(goal.isEnd(10, 62, 20)).toBe(false);
+      expect(goal.isEnd(10, 65, 20)).toBe(false);
       expect(goal.isEnd(10, 66, 20)).toBe(false);
     });
   });
@@ -186,8 +192,8 @@ describe('Goals', () => {
 
   describe('GoalRunAway', () => {
     const dangers = [
-      { x: 100, y: 64, z: 100 },
-      { x: 110, y: 64, z: 100 }
+      new BlockPos(100, 64, 100),
+      new BlockPos(110, 64, 100)
     ];
     const goal = new GoalRunAway(dangers, 20);
 

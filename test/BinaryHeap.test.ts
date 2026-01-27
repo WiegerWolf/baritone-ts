@@ -10,7 +10,7 @@ describe('BinaryHeap', () => {
 
   describe('basic operations', () => {
     it('should start empty', () => {
-      expect(heap.size()).toBe(0);
+      expect(heap.getSize()).toBe(0);
       expect(heap.isEmpty()).toBe(true);
     });
 
@@ -19,7 +19,7 @@ describe('BinaryHeap', () => {
       node.combinedCost = 10;
       heap.push(node);
 
-      expect(heap.size()).toBe(1);
+      expect(heap.getSize()).toBe(1);
       expect(heap.isEmpty()).toBe(false);
 
       const popped = heap.pop();
@@ -44,7 +44,7 @@ describe('BinaryHeap', () => {
 
       nodes.forEach(n => heap.push(n));
 
-      expect(heap.size()).toBe(5);
+      expect(heap.getSize()).toBe(5);
 
       // Should pop in order: 10, 20, 30, 40, 50
       expect(heap.pop()?.combinedCost).toBe(10);
@@ -63,7 +63,7 @@ describe('BinaryHeap', () => {
 
       nodes.forEach(n => heap.push(n));
 
-      expect(heap.size()).toBe(3);
+      expect(heap.getSize()).toBe(3);
       expect(heap.pop()?.combinedCost).toBe(10);
       expect(heap.pop()?.combinedCost).toBe(10);
       expect(heap.pop()?.combinedCost).toBe(10);
@@ -82,7 +82,7 @@ describe('BinaryHeap', () => {
 
       // Decrease node1's cost to be the minimum
       node1.combinedCost = 5;
-      heap.decreaseKey(node1);
+      heap.update(node1);
 
       // node1 should now be first
       expect(heap.pop()).toBe(node1);
@@ -98,7 +98,7 @@ describe('BinaryHeap', () => {
       heap.push(node2);
 
       expect(heap.peek()).toBe(node2);
-      expect(heap.size()).toBe(2); // Size unchanged
+      expect(heap.getSize()).toBe(2); // Size unchanged
       expect(heap.peek()).toBe(node2); // Same result
     });
 
@@ -120,7 +120,7 @@ describe('BinaryHeap', () => {
         heap.push(node);
       }
 
-      expect(heap.size()).toBe(count);
+      expect(heap.getSize()).toBe(count);
 
       // Pop all and verify order
       let lastCost = -Infinity;

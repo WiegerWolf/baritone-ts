@@ -151,6 +151,31 @@ export { FarmProcess, type FarmConfig } from './behavior/FarmProcess';
 export { BuildProcess, type BuildConfig, type PlaceInstruction } from './behavior/BuildProcess';
 export { CombatProcess, type CombatConfig, type CombatMode } from './behavior/CombatProcess';
 
+// Benchmarking utilities
+export {
+  benchmark,
+  compareBenchmarks,
+  formatResults,
+  BenchmarkSuite,
+  Timer,
+  MemoryProfiler,
+  type BenchmarkResult,
+  type BenchmarkOptions
+} from './benchmark';
+
+// Debug/visualization utilities
+export {
+  PathDebugger,
+  pathDebugger,
+  visualizePath,
+  visualizeSearchState,
+  formatPathResult,
+  tracePathSteps,
+  type DebugEvent,
+  type DebugEventType,
+  type VisualizationOptions
+} from './debug';
+
 /**
  * Baritone-TS Pathfinder Plugin
  *
