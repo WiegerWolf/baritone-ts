@@ -1,0 +1,34 @@
+{
+  "name": "baritone-ts",
+  "version": "0.1.0",
+  "description": "Baritone-quality pathfinding for Mineflayer in TypeScript",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "watch": "tsc -w",
+    "test": "jest",
+    "lint": "eslint src/**/*.ts"
+  },
+  "keywords": [
+    "minecraft",
+    "mineflayer",
+    "pathfinding",
+    "baritone",
+    "astar"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "mineflayer": "^4.0.0",
+    "prismarine-block": "^1.0.0",
+    "prismarine-world": "^3.0.0",
+    "vec3": "^0.1.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "typescript": "^5.0.0"
+  },
+  "peerDependencies": {
+    "mineflayer": ">=4.0.0"
+  }
+}
