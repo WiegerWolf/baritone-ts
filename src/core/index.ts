@@ -12,3 +12,15 @@ export {
   calculateLookRotation,
   calculateFaceVector
 } from './BlockInteraction';
+export {
+  RotationHelper,
+  getRotationHelper,
+  type Rotation,
+  type RotationConfig
+} from './RotationHelper';
+export {
+  InputHelper,
+  getInputHelper,
+  type ControlState,
+  type InputState
+} from './InputHelper';
