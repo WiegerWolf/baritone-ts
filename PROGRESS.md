@@ -254,7 +254,9 @@ src/
 │       ├── BrewingTask.ts        # Potion brewing
 │       ├── FishingTask.ts        # Automated fishing
 │       ├── SleepTask.ts          # Bed sleeping automation
-│       └── BoatTask.ts           # Boat/vehicle navigation
+│       ├── BoatTask.ts           # Boat/vehicle navigation
+│       ├── ParkourTask.ts        # Advanced parkour movement
+│       └── SchematicTask.ts      # Schematic-based building
 ├── chains/          # Priority chains
 │   ├── FoodChain.ts
 │   ├── WorldSurvivalChain.ts
@@ -360,14 +362,31 @@ src/tasks/composite/
 └── BoatTask.ts         # Boat/vehicle navigation
 ```
 
+### Phase 19: Advanced Movement and Building (Iteration 20)
+- [x] ParkourTask - Advanced parkour movement automation
+- [x] ParkourMoveType enum (SPRINT_JUMP, WALK_JUMP, STEP_UP, LADDER_CLIMB, WATER_ESCAPE, NEO, HEAD_HITTER)
+- [x] ParkourState enum (ANALYZING, APPROACHING_START, ALIGNING, SPRINTING, JUMPING, IN_AIR, LANDING, CLIMBING, SWIMMING)
+- [x] Jump distance constants (SOUL_SAND: 2, WALK: 3, SPRINT: 4)
+- [x] SchematicTask - Schematic-based building automation
+- [x] Schematic creation utilities (createCubeSchematic, createHollowBoxSchematic, createWallSchematic)
+- [x] SchematicState enum (LOADING, ANALYZING, GATHERING_MATERIALS, CLEARING_AREA, BUILDING, VERIFYING)
+- [x] Tests for ParkourTask, SchematicTask (16 new tests)
+
+## New Files (Iteration 20)
+```
+src/tasks/composite/
+├── ParkourTask.ts      # Advanced parkour movement
+└── SchematicTask.ts    # Schematic-based building
+```
+
 ## Test Results
-All 419 tests passing:
+All 435 tests passing:
 - TaskSystem.test.ts: 24 tests
 - ItemTarget.test.ts: 23 tests
 - Timers.test.ts: 15 tests
 - CraftingRecipe.test.ts: 34 tests
 - EventBus.test.ts: 24 tests
-- CompositeTasks.test.ts: 89 tests (72 + 17 new)
+- CompositeTasks.test.ts: 105 tests (89 + 16 new)
 - ConcreteTasks.test.ts: 40 tests
 - Plus existing pathfinding tests
 
@@ -411,14 +430,12 @@ The baritone-ts project now includes a comprehensive implementation of features 
 - Fishing: FishingTask (automated fishing)
 - Sleep: SleepTask (bed sleeping automation)
 - Boats: BoatTask (boat/vehicle navigation)
+- Parkour: ParkourTask (4-block jumps, ladder climbing, water escape)
+- Schematics: SchematicTask (schematic-based building)
 
 ## Next Steps (Future Iterations)
 
-1. **Advanced Features**
-   - Schematic-based building from files
-   - Advanced parkour (4-block jumps, ladder climbing)
-
-2. **Performance and Polish**
+1. **Performance and Polish**
    - Performance optimization
    - Error handling improvements
    - Documentation updates

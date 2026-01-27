@@ -160,3 +160,27 @@ export {
   enterNearestBoat,
   type BoatConfig,
 } from './BoatTask';
+export {
+  ParkourTask,
+  ParkourMoveType,
+  parkourTo,
+  sprintJumpTo,
+  escapeWater,
+  climbLadder,
+  type ParkourConfig,
+} from './ParkourTask';
+export {
+  SchematicTask,
+  createEmptySchematic,
+  createSchematic,
+  createCubeSchematic,
+  createHollowBoxSchematic,
+  createWallSchematic,
+  buildSchematic,
+  buildCube as buildSchematicCube,
+  buildHollowBox,
+  buildWall as buildSchematicWall,
+  type Schematic,
+  type SchematicBlock,
+  type SchematicConfig,
+} from './SchematicTask';
