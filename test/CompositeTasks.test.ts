@@ -39,6 +39,8 @@ import {
   createCubeSchematic,
   createHollowBoxSchematic,
   createWallSchematic,
+  DragonFightTask,
+  StrongholdTask,
 } from '../src/tasks/composite';
 import { Vec3 } from 'vec3';
 
@@ -864,6 +866,106 @@ describe('Composite Tasks', () => {
     it('should create wall schematic with correct block count', () => {
       const schematic = createWallSchematic(5, 3, 'brick');
       expect(schematic.blocks.length).toBe(15); // 5x3
+    });
+  });
+
+  describe('DragonFightTask', () => {
+    it('should create with default config', () => {
+      const bot = createMockBot();
+      const task = new DragonFightTask(bot);
+      expect(task.displayName).toContain('DragonFight');
+    });
+
+    it('should create with bed bombing enabled', () => {
+      const bot = createMockBot();
+      const task = new DragonFightTask(bot, { useBeds: true });
+      expect(task.displayName).toContain('DragonFight');
+    });
+
+    it('should create with crystal destruction', () => {
+      const bot = createMockBot();
+      const task = new DragonFightTask(bot, { destroyCrystals: true });
+      expect(task.displayName).toContain('DragonFight');
+    });
+
+    it('should start in ARRIVING state', () => {
+      const bot = createMockBot();
+      const task = new DragonFightTask(bot);
+      task.onStart();
+      expect(task.displayName).toContain('ARRIVING');
+    });
+
+    it('should track crystals destroyed', () => {
+      const bot = createMockBot();
+      const task = new DragonFightTask(bot);
+      task.onStart();
+      expect(task.getCrystalsDestroyed()).toBe(0);
+    });
+
+    it('should compare by config options', () => {
+      const bot = createMockBot();
+      const task1 = new DragonFightTask(bot, { useBeds: true });
+      const task2 = new DragonFightTask(bot, { useBeds: true });
+      const task3 = new DragonFightTask(bot, { useBeds: false });
+      expect(task1.isEqual(task2)).toBe(true);
+      expect(task1.isEqual(task3)).toBe(false);
+    });
+  });
+
+  describe('StrongholdTask', () => {
+    it('should create with default config', () => {
+      const bot = createMockBot();
+      const task = new StrongholdTask(bot);
+      expect(task.displayName).toContain('Stronghold');
+    });
+
+    it('should create with custom throw distance', () => {
+      const bot = createMockBot();
+      const task = new StrongholdTask(bot, { throwDistance: 50 });
+      expect(task.displayName).toContain('Stronghold');
+    });
+
+    it('should start in PREPARING state', () => {
+      const bot = createMockBot();
+      const task = new StrongholdTask(bot);
+      task.onStart();
+      expect(task.displayName).toContain('PREPARING');
+    });
+
+    it('should have null estimated position at start', () => {
+      const bot = createMockBot();
+      const task = new StrongholdTask(bot);
+      task.onStart();
+      expect(task.getEstimatedPosition()).toBeNull();
+    });
+
+    it('should have null portal position at start', () => {
+      const bot = createMockBot();
+      const task = new StrongholdTask(bot);
+      task.onStart();
+      expect(task.getPortalPosition()).toBeNull();
+    });
+
+    it('should calculate intersection correctly', () => {
+      const start1 = new Vec3(0, 0, 0);
+      const dir1 = new Vec3(1, 0, 1);
+      const start2 = new Vec3(100, 0, 0);
+      const dir2 = new Vec3(-1, 0, 1);
+      const intersection = StrongholdTask.calculateIntersection(start1, dir1, start2, dir2);
+      expect(intersection).not.toBeNull();
+      if (intersection) {
+        expect(intersection.x).toBe(50);
+        expect(intersection.z).toBe(50);
+      }
+    });
+
+    it('should return null for parallel lines', () => {
+      const start1 = new Vec3(0, 0, 0);
+      const dir1 = new Vec3(1, 0, 0);
+      const start2 = new Vec3(0, 0, 10);
+      const dir2 = new Vec3(1, 0, 0);
+      const intersection = StrongholdTask.calculateIntersection(start1, dir1, start2, dir2);
+      expect(intersection).toBeNull();
     });
   });
 });

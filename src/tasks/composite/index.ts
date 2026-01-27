@@ -184,3 +184,17 @@ export {
   type SchematicBlock,
   type SchematicConfig,
 } from './SchematicTask';
+export {
+  DragonFightTask,
+  fightDragon,
+  fightDragonWithBeds,
+  fightDragonSafe,
+  type DragonFightConfig,
+} from './DragonFightTask';
+export {
+  StrongholdTask,
+  findStronghold,
+  findStrongholdQuick,
+  findStrongholdPrecise,
+  type StrongholdConfig,
+} from './StrongholdTask';

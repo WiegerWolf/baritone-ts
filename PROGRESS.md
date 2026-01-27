@@ -256,7 +256,9 @@ src/
 │       ├── SleepTask.ts          # Bed sleeping automation
 │       ├── BoatTask.ts           # Boat/vehicle navigation
 │       ├── ParkourTask.ts        # Advanced parkour movement
-│       └── SchematicTask.ts      # Schematic-based building
+│       ├── SchematicTask.ts      # Schematic-based building
+│       ├── DragonFightTask.ts    # Ender dragon combat
+│       └── StrongholdTask.ts     # Stronghold navigation
 ├── chains/          # Priority chains
 │   ├── FoodChain.ts
 │   ├── WorldSurvivalChain.ts
@@ -379,14 +381,33 @@ src/tasks/composite/
 └── SchematicTask.ts    # Schematic-based building
 ```
 
+### Phase 20: End Dimension Tasks (Iteration 21)
+- [x] DragonFightTask - Ender dragon combat automation
+- [x] DragonFightState enum (ARRIVING, DESTROYING_CRYSTALS, WAITING_FOR_PERCH, ATTACKING_PERCHED, DODGING_BREATH, BED_BOMBING)
+- [x] Crystal destruction priority system
+- [x] Dragon perch detection and attack timing
+- [x] Breath cloud avoidance with escape direction
+- [x] StrongholdTask - Stronghold navigation via eye triangulation
+- [x] StrongholdState enum (PREPARING, FIRST_THROW, TRAVELING_TO_SECOND, SECOND_THROW, TRIANGULATING, NAVIGATING, SEARCHING_PORTAL)
+- [x] Two-eye triangulation algorithm for stronghold location
+- [x] End portal frame detection
+- [x] Tests for DragonFightTask, StrongholdTask (13 new tests)
+
+## New Files (Iteration 21)
+```
+src/tasks/composite/
+├── DragonFightTask.ts    # Ender dragon combat
+└── StrongholdTask.ts     # Stronghold navigation
+```
+
 ## Test Results
-All 435 tests passing:
+All 448 tests passing:
 - TaskSystem.test.ts: 24 tests
 - ItemTarget.test.ts: 23 tests
 - Timers.test.ts: 15 tests
 - CraftingRecipe.test.ts: 34 tests
 - EventBus.test.ts: 24 tests
-- CompositeTasks.test.ts: 105 tests (89 + 16 new)
+- CompositeTasks.test.ts: 118 tests (105 + 13 new)
 - ConcreteTasks.test.ts: 40 tests
 - Plus existing pathfinding tests
 
@@ -432,6 +453,8 @@ The baritone-ts project now includes a comprehensive implementation of features 
 - Boats: BoatTask (boat/vehicle navigation)
 - Parkour: ParkourTask (4-block jumps, ladder climbing, water escape)
 - Schematics: SchematicTask (schematic-based building)
+- Dragon: DragonFightTask (end dragon combat with crystal/bed tactics)
+- Stronghold: StrongholdTask (eye triangulation navigation)
 
 ## Next Steps (Future Iterations)
 
