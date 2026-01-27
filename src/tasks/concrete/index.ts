@@ -56,3 +56,26 @@ export {
   AttackEntityTask,
   UseItemTask,
 } from './InteractTask';
+
+// Slot management tasks
+export {
+  ClickSlotTask,
+  SlotActionType,
+  SlotConstants,
+  EnsureFreeCursorSlotTask,
+  EnsureFreeInventorySlotTask,
+  EnsureFreePlayerCraftingGridTask,
+  ThrowCursorTask,
+  ReceiveCraftingOutputTask,
+  MoveItemToSlotTask,
+} from './SlotTask';
+
+// Movement utility tasks
+export {
+  TimeoutWanderTask,
+  IdleTask,
+  GetToYTask,
+  SafeRandomShimmyTask,
+  WaitTask,
+  LookAtBlockTask,
+} from './MovementUtilTask';

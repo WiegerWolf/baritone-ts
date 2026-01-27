@@ -5,7 +5,7 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 ## Summary
 
 **Status**: In Progress
-**Last Updated**: Iteration 1
+**Last Updated**: Iteration 2
 
 ### BaritonePlus Java Statistics:
 - Total Tasks: 173 Java files in tasks/
@@ -28,14 +28,14 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 
 ### Priority 2: Core Missing Tasks
 
-#### Slot Management Tasks (MISSING - High Priority)
-- [ ] ClickSlotTask
-- [ ] EnsureFreeCursorSlotTask
-- [ ] EnsureFreeInventorySlotTask
-- [ ] EnsureFreePlayerCraftingGridTask
-- [ ] MoveItemToSlotTask (and variants)
-- [ ] ReceiveCraftingOutputSlotTask
-- [ ] ThrowCursorTask
+#### Slot Management Tasks (Completed Iteration 2)
+- [x] ClickSlotTask
+- [x] EnsureFreeCursorSlotTask
+- [x] EnsureFreeInventorySlotTask
+- [x] EnsureFreePlayerCraftingGridTask
+- [x] MoveItemToSlotTask (and variants)
+- [x] ReceiveCraftingOutputTask
+- [x] ThrowCursorTask
 
 #### Container Tasks (Partially Exists)
 - [x] LootChestTask (exists as LootChestTask)
@@ -69,13 +69,13 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [x] FleeTask/RunAwayFromEntitiesTask (exists)
 - [x] ExploreTask (exists)
 - [x] FollowPlayerTask (exists)
-- [ ] TimeoutWanderTask
+- [x] TimeoutWanderTask (Completed Iteration 2)
 - [ ] SearchChunkForBlockTask
 - [ ] SearchChunksExploreTask
 - [ ] GetToChunkTask
-- [ ] GetToYTask
+- [x] GetToYTask (Completed Iteration 2)
 - [ ] GetWithinRangeOfBlockTask
-- [ ] PickupDroppedItemTask
+- [x] PickupDroppedItemTask (Exists as PickupItemTask)
 - [ ] DodgeProjectilesTask
 - [ ] MLGBucketTask (task version)
 - [ ] EnterNetherPortalTask
@@ -83,9 +83,11 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [ ] RunAwayFromCreepersTask
 - [ ] RunAwayFromHostilesTask
 - [ ] GoInDirectionXZTask
-- [ ] SafeRandomShimmyTask
-- [ ] IdleTask
+- [x] SafeRandomShimmyTask (Completed Iteration 2)
+- [x] IdleTask (Completed Iteration 2)
 - [ ] FastTravelTask
+- [x] WaitTask (Completed Iteration 2)
+- [x] LookAtBlockTask (Completed Iteration 2)
 
 #### Entity Tasks
 - [x] CombatTask/KillEntityTask (exists)
@@ -151,6 +153,27 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [x] Added comprehensive tests for both chains (28 new tests)
 - [x] All 623 tests passing
 
+### Iteration 2 (Complete)
+- [x] Implemented slot management tasks (SlotTask.ts):
+  - ClickSlotTask - atomic slot click operations
+  - EnsureFreeCursorSlotTask - clear cursor before inventory ops
+  - EnsureFreeInventorySlotTask - ensure free space in inventory
+  - EnsureFreePlayerCraftingGridTask - clear crafting grid
+  - ThrowCursorTask - throw items from cursor
+  - ReceiveCraftingOutputTask - receive crafted items
+  - MoveItemToSlotTask - move items between slots
+  - SlotActionType enum and SlotConstants
+- [x] Implemented movement utility tasks (MovementUtilTask.ts):
+  - TimeoutWanderTask - escape from stuck positions
+  - IdleTask - do nothing placeholder
+  - GetToYTask - navigate to specific Y level
+  - SafeRandomShimmyTask - random movement to escape
+  - WaitTask - wait for duration
+  - LookAtBlockTask - orient player view
+- [x] Added comprehensive tests for all new tasks (60 new tests)
+- [x] Updated concrete task exports in index.ts
+- [x] All 683 tests passing
+
 ## Test Coverage Goals
 
 For each ported task, we need tests that verify:
@@ -179,8 +202,10 @@ For each ported task, we need tests that verify:
 
 1. ~~Implement DeathMenuChain for auto-respawn~~ ✅ Done
 2. ~~Implement PlayerInteractionFixChain~~ ✅ Done
-3. Implement slot management tasks for inventory operations (ClickSlotTask, MoveItemToSlotTask, etc.)
-4. Add container interaction base classes (DoStuffInContainerTask)
-5. Implement movement utility tasks (TimeoutWanderTask, PickupDroppedItemTask)
-6. Improve resource collection tasks
-7. Add comprehensive tests for new tasks
+3. ~~Implement slot management tasks~~ ✅ Done
+4. ~~Implement movement utility tasks~~ ✅ Done
+5. Add container interaction base classes (DoStuffInContainerTask)
+6. Implement resource collection tasks (CollectBlazeRodsTask, CollectFuelTask)
+7. Implement entity interaction base classes (AbstractDoToEntityTask)
+8. Implement construction tasks (DestroyBlockTask, PlaceBlockNearbyTask)
+9. Add comprehensive tests for new tasks
