@@ -267,7 +267,7 @@ export abstract class GroundedTask extends Task {
     if (!entity) return false;
 
     if (entity.onGround) return false;
-    if (this.bot.entity.isInWater) return false;
+    if ((entity as any).isInWater) return false;
 
     // Check if on ladder/vine
     const block = this.bot.blockAt(entity.position);

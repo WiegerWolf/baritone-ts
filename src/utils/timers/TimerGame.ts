@@ -28,6 +28,8 @@ export class TimerGame extends BaseTimer {
   constructor(bot: Bot, intervalSeconds: number) {
     super(intervalSeconds);
     this.bot = bot;
+    // Re-reset now that bot is set
+    this.reset();
   }
 
   /**
@@ -36,6 +38,8 @@ export class TimerGame extends BaseTimer {
    */
   protected currentTime(): number {
     // bot.time.age is the server tick count
+    // Handle case where bot is not yet set (during super constructor)
+    if (!this.bot?.time) return 0;
     return this.bot.time.age / 20.0;
   }
 

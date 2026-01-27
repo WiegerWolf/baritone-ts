@@ -176,7 +176,7 @@ export class TaskCatalogue {
   getItemTargetTask(target: ItemTarget): Task | null {
     // Try each item name until one works
     for (const itemName of target.getItemNames()) {
-      const task = this.getItemTask(itemName, target.targetCount);
+      const task = this.getItemTask(itemName, target.getTargetCount());
       if (task) return task;
     }
     return null;

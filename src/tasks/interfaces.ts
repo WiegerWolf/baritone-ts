@@ -64,7 +64,7 @@ export function isGroundedOrSafe(bot: Bot): boolean {
   if (entity.onGround) return true;
 
   // In water (swimming)
-  if (bot.entity.isInWater) return true;
+  if ((entity as any).isInWater) return true;
 
   // On ladder/vine (climbing)
   const block = bot.blockAt(entity.position);

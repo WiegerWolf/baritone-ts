@@ -130,7 +130,7 @@ export class CraftingRecipe {
     for (const ingredient of this.ingredients) {
       if (!ingredient) continue;
 
-      const key = ingredient.getItemNames().sort().join(',');
+      const key = [...ingredient.getItemNames()].sort().join(',');
       if (!seen.has(key)) {
         seen.add(key);
         unique.push(ingredient);
@@ -171,8 +171,8 @@ export class CraftingRecipe {
    * Check if two item targets match the same items
    */
   private targetsMatch(a: ItemTarget, b: ItemTarget): boolean {
-    const aNames = a.getItemNames().sort();
-    const bNames = b.getItemNames().sort();
+    const aNames = [...a.getItemNames()].sort();
+    const bNames = [...b.getItemNames()].sort();
     if (aNames.length !== bNames.length) return false;
     return aNames.every((name, i) => name === bNames[i]);
   }

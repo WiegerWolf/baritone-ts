@@ -159,7 +159,7 @@ export abstract class ResourceTask extends Task {
    * Check if cursor has item that needs to be put back
    */
   protected needsCursorCleanup(): boolean {
-    return this.bot.inventory.cursor !== null;
+    return (this.bot.inventory as any).cursor !== null;
   }
 
   /**
@@ -249,7 +249,7 @@ export abstract class ResourceTask extends Task {
     if (itemNames.length === 0) return null;
 
     // Find containers with needed items
-    const containers = this.storageTracker.getContainersWithItem(itemNames);
+    const containers = this.storageTracker.getContainersWithItem(...itemNames);
     if (containers.length === 0) return null;
 
     // Sort by distance
@@ -373,7 +373,7 @@ export abstract class ResourceTask extends Task {
    */
   protected getNeededCount(target: ItemTarget): number {
     const have = this.getItemCount(target);
-    return Math.max(0, target.targetCount - have);
+    return Math.max(0, target.getTargetCount() - have);
   }
 
   /**

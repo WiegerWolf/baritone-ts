@@ -118,7 +118,7 @@ export class TaskRunner extends EventEmitter {
     this.emit('tick');
 
     // Find highest priority active chain
-    let maxPriority = ChainPriority.INACTIVE;
+    let maxPriority: number = ChainPriority.INACTIVE;
     let maxChain: TaskChain | null = null;
 
     for (const chain of this.chains) {
