@@ -13,3 +13,4 @@ export {
 export { MineProcess, type MineConfig } from './MineProcess';
 export { FollowProcess, type FollowConfig } from './FollowProcess';
 export { ExploreProcess, type ExploreConfig } from './ExploreProcess';
+export { GatherProcess, type GatherConfig } from './GatherProcess';

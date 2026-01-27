@@ -20,6 +20,12 @@ export const SNEAK_ONE_BLOCK_COST = 20 / 1.3; // 15.385 ticks
 // Swimming/water walking speed: 2.2 blocks/second
 export const WALK_ONE_IN_WATER_COST = 20 / 2.2; // 9.091 ticks
 
+// Swimming up: slower due to fighting gravity
+export const SWIM_UP_ONE_COST = 20 / 3.0; // 6.667 ticks (similar to ladder)
+
+// Swimming down: faster due to gravity assist
+export const SWIM_DOWN_ONE_COST = 20 / 8.0; // 2.5 ticks
+
 // Soul sand: 40% slower than normal walking
 export const WALK_ONE_OVER_SOUL_SAND_COST = WALK_ONE_BLOCK_COST * 1.4; // 6.486 ticks
 
