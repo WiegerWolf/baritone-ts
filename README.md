@@ -341,7 +341,7 @@ Baritone-TS is optimized for performance:
 
 ## License
 
-MIT
+GNU AFFERO GENERAL PUBLIC LICENSE
 
 ## Credits
 
