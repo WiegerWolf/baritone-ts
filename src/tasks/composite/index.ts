@@ -65,3 +65,27 @@ export {
   surviveAndProgress,
   type SurvivalGoals,
 } from './SurviveTask';
+export {
+  TradingTask,
+  tradeWithVillager,
+  buyItem,
+  sellItem,
+  tradeWithLibrarian,
+  type TradingConfig,
+} from './TradingTask';
+export {
+  EnchantTask,
+  enchantItem,
+  enchantBestAvailable,
+  enchantCheap,
+  type EnchantConfig,
+} from './EnchantTask';
+export {
+  BrewingTask,
+  brewPotion,
+  brewHealingPotions,
+  brewStrengthPotions,
+  brewFireResistance,
+  brewSpeedPotions,
+  type BrewingConfig,
+} from './BrewingTask';

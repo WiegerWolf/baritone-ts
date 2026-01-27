@@ -248,7 +248,10 @@ src/
 │       ├── ExploreTask.ts        # Terrain exploration
 │       ├── BuildShelterTask.ts   # Shelter construction
 │       ├── CombatTask.ts         # Combat behavior
-│       └── SurviveTask.ts        # Survival automation
+│       ├── SurviveTask.ts        # Survival automation
+│       ├── TradingTask.ts        # Villager trading
+│       ├── EnchantTask.ts        # Enchanting workflow
+│       └── BrewingTask.ts        # Potion brewing
 ├── chains/          # Priority chains
 │   ├── FoodChain.ts
 │   ├── WorldSurvivalChain.ts
@@ -274,20 +277,39 @@ src/
     └── Settings.ts
 ```
 
+### Phase 14: Interaction Composite Tasks (Iteration 15)
+- [x] TradingTask - Villager trading automation with profession filtering
+- [x] EnchantTask - Enchanting workflow with level/slot selection
+- [x] BrewingTask - Potion brewing automation with ingredient management
+- [x] Tests for TradingTask, EnchantTask, BrewingTask (14 new tests)
+
+## New Files (Iteration 15)
+```
+src/tasks/composite/
+├── TradingTask.ts        # Villager trading automation
+├── EnchantTask.ts        # Enchanting workflow
+└── BrewingTask.ts        # Potion brewing
+```
+
+## Test Results
+All 334 tests passing:
+- TaskSystem.test.ts: 24 tests
+- ItemTarget.test.ts: 23 tests
+- Timers.test.ts: 15 tests
+- CraftingRecipe.test.ts: 34 tests
+- EventBus.test.ts: 24 tests
+- CompositeTasks.test.ts: 44 tests (30 + 14 new)
+- Plus existing pathfinding tests
+
 ## Next Steps (Future Iterations)
 
-1. **More Composite Tasks**
-   - TradingTask (villager trading automation)
-   - EnchantTask (enchanting workflow)
-   - BrewingTask (potion brewing automation)
-
-2. **Testing and Polish**
+1. **Testing and Polish**
    - Integration tests for concrete tasks
    - Integration tests for composite tasks
    - Performance optimization
    - Error handling improvements
 
-3. **High-Level Tasks**
+2. **Additional Features**
    - BuildTask - Build structures from patterns
-   - ExploreTask - Explore and map terrain
-   - SurviveTask - Automated survival gameplay
+   - RepairTask - Repair items at anvil/grindstone
+   - StorageTask - Organize and manage inventory in containers

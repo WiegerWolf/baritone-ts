@@ -17,6 +17,9 @@ import {
   CombatStyle,
   SurviveTask,
   SurvivalPriority,
+  TradingTask,
+  EnchantTask,
+  BrewingTask,
 } from '../src/tasks/composite';
 
 // Mock bot for testing
@@ -266,6 +269,101 @@ describe('Composite Tasks', () => {
 
       expect(task1.isEqual(task2)).toBe(true);
       expect(task1.isEqual(task3)).toBe(false);
+    });
+  });
+
+  describe('TradingTask', () => {
+    it('should create with default config', () => {
+      const bot = createMockBot();
+      const task = new TradingTask(bot);
+      expect(task.displayName).toContain('Trading');
+    });
+
+    it('should create with specific profession', () => {
+      const bot = createMockBot();
+      const task = new TradingTask(bot, { professions: ['librarian'] });
+      expect(task.displayName).toContain('Trading');
+    });
+
+    it('should create with wanted items', () => {
+      const bot = createMockBot();
+      const task = new TradingTask(bot, { wantedItems: ['emerald'] });
+      expect(task.displayName).toContain('Trading');
+    });
+
+    it('should start in FINDING_VILLAGER state', () => {
+      const bot = createMockBot();
+      const task = new TradingTask(bot);
+      task.onStart();
+      expect(task.isFinished()).toBe(false);
+    });
+
+    it('should track trade count', () => {
+      const bot = createMockBot();
+      const task = new TradingTask(bot);
+      task.onStart();
+      expect(task.getTradeCount()).toBe(0);
+    });
+  });
+
+  describe('EnchantTask', () => {
+    it('should create with default config', () => {
+      const bot = createMockBot();
+      const task = new EnchantTask(bot);
+      expect(task.displayName).toContain('Enchant');
+    });
+
+    it('should create with specific item', () => {
+      const bot = createMockBot();
+      const task = new EnchantTask(bot, { itemToEnchant: 'diamond_sword' });
+      expect(task.displayName).toContain('diamond_sword');
+    });
+
+    it('should create with preferred slot', () => {
+      const bot = createMockBot();
+      const task = new EnchantTask(bot, { preferredSlot: 0 });
+      expect(task.displayName).toContain('Enchant');
+    });
+
+    it('should start in FINDING_TABLE state', () => {
+      const bot = createMockBot();
+      const task = new EnchantTask(bot);
+      task.onStart();
+      expect(task.isFinished()).toBe(false);
+    });
+  });
+
+  describe('BrewingTask', () => {
+    it('should create with default config', () => {
+      const bot = createMockBot();
+      const task = new BrewingTask(bot);
+      expect(task.displayName).toContain('Brew');
+    });
+
+    it('should create with target effect', () => {
+      const bot = createMockBot();
+      const task = new BrewingTask(bot, { targetEffect: 'healing' });
+      expect(task.displayName).toContain('healing');
+    });
+
+    it('should create with count', () => {
+      const bot = createMockBot();
+      const task = new BrewingTask(bot, { count: 6 });
+      expect(task.displayName).toContain('0/6');
+    });
+
+    it('should start in FINDING_STAND state', () => {
+      const bot = createMockBot();
+      const task = new BrewingTask(bot);
+      task.onStart();
+      expect(task.isFinished()).toBe(false);
+    });
+
+    it('should track brewed count', () => {
+      const bot = createMockBot();
+      const task = new BrewingTask(bot);
+      task.onStart();
+      expect(task.getBrewedCount()).toBe(0);
     });
   });
 });
