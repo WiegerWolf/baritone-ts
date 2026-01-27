@@ -139,15 +139,77 @@ src/tasks/concrete/
 └── InteractTask.ts    # Block/entity interaction, attacking
 ```
 
+### Phase 9: Composite Task Chains (Iteration 10)
+- [x] CollectWoodTask - Find trees, mine logs, collect drops
+- [x] GetToolTask - Ensure bot has required tool, crafting if necessary
+- [x] ensureTool() - Convenience function for tool acquisition
+- [x] ToolType type - 'pickaxe' | 'axe' | 'shovel' | 'sword' | 'hoe'
+
+## New Files (Iteration 10)
+```
+src/tasks/composite/
+├── index.ts           # Exports all composite tasks
+├── CollectWoodTask.ts # Wood collection workflow
+└── GetToolTask.ts     # Tool acquisition with crafting
+```
+
+## Updated Architecture Overview
+
+```
+src/
+├── tasks/           # Task system
+│   ├── Task.ts           # Base task class
+│   ├── TaskChain.ts      # Chain management
+│   ├── TaskRunner.ts     # Priority-based execution
+│   ├── ResourceTask.ts   # Resource gathering base
+│   ├── TaskCatalogue.ts  # Item acquisition strategies
+│   ├── interfaces.ts     # Type definitions
+│   ├── concrete/         # Low-level atomic tasks
+│   │   ├── GoToTask.ts        # Navigation tasks
+│   │   ├── MineBlockTask.ts   # Mining tasks
+│   │   ├── PlaceBlockTask.ts  # Placement tasks
+│   │   ├── CraftTask.ts       # Crafting tasks
+│   │   ├── SmeltTask.ts       # Furnace smelting
+│   │   ├── InventoryTask.ts   # Item management
+│   │   └── InteractTask.ts    # Block/entity interaction
+│   └── composite/        # High-level orchestrating tasks
+│       ├── CollectWoodTask.ts # Wood gathering workflow
+│       └── GetToolTask.ts     # Tool acquisition
+├── chains/          # Priority chains
+│   ├── FoodChain.ts
+│   ├── WorldSurvivalChain.ts
+│   ├── MLGBucketChain.ts
+│   └── MobDefenseChain.ts
+├── trackers/        # World state tracking
+│   ├── BlockTracker.ts
+│   ├── EntityTracker.ts
+│   └── ItemStorageTracker.ts
+├── crafting/        # Crafting system
+│   └── CraftingRecipe.ts
+├── events/          # Event system
+│   └── EventBus.ts
+├── utils/           # Utilities
+│   ├── ItemTarget.ts
+│   ├── LookHelper.ts
+│   └── timers/
+│       ├── BaseTimer.ts
+│       ├── TimerGame.ts
+│       ├── TimerReal.ts
+│       └── Stopwatch.ts
+└── settings/        # Configuration
+    └── Settings.ts
+```
+
 ## Next Steps (Future Iterations)
 
-1. **Complex Task Chains**
-   - CollectWoodTask (find tree, mine logs, collect drops)
-   - GetToolTask (ensure have tool for task)
+1. **More Composite Tasks**
    - GatherResourcesTask (flexible multi-item gathering)
+   - MineOresTask (find and mine ore deposits)
+   - BuildShelterTask (create basic shelter)
 
 2. **Testing and Polish**
    - Integration tests for concrete tasks
+   - Integration tests for composite tasks
    - Performance optimization
    - Error handling improvements
 

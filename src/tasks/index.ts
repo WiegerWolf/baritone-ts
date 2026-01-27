@@ -79,3 +79,11 @@ export {
   AttackEntityTask,
   UseItemTask,
 } from './concrete';
+
+// Composite task implementations
+export {
+  CollectWoodTask,
+  GetToolTask,
+  ensureTool,
+  type ToolType,
+} from './composite';
