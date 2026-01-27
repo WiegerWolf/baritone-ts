@@ -112,6 +112,7 @@ export { FollowProcess, type FollowConfig } from './behavior/FollowProcess';
 export { ExploreProcess, type ExploreConfig } from './behavior/ExploreProcess';
 export { GatherProcess, type GatherConfig } from './behavior/GatherProcess';
 export { FarmProcess, type FarmConfig } from './behavior/FarmProcess';
+export { BuildProcess, type BuildConfig, type PlaceInstruction } from './behavior/BuildProcess';
 
 /**
  * Baritone-TS Pathfinder Plugin

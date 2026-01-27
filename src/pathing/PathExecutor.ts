@@ -1,4 +1,5 @@
 import { PathNode, MovementStatus, BlockPos, CalculationContext } from '../types';
+import { Vec3 } from 'vec3';
 import { Movement, MovementTraverse, MovementAscend, MovementDescend, MovementDiagonal, MovementPillar, MovementParkour } from '../movements/Movement';
 import { MovementFall } from '../movements/MovementFall';
 import { getMovementHelper } from '../movements/MovementHelper';
@@ -42,6 +43,11 @@ export class PathExecutor {
 
   // Failure tracking
   private failureMode: PathFailureMode = PathFailureMode.NONE;
+
+  // Break-while-walking state
+  private breakAheadEnabled: boolean = true;
+  private currentlyBreakingAhead: { x: number; y: number; z: number } | null = null;
+  private breakAheadLookahead: number = 3; // How many movements to look ahead
 
   constructor(
     bot: any,
@@ -217,6 +223,9 @@ export class PathExecutor {
     this.sprintNextTick = this.shouldSprintNextTick();
     this.bot.setControlState('sprint', this.sprintNextTick);
 
+    // Break-while-walking: look ahead and pre-break blocks
+    this.tickBreakAhead();
+
     // Check for movement timeout
     this.ticksOnCurrent++;
     if (this.ticksOnCurrent > this.currentMovementEstimate + PathExecutor.MOVEMENT_TIMEOUT_BUFFER) {
@@ -225,6 +234,103 @@ export class PathExecutor {
     }
 
     return false;
+  }
+
+  /**
+   * Break-while-walking: Look ahead and pre-break blocks we'll need to break
+   * This allows continuous movement instead of stop-break-move cycles
+   */
+  private tickBreakAhead(): void {
+    if (!this.breakAheadEnabled) return;
+
+    // Don't break ahead while falling
+    if (this.fallOverrideActive) return;
+
+    // Check if we're already breaking something ahead
+    if (this.currentlyBreakingAhead) {
+      // Check if the block is gone
+      const block = this.bot.blockAt(this.currentlyBreakingAhead);
+      if (!block || block.name === 'air') {
+        this.currentlyBreakingAhead = null;
+      } else {
+        // Still breaking, continue
+        return;
+      }
+    }
+
+    // Look ahead for blocks to break
+    const pos = this.bot.entity.position;
+    const reach = 4.5; // Standard reach distance
+
+    for (let i = this.pathPosition + 1; i < Math.min(this.movements.length, this.pathPosition + this.breakAheadLookahead); i++) {
+      const pathNode = this.path[i + 1]; // +1 because movements[i] goes TO path[i+1]
+      if (!pathNode) continue;
+
+      // Check if this node has blocks to break
+      if (pathNode.toBreak && pathNode.toBreak.length > 0) {
+        for (const breakPos of pathNode.toBreak) {
+          // Check if block is in range
+          const dist = pos.distanceTo(new Vec3(breakPos.x + 0.5, breakPos.y + 0.5, breakPos.z + 0.5));
+          if (dist > reach) continue;
+
+          // Check if block exists and needs breaking
+          const block = this.bot.blockAt(breakPos);
+          if (!block || block.name === 'air') continue;
+
+          // Start breaking this block
+          this.currentlyBreakingAhead = { x: breakPos.x, y: breakPos.y, z: breakPos.z };
+
+          // Don't await - just start digging and let it run in background
+          this.bot.dig(block).then(() => {
+            this.currentlyBreakingAhead = null;
+          }).catch(() => {
+            this.currentlyBreakingAhead = null;
+          });
+
+          return; // Only break one block at a time
+        }
+      }
+
+      // Also check body space of upcoming movements
+      const bodyPos1 = new Vec3(pathNode.x, pathNode.y, pathNode.z);
+      const bodyPos2 = new Vec3(pathNode.x, pathNode.y + 1, pathNode.z);
+
+      for (const checkPos of [bodyPos1, bodyPos2]) {
+        const dist = pos.distanceTo(checkPos.offset(0.5, 0.5, 0.5));
+        if (dist > reach) continue;
+
+        const block = this.bot.blockAt(checkPos);
+        if (!block || block.name === 'air') continue;
+
+        // Check if this block needs breaking (not walkthrough-able)
+        if (!this.ctx.canWalkThrough(block)) {
+          // Check if we can break it
+          const breakTime = this.ctx.getBreakTime(block);
+          if (breakTime < 9999) { // Not unbreakable
+            this.currentlyBreakingAhead = { x: checkPos.x, y: checkPos.y, z: checkPos.z };
+
+            this.bot.dig(block).then(() => {
+              this.currentlyBreakingAhead = null;
+            }).catch(() => {
+              this.currentlyBreakingAhead = null;
+            });
+
+            return;
+          }
+        }
+      }
+    }
+  }
+
+  /**
+   * Enable or disable break-while-walking
+   */
+  setBreakAheadEnabled(enabled: boolean): void {
+    this.breakAheadEnabled = enabled;
+    if (!enabled && this.currentlyBreakingAhead) {
+      this.bot.stopDigging();
+      this.currentlyBreakingAhead = null;
+    }
   }
 
   /**
