@@ -14,3 +14,11 @@ export {
   type CachedProjectile,
   type ThreatInfo,
 } from './EntityTracker';
+
+export {
+  ItemStorageTracker,
+  ContainerType,
+  type ContainerCache,
+  type CachedItem,
+  type StorageTrackerConfig,
+} from './ItemStorageTracker';
