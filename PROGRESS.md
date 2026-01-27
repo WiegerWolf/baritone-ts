@@ -51,12 +51,13 @@ This document tracks the implementation of features from AltoClef and BaritonePl
 - Fixed TimerGame null check in constructor
 
 ## Test Results
-All 290 tests passing:
+All 320 tests passing:
 - TaskSystem.test.ts: 24 tests
 - ItemTarget.test.ts: 23 tests
 - Timers.test.ts: 15 tests
 - CraftingRecipe.test.ts: 34 tests
 - EventBus.test.ts: 24 tests
+- CompositeTasks.test.ts: 30 tests
 - Plus existing pathfinding tests
 
 ## Architecture Overview
@@ -176,6 +177,18 @@ src/tasks/concrete/
 - [x] SurvivalPriority enum - CRITICAL, URGENT, NORMAL, LOW
 - [x] survive, survivePassive, surviveAndProgress - Convenience functions
 - [x] SurvivalGoals - Configuration for survival behavior
+
+### Phase 13: Composite Task Testing (Iteration 14)
+- [x] CompositeTasks.test.ts - 30 tests for all composite tasks
+- [x] CollectWoodTask tests - creation, state management
+- [x] GetToolTask tests - tool types, tiers, equality
+- [x] GatherResourcesTask tests - string/array targets
+- [x] MineOresTask tests - default config, specific ores
+- [x] FarmTask tests - modes, crop targeting
+- [x] ExploreTask tests - patterns, chunk tracking
+- [x] BuildShelterTask tests - shelter types, states
+- [x] CombatTask tests - styles, target types, kill tracking
+- [x] SurviveTask tests - goals, continuous operation
 
 ## New Files (Iteration 10)
 ```
