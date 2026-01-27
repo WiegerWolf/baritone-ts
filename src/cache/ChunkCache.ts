@@ -370,6 +370,208 @@ export class ChunkCache {
     if (type === null) return null;
     return type === PathingBlockType.AVOID;
   }
+
+  // ============ Disk Persistence ============
+
+  /**
+   * Save all cached chunks to a directory
+   * Uses region-based file format (32x32 chunks per region file)
+   */
+  async saveToDirectory(dirPath: string): Promise<void> {
+    const fs = await import('fs').then(m => m.promises);
+    const path = await import('path');
+
+    // Ensure directory exists
+    await fs.mkdir(dirPath, { recursive: true });
+
+    // Group columns by region
+    const regions = new Map<string, Map<string, CachedColumn>>();
+
+    for (const [key, column] of this.columns.entries()) {
+      const [chunkXStr, chunkZStr] = key.split(',');
+      const chunkX = parseInt(chunkXStr, 10);
+      const chunkZ = parseInt(chunkZStr, 10);
+
+      const regionX = Math.floor(chunkX / 32);
+      const regionZ = Math.floor(chunkZ / 32);
+      const regionKey = `${regionX},${regionZ}`;
+
+      if (!regions.has(regionKey)) {
+        regions.set(regionKey, new Map());
+      }
+      regions.get(regionKey)!.set(key, column);
+    }
+
+    // Save each region
+    for (const [regionKey, regionColumns] of regions.entries()) {
+      const [regionX, regionZ] = regionKey.split(',').map(s => parseInt(s, 10));
+      const filename = path.join(dirPath, `r.${regionX}.${regionZ}.cache`);
+      await this.saveRegion(filename, regionColumns);
+    }
+  }
+
+  /**
+   * Save a region file
+   */
+  private async saveRegion(filename: string, columns: Map<string, CachedColumn>): Promise<void> {
+    const fs = await import('fs').then(m => m.promises);
+
+    // Build region data
+    // Format: [numColumns:4][for each column: chunkX:4, chunkZ:4, numSections:4, [sectionY:4, data:1024]...]
+    const chunks: Buffer[] = [];
+
+    // Header: number of columns
+    const header = Buffer.alloc(4);
+    header.writeInt32LE(columns.size, 0);
+    chunks.push(header);
+
+    for (const [key, column] of columns.entries()) {
+      const [chunkXStr, chunkZStr] = key.split(',');
+      const chunkX = parseInt(chunkXStr, 10);
+      const chunkZ = parseInt(chunkZStr, 10);
+
+      const sectionYs = column.getSectionYs();
+
+      // Column header: chunkX, chunkZ, numSections
+      const colHeader = Buffer.alloc(12);
+      colHeader.writeInt32LE(chunkX, 0);
+      colHeader.writeInt32LE(chunkZ, 4);
+      colHeader.writeInt32LE(sectionYs.length, 8);
+      chunks.push(colHeader);
+
+      // Each section
+      for (const sectionY of sectionYs) {
+        const section = column.getSection(sectionY * 16);
+        if (!section) continue;
+
+        const sectionHeader = Buffer.alloc(4);
+        sectionHeader.writeInt32LE(sectionY, 0);
+        chunks.push(sectionHeader);
+
+        // Section data (1024 bytes)
+        chunks.push(Buffer.from(section.getRawData()));
+      }
+    }
+
+    // Write to file
+    await fs.writeFile(filename, Buffer.concat(chunks));
+  }
+
+  /**
+   * Load cached chunks from a directory
+   */
+  async loadFromDirectory(dirPath: string): Promise<number> {
+    const fs = await import('fs').then(m => m.promises);
+    const path = await import('path');
+
+    let loadedColumns = 0;
+
+    try {
+      const files = await fs.readdir(dirPath);
+
+      for (const file of files) {
+        if (!file.startsWith('r.') || !file.endsWith('.cache')) continue;
+
+        const filepath = path.join(dirPath, file);
+        const count = await this.loadRegion(filepath);
+        loadedColumns += count;
+      }
+    } catch (err) {
+      // Directory doesn't exist or can't be read
+      return 0;
+    }
+
+    return loadedColumns;
+  }
+
+  /**
+   * Load a region file
+   */
+  private async loadRegion(filename: string): Promise<number> {
+    const fs = await import('fs').then(m => m.promises);
+
+    let loadedColumns = 0;
+
+    try {
+      const data = await fs.readFile(filename);
+      let offset = 0;
+
+      // Read header
+      const numColumns = data.readInt32LE(offset);
+      offset += 4;
+
+      for (let i = 0; i < numColumns; i++) {
+        // Read column header
+        const chunkX = data.readInt32LE(offset);
+        offset += 4;
+        const chunkZ = data.readInt32LE(offset);
+        offset += 4;
+        const numSections = data.readInt32LE(offset);
+        offset += 4;
+
+        const column = this.getOrCreateColumn(chunkX, chunkZ);
+
+        // Read sections
+        for (let j = 0; j < numSections; j++) {
+          const sectionY = data.readInt32LE(offset);
+          offset += 4;
+
+          // Read section data
+          const sectionData = data.subarray(offset, offset + SECTION_BYTES);
+          offset += SECTION_BYTES;
+
+          // Create section and set data
+          const y = sectionY * 16;
+          column.setBlockType(0, y, 0, PathingBlockType.AIR); // Force section creation
+          const section = column.getSection(y);
+          if (section) {
+            section.setRawData(new Uint8Array(sectionData));
+          }
+        }
+
+        loadedColumns++;
+      }
+    } catch (err) {
+      // File doesn't exist or is corrupted
+      return 0;
+    }
+
+    return loadedColumns;
+  }
+
+  /**
+   * Get cache directory path for a world
+   */
+  static getCacheDir(worldName: string, serverAddress?: string): string {
+    const os = require('os');
+    const path = require('path');
+
+    const baseDir = path.join(os.homedir(), '.baritone-ts', 'cache');
+
+    if (serverAddress) {
+      // Sanitize server address for use as directory name
+      const sanitized = serverAddress.replace(/[^a-zA-Z0-9.-]/g, '_');
+      return path.join(baseDir, sanitized, worldName);
+    }
+
+    return path.join(baseDir, worldName);
+  }
+
+  /**
+   * Save cache to default location based on world info
+   */
+  async saveCache(worldName: string, serverAddress?: string): Promise<void> {
+    const cacheDir = ChunkCache.getCacheDir(worldName, serverAddress);
+    await this.saveToDirectory(cacheDir);
+  }
+
+  /**
+   * Load cache from default location based on world info
+   */
+  async loadCache(worldName: string, serverAddress?: string): Promise<number> {
+    const cacheDir = ChunkCache.getCacheDir(worldName, serverAddress);
+    return this.loadFromDirectory(cacheDir);
+  }
 }
 
 /**

@@ -272,6 +272,36 @@ export class AStar {
     // Downward (mine down)
     this.checkDownward(x, y, z, neighbors);
 
+    // Swimming movements (if in water)
+    const currentBlock = this.ctx.getBlock(x, y, z);
+    if (this.ctx.isWater(currentBlock)) {
+      // Swim up
+      this.checkSwimUp(x, y, z, neighbors);
+
+      // Swim down
+      this.checkSwimDown(x, y, z, neighbors);
+
+      // Horizontal swimming
+      for (const dir of cardinals) {
+        this.checkSwimHorizontal(x, y, z, dir.dx, dir.dz, neighbors);
+      }
+
+      // Water exit
+      for (const dir of cardinals) {
+        this.checkWaterExit(x, y, z, dir.dx, dir.dz, neighbors);
+      }
+    } else {
+      // Water entry (if adjacent to water)
+      for (const dir of cardinals) {
+        this.checkWaterEntry(x, y, z, dir.dx, dir.dz, neighbors);
+      }
+    }
+
+    // Door/gate movements
+    for (const dir of cardinals) {
+      this.checkDoor(x, y, z, dir.dx, dir.dz, neighbors);
+    }
+
     return neighbors;
   }
 
@@ -665,6 +695,253 @@ export class AStar {
 
       break; // Only consider first valid landing
     }
+  }
+
+  /**
+   * Check swim up movement
+   */
+  private checkSwimUp(
+    x: number, y: number, z: number,
+    neighbors: NeighborMove[]
+  ): void {
+    const destY = y + 1;
+
+    // Check destination is water or air (surfacing)
+    const destBlock = this.ctx.getBlock(x, destY, z);
+    if (!destBlock) return;
+
+    // Can swim up if destination is water or air
+    if (!this.ctx.isWater(destBlock) && !this.ctx.canWalkThrough(destBlock)) return;
+
+    // Cost: SWIM_UP_ONE_COST = 20 / 3.0 ≈ 6.667 ticks
+    const cost = 6.667 * this.ctx.getFavoring(x, destY, z);
+
+    neighbors.push({
+      x: x,
+      y: destY,
+      z: z,
+      moveCost: cost,
+      hash: `${x},${destY},${z}`
+    });
+  }
+
+  /**
+   * Check swim down movement
+   */
+  private checkSwimDown(
+    x: number, y: number, z: number,
+    neighbors: NeighborMove[]
+  ): void {
+    const destY = y - 1;
+
+    // Check destination is water
+    const destBlock = this.ctx.getBlock(x, destY, z);
+    if (!destBlock || !this.ctx.isWater(destBlock)) return;
+
+    // Cost: SWIM_DOWN_ONE_COST = 20 / 8.0 = 2.5 ticks
+    const cost = 2.5 * this.ctx.getFavoring(x, destY, z);
+
+    neighbors.push({
+      x: x,
+      y: destY,
+      z: z,
+      moveCost: cost,
+      hash: `${x},${destY},${z}`
+    });
+  }
+
+  /**
+   * Check horizontal swimming movement
+   */
+  private checkSwimHorizontal(
+    x: number, y: number, z: number,
+    dx: number, dz: number,
+    neighbors: NeighborMove[]
+  ): void {
+    const destX = x + dx;
+    const destZ = z + dz;
+
+    // Check destination is water
+    const destBlock = this.ctx.getBlock(destX, y, destZ);
+    if (!destBlock || !this.ctx.isWater(destBlock)) return;
+
+    // Cost: WALK_ONE_IN_WATER_COST ≈ 9.091 ticks
+    const cost = 9.091 * this.ctx.getFavoring(destX, y, destZ);
+
+    neighbors.push({
+      x: destX,
+      y: y,
+      z: destZ,
+      moveCost: cost,
+      hash: `${destX},${y},${destZ}`
+    });
+  }
+
+  /**
+   * Check water exit movement (from water to land)
+   */
+  private checkWaterExit(
+    x: number, y: number, z: number,
+    dx: number, dz: number,
+    neighbors: NeighborMove[]
+  ): void {
+    const destX = x + dx;
+    const destZ = z + dz;
+
+    // Check destination floor (must be able to stand)
+    const floor = this.ctx.getBlock(destX, y - 1, destZ);
+    if (!this.ctx.canWalkOn(floor)) return;
+
+    // Check destination body space (must not be water and must be passable)
+    const body1 = this.ctx.getBlock(destX, y, destZ);
+    const body2 = this.ctx.getBlock(destX, y + 1, destZ);
+
+    if (this.ctx.isWater(body1)) return; // Still in water
+    if (!this.ctx.canWalkThrough(body1)) return;
+    if (!this.ctx.canWalkThrough(body2)) return;
+
+    // Cost: swim + walk
+    const cost = (4.633 + 4.5) * this.ctx.getFavoring(destX, y, destZ);
+
+    neighbors.push({
+      x: destX,
+      y: y,
+      z: destZ,
+      moveCost: cost,
+      hash: `${destX},${y},${destZ}`
+    });
+  }
+
+  /**
+   * Check water entry movement (from land to water)
+   */
+  private checkWaterEntry(
+    x: number, y: number, z: number,
+    dx: number, dz: number,
+    neighbors: NeighborMove[]
+  ): void {
+    const destX = x + dx;
+    const destZ = z + dz;
+
+    // Check destination is water
+    const destBlock = this.ctx.getBlock(destX, y, destZ);
+    if (!destBlock || !this.ctx.isWater(destBlock)) return;
+
+    // Check head space at destination
+    const head = this.ctx.getBlock(destX, y + 1, destZ);
+    if (!this.ctx.canWalkThrough(head) && !this.ctx.isWater(head)) return;
+
+    // Cost: walk + swim
+    const cost = (4.633 + 4.5) * this.ctx.getFavoring(destX, y, destZ);
+
+    neighbors.push({
+      x: destX,
+      y: y,
+      z: destZ,
+      moveCost: cost,
+      hash: `${destX},${y},${destZ}`
+    });
+  }
+
+  /**
+   * Check door/fence gate/trapdoor movement
+   */
+  private checkDoor(
+    x: number, y: number, z: number,
+    dx: number, dz: number,
+    neighbors: NeighborMove[]
+  ): void {
+    const midX = x + dx;
+    const midZ = z + dz;
+    const destX = x + dx * 2;
+    const destZ = z + dz * 2;
+
+    // Check if there's a door/gate in the way
+    const block = this.ctx.getBlock(midX, y, midZ);
+    if (!block) return;
+
+    const blockName = block.name || '';
+    const isDoor = blockName.endsWith('_door');
+    const isFenceGate = blockName.endsWith('_fence_gate');
+    const isTrapdoor = blockName.endsWith('_trapdoor');
+
+    if (!isDoor && !isFenceGate && !isTrapdoor) return;
+
+    // Iron doors require redstone - skip them
+    if (blockName === 'iron_door') return;
+
+    // For horizontal doors, we go 2 blocks through
+    // For trapdoors, we might go up or down
+
+    if (isTrapdoor) {
+      // Check if trapdoor is above or below us
+      const trapAbove = this.ctx.getBlock(x, y + 1, z);
+      const trapBelow = this.ctx.getBlock(x, y - 1, z);
+
+      if (trapAbove && (trapAbove.name || '').endsWith('_trapdoor')) {
+        // Can go up through trapdoor
+        const destY = y + 1;
+        const headSpace = this.ctx.getBlock(x, y + 2, z);
+        if (this.ctx.canWalkThrough(headSpace)) {
+          const cost = (4.633 + 2.0) * this.ctx.getFavoring(x, destY, z); // Walk + interact
+          neighbors.push({
+            x: x,
+            y: destY,
+            z: z,
+            moveCost: cost,
+            hash: `${x},${destY},${z}`
+          });
+        }
+      }
+
+      if (trapBelow && (trapBelow.name || '').endsWith('_trapdoor')) {
+        // Can go down through trapdoor
+        const destY = y - 1;
+        const floor = this.ctx.getBlock(x, y - 2, z);
+        if (this.ctx.canWalkOn(floor)) {
+          const cost = (4.633 + 2.0) * this.ctx.getFavoring(x, destY, z);
+          neighbors.push({
+            x: x,
+            y: destY,
+            z: z,
+            moveCost: cost,
+            hash: `${x},${destY},${z}`
+          });
+        }
+      }
+      return;
+    }
+
+    // Horizontal doors/gates - destination is 2 blocks away
+    // Check destination floor
+    const floor = this.ctx.getBlock(destX, y - 1, destZ);
+    if (!this.ctx.canWalkOn(floor)) return;
+
+    // Check body space at destination
+    const body1 = this.ctx.getBlock(destX, y, destZ);
+    const body2 = this.ctx.getBlock(destX, y + 1, destZ);
+
+    if (!this.ctx.canWalkThrough(body1)) return;
+    if (!this.ctx.canWalkThrough(body2)) return;
+
+    // Check if door blocks head (for doors that are 2 blocks tall)
+    if (isDoor) {
+      const doorTop = this.ctx.getBlock(midX, y + 1, midZ);
+      if (doorTop && !(doorTop.name || '').endsWith('_door')) {
+        if (!this.ctx.canWalkThrough(doorTop)) return;
+      }
+    }
+
+    // Cost: walk through door (2 blocks) + interact cost
+    const cost = (4.633 * 2 + 2.0) * this.ctx.getFavoring(destX, y, destZ);
+
+    neighbors.push({
+      x: destX,
+      y: y,
+      z: destZ,
+      moveCost: cost,
+      hash: `${destX},${y},${destZ}`
+    });
   }
 
   /**

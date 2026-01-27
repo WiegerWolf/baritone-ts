@@ -29,6 +29,8 @@ export {
   WALK_ONE_OVER_SOUL_SAND_COST,
   LADDER_UP_ONE_COST,
   LADDER_DOWN_ONE_COST,
+  SWIM_UP_ONE_COST,
+  SWIM_DOWN_ONE_COST,
   JUMP_ONE_BLOCK_COST,
   WALK_OFF_BLOCK_COST,
   CENTER_AFTER_FALL_COST,
@@ -45,6 +47,7 @@ export { AStar } from './pathing/AStar';
 export { PathExecutor } from './pathing/PathExecutor';
 export { Favoring } from './pathing/Favoring';
 export { PrecomputedData } from './cache/PrecomputedData';
+export { ChunkCache, createBlockClassifier } from './cache/ChunkCache';
 export {
   MovementTraverse,
   MovementAscend,
@@ -53,6 +56,50 @@ export {
   MovementPillar,
   MovementParkour
 } from './movements/Movement';
+
+// Swimming movements
+export {
+  MovementSwimHorizontal,
+  MovementSwimUp,
+  MovementSwimDown,
+  MovementWaterExit,
+  MovementWaterEntry
+} from './movements/MovementSwim';
+
+// Door movements
+export {
+  MovementThroughDoor,
+  MovementThroughFenceGate,
+  MovementThroughTrapdoor,
+  isDoor,
+  isFenceGate,
+  isTrapdoor,
+  isOpenable,
+  requiresRedstone
+} from './movements/MovementDoor';
+
+// Async pathfinding
+export {
+  AsyncPathfinder,
+  AsyncPathState,
+  computePathAsync,
+  type AsyncPathOptions,
+  type AsyncPathProgress
+} from './pathing/AsyncPathfinder';
+
+// Behavior/Process system
+export {
+  IProcess,
+  BaseProcess,
+  ProcessManager,
+  ProcessPriority,
+  ProcessState,
+  type ProcessTickResult
+} from './behavior/Process';
+export { MineProcess, type MineConfig } from './behavior/MineProcess';
+export { FollowProcess, type FollowConfig } from './behavior/FollowProcess';
+export { ExploreProcess, type ExploreConfig } from './behavior/ExploreProcess';
+export { GatherProcess, type GatherConfig } from './behavior/GatherProcess';
 
 /**
  * Baritone-TS Pathfinder Plugin
