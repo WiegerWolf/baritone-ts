@@ -12,3 +12,13 @@ export {
   HazardType,
   type WorldSurvivalConfig,
 } from './WorldSurvivalChain';
+
+export {
+  MLGBucketChain,
+  type MLGBucketConfig,
+} from './MLGBucketChain';
+
+export {
+  MobDefenseChain,
+  type MobDefenseConfig,
+} from './MobDefenseChain';
