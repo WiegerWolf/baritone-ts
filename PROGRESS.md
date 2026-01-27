@@ -119,24 +119,39 @@ src/tasks/concrete/
 └── CraftTask.ts       # Crafting tasks
 ```
 
+### Phase 8: Additional Concrete Tasks (Iteration 9)
+- [x] SmeltTask - Smelt items in furnaces
+- [x] isFuel/getFuelBurnTime - Fuel utilities
+- [x] PickupItemTask - Pick up dropped items
+- [x] EquipTask - Equip items to equipment slots
+- [x] DropItemTask - Drop items from inventory
+- [x] MoveItemTask - Move items between slots
+- [x] InteractBlockTask - Right-click blocks
+- [x] InteractEntityTask - Right-click entities
+- [x] AttackEntityTask - Attack entities
+- [x] UseItemTask - Use held item
+
+## New Files (Iteration 9)
+```
+src/tasks/concrete/
+├── SmeltTask.ts       # Furnace smelting
+├── InventoryTask.ts   # Item management (pickup, equip, drop, move)
+└── InteractTask.ts    # Block/entity interaction, attacking
+```
+
 ## Next Steps (Future Iterations)
 
-1. **SmeltTask**
-   - Smelt items in furnace
-   - Manage fuel and ingredients
-
-2. **Complex Task Chains**
+1. **Complex Task Chains**
    - CollectWoodTask (find tree, mine logs, collect drops)
-   - BuildShelterTask (gather materials, find location, build)
    - GetToolTask (ensure have tool for task)
+   - GatherResourcesTask (flexible multi-item gathering)
 
-3. **Testing and Polish**
-   - Integration tests with mock Minecraft world
+2. **Testing and Polish**
+   - Integration tests for concrete tasks
    - Performance optimization
    - Error handling improvements
 
-4. **Additional Concrete Tasks**
-   - InteractTask - Interact with blocks/entities
-   - PickupItemTask - Pick up dropped items
-   - EquipTask - Equip items to slots
-   - DropItemTask - Drop items
+3. **High-Level Tasks**
+   - BuildTask - Build structures from patterns
+   - ExploreTask - Explore and map terrain
+   - SurviveTask - Automated survival gameplay

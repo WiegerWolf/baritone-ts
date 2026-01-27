@@ -47,16 +47,35 @@ export {
 
 // Concrete task implementations
 export {
+  // Navigation
   GoToTask,
   GoToBlockTask,
   GetToBlockTask,
   GoToNearTask,
   GoToXZTask,
   FollowEntityTask,
+  // Mining
   MineBlockTask,
   MineBlockTypeTask,
+  // Placement
   PlaceBlockTask,
   PlaceAgainstTask,
+  // Crafting
   CraftTask,
   EnsureItemTask,
+  // Smelting
+  SmeltTask,
+  isFuel,
+  getFuelBurnTime,
+  // Inventory
+  EquipmentSlot,
+  PickupItemTask,
+  EquipTask,
+  DropItemTask,
+  MoveItemTask,
+  // Interaction
+  InteractBlockTask,
+  InteractEntityTask,
+  AttackEntityTask,
+  UseItemTask,
 } from './concrete';

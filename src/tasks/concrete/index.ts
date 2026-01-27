@@ -32,3 +32,27 @@ export {
   CraftTask,
   EnsureItemTask,
 } from './CraftTask';
+
+// Smelting tasks
+export {
+  SmeltTask,
+  isFuel,
+  getFuelBurnTime,
+} from './SmeltTask';
+
+// Inventory tasks
+export {
+  EquipmentSlot,
+  PickupItemTask,
+  EquipTask,
+  DropItemTask,
+  MoveItemTask,
+} from './InventoryTask';
+
+// Interaction tasks
+export {
+  InteractBlockTask,
+  InteractEntityTask,
+  AttackEntityTask,
+  UseItemTask,
+} from './InteractTask';
