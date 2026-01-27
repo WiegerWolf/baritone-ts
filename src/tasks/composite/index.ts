@@ -198,3 +198,30 @@ export {
   findStrongholdPrecise,
   type StrongholdConfig,
 } from './StrongholdTask';
+export {
+  HuntTask,
+  huntAnimals,
+  huntForFood,
+  huntCows,
+  huntForLeather,
+  huntChickens,
+  type HuntConfig,
+} from './HuntTask';
+export {
+  DefendAreaTask,
+  defendArea,
+  defendCurrentPosition,
+  defendForDuration,
+  defendWithPatrol,
+  defendStationary,
+  type DefendAreaConfig,
+} from './DefendAreaTask';
+export {
+  FollowPlayerTask,
+  followPlayer,
+  followPlayerClose,
+  followPlayerFar,
+  followPlayerForDuration,
+  followPlayerWithMimic,
+  type FollowPlayerConfig,
+} from './FollowPlayerTask';

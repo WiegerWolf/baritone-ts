@@ -258,7 +258,10 @@ src/
 │       ├── ParkourTask.ts        # Advanced parkour movement
 │       ├── SchematicTask.ts      # Schematic-based building
 │       ├── DragonFightTask.ts    # Ender dragon combat
-│       └── StrongholdTask.ts     # Stronghold navigation
+│       ├── StrongholdTask.ts     # Stronghold navigation
+│       ├── HuntTask.ts           # Animal hunting
+│       ├── DefendAreaTask.ts     # Area defense
+│       └── FollowPlayerTask.ts   # Player following
 ├── chains/          # Priority chains
 │   ├── FoodChain.ts
 │   ├── WorldSurvivalChain.ts
@@ -400,14 +403,41 @@ src/tasks/composite/
 └── StrongholdTask.ts     # Stronghold navigation
 ```
 
+### Phase 21: Combat and Hunting Tasks (Iteration 22)
+- [x] HuntTask - Animal hunting automation
+- [x] HuntState enum (SEARCHING, APPROACHING, ATTACKING, COLLECTING_DROPS)
+- [x] ANIMAL_DATA mapping for drops per animal type
+- [x] Baby animal avoidance option
+- [x] Drop collection after kills
+- [x] DefendAreaTask - Area defense automation
+- [x] DefendState enum (PATROLLING, ENGAGING, PURSUING, RETURNING, RESTING)
+- [x] Patrol point generation and movement
+- [x] Threat detection and prioritization
+- [x] Chase distance limits
+- [x] Tests for HuntTask, DefendAreaTask (15 new tests)
+- [x] FollowPlayerTask - Player following automation
+- [x] FollowState enum (SEARCHING, FOLLOWING, WAITING, TELEPORTING, LOST)
+- [x] Distance-based following with sprint option
+- [x] Player action mimicking option
+- [x] Lost player handling and recovery
+- [x] Tests for FollowPlayerTask (9 new tests)
+
+## New Files (Iteration 22)
+```
+src/tasks/composite/
+├── HuntTask.ts           # Animal hunting
+├── DefendAreaTask.ts     # Area defense
+└── FollowPlayerTask.ts   # Player following
+```
+
 ## Test Results
-All 448 tests passing:
+All 472 tests passing:
 - TaskSystem.test.ts: 24 tests
 - ItemTarget.test.ts: 23 tests
 - Timers.test.ts: 15 tests
 - CraftingRecipe.test.ts: 34 tests
 - EventBus.test.ts: 24 tests
-- CompositeTasks.test.ts: 118 tests (105 + 13 new)
+- CompositeTasks.test.ts: 142 tests (133 + 9 new)
 - ConcreteTasks.test.ts: 40 tests
 - Plus existing pathfinding tests
 
@@ -455,6 +485,9 @@ The baritone-ts project now includes a comprehensive implementation of features 
 - Schematics: SchematicTask (schematic-based building)
 - Dragon: DragonFightTask (end dragon combat with crystal/bed tactics)
 - Stronghold: StrongholdTask (eye triangulation navigation)
+- Hunting: HuntTask (animal hunting with drop collection)
+- Defense: DefendAreaTask (area defense with patrol)
+- Following: FollowPlayerTask (player following automation)
 
 ## Next Steps (Future Iterations)
 

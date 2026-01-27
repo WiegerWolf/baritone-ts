@@ -41,6 +41,9 @@ import {
   createWallSchematic,
   DragonFightTask,
   StrongholdTask,
+  HuntTask,
+  DefendAreaTask,
+  FollowPlayerTask,
 } from '../src/tasks/composite';
 import { Vec3 } from 'vec3';
 
@@ -966,6 +969,190 @@ describe('Composite Tasks', () => {
       const dir2 = new Vec3(1, 0, 0);
       const intersection = StrongholdTask.calculateIntersection(start1, dir1, start2, dir2);
       expect(intersection).toBeNull();
+    });
+  });
+
+  describe('HuntTask', () => {
+    it('should create with default config', () => {
+      const bot = createMockBot();
+      const task = new HuntTask(bot);
+      expect(task.displayName).toContain('Hunt');
+    });
+
+    it('should create with target kill count', () => {
+      const bot = createMockBot();
+      const task = new HuntTask(bot, { targetKills: 10 });
+      expect(task.displayName).toContain('0/10');
+    });
+
+    it('should create with specific animals', () => {
+      const bot = createMockBot();
+      const task = new HuntTask(bot, { targetAnimals: ['cow', 'pig'] });
+      expect(task.displayName).toContain('Hunt');
+    });
+
+    it('should start in SEARCHING state', () => {
+      const bot = createMockBot();
+      const task = new HuntTask(bot);
+      task.onStart();
+      expect(task.displayName).toContain('SEARCHING');
+    });
+
+    it('should track kill count', () => {
+      const bot = createMockBot();
+      const task = new HuntTask(bot);
+      task.onStart();
+      expect(task.getKillCount()).toBe(0);
+    });
+
+    it('should have no current target at start', () => {
+      const bot = createMockBot();
+      const task = new HuntTask(bot);
+      task.onStart();
+      expect(task.getCurrentTarget()).toBeNull();
+    });
+
+    it('should compare by target kills and animals', () => {
+      const bot = createMockBot();
+      const task1 = new HuntTask(bot, { targetKills: 5, targetAnimals: ['cow'] });
+      const task2 = new HuntTask(bot, { targetKills: 5, targetAnimals: ['cow'] });
+      const task3 = new HuntTask(bot, { targetKills: 10, targetAnimals: ['cow'] });
+      expect(task1.isEqual(task2)).toBe(true);
+      expect(task1.isEqual(task3)).toBe(false);
+    });
+  });
+
+  describe('DefendAreaTask', () => {
+    it('should create with center position', () => {
+      const bot = createMockBot();
+      const center = new Vec3(100, 64, 100);
+      const task = new DefendAreaTask(bot, center);
+      expect(task.displayName).toContain('DefendArea');
+    });
+
+    it('should create with custom radius', () => {
+      const bot = createMockBot();
+      const center = new Vec3(0, 64, 0);
+      const task = new DefendAreaTask(bot, center, { radius: 32 });
+      expect(task.getRadius()).toBe(32);
+    });
+
+    it('should start in PATROLLING state', () => {
+      const bot = createMockBot();
+      const center = new Vec3(0, 64, 0);
+      const task = new DefendAreaTask(bot, center);
+      task.onStart();
+      expect(task.displayName).toContain('PATROLLING');
+    });
+
+    it('should track kill count', () => {
+      const bot = createMockBot();
+      const center = new Vec3(0, 64, 0);
+      const task = new DefendAreaTask(bot, center);
+      task.onStart();
+      expect(task.getKillCount()).toBe(0);
+    });
+
+    it('should return defense center', () => {
+      const bot = createMockBot();
+      const center = new Vec3(50, 64, 50);
+      const task = new DefendAreaTask(bot, center);
+      const returnedCenter = task.getCenter();
+      expect(returnedCenter.x).toBe(50);
+      expect(returnedCenter.z).toBe(50);
+    });
+
+    it('should compare by center and radius', () => {
+      const bot = createMockBot();
+      const center1 = new Vec3(100, 64, 100);
+      const center2 = new Vec3(100, 64, 100);
+      const center3 = new Vec3(200, 64, 200);
+      const task1 = new DefendAreaTask(bot, center1, { radius: 16 });
+      const task2 = new DefendAreaTask(bot, center2, { radius: 16 });
+      const task3 = new DefendAreaTask(bot, center3, { radius: 16 });
+      expect(task1.isEqual(task2)).toBe(true);
+      expect(task1.isEqual(task3)).toBe(false);
+    });
+
+    it('should create with patrol disabled', () => {
+      const bot = createMockBot();
+      const center = new Vec3(0, 64, 0);
+      const task = new DefendAreaTask(bot, center, { patrolWhenIdle: false });
+      expect(task.displayName).toContain('DefendArea');
+    });
+
+    it('should create with duration limit', () => {
+      const bot = createMockBot();
+      const center = new Vec3(0, 64, 0);
+      const task = new DefendAreaTask(bot, center, { continuous: false, duration: 60 });
+      expect(task.displayName).toContain('DefendArea');
+    });
+  });
+
+  describe('FollowPlayerTask', () => {
+    it('should create with player name', () => {
+      const bot = createMockBot();
+      const task = new FollowPlayerTask(bot, 'TestPlayer');
+      expect(task.displayName).toContain('Follow');
+      expect(task.displayName).toContain('TestPlayer');
+    });
+
+    it('should create with custom distances', () => {
+      const bot = createMockBot();
+      const task = new FollowPlayerTask(bot, 'TestPlayer', {
+        minDistance: 3,
+        maxDistance: 8,
+      });
+      expect(task.displayName).toContain('Follow');
+    });
+
+    it('should start in SEARCHING state', () => {
+      const bot = createMockBot();
+      const task = new FollowPlayerTask(bot, 'TestPlayer');
+      task.onStart();
+      expect(task.displayName).toContain('SEARCHING');
+    });
+
+    it('should have no target at start', () => {
+      const bot = createMockBot();
+      const task = new FollowPlayerTask(bot, 'TestPlayer');
+      task.onStart();
+      expect(task.getTargetPlayer()).toBeNull();
+    });
+
+    it('should return infinite distance when no target', () => {
+      const bot = createMockBot();
+      const task = new FollowPlayerTask(bot, 'TestPlayer');
+      task.onStart();
+      expect(task.getDistanceToTarget()).toBe(Infinity);
+    });
+
+    it('should not be following at start', () => {
+      const bot = createMockBot();
+      const task = new FollowPlayerTask(bot, 'TestPlayer');
+      task.onStart();
+      expect(task.isFollowing()).toBe(false);
+    });
+
+    it('should compare by player name', () => {
+      const bot = createMockBot();
+      const task1 = new FollowPlayerTask(bot, 'Player1');
+      const task2 = new FollowPlayerTask(bot, 'Player1');
+      const task3 = new FollowPlayerTask(bot, 'Player2');
+      expect(task1.isEqual(task2)).toBe(true);
+      expect(task1.isEqual(task3)).toBe(false);
+    });
+
+    it('should create with duration', () => {
+      const bot = createMockBot();
+      const task = new FollowPlayerTask(bot, 'TestPlayer', { duration: 60 });
+      expect(task.displayName).toContain('Follow');
+    });
+
+    it('should create with mimic enabled', () => {
+      const bot = createMockBot();
+      const task = new FollowPlayerTask(bot, 'TestPlayer', { mimicActions: true });
+      expect(task.displayName).toContain('Follow');
     });
   });
 });
