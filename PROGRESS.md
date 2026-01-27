@@ -450,14 +450,39 @@ src/tasks/composite/
 └── FleeTask.ts           # Escape/flee automation
 ```
 
+### Phase 23: Additional Utility Tasks (Iteration 24)
+- [x] SmithingTask - Smithing table automation for netherite upgrades
+- [x] SmithingState enum (FINDING_TABLE, APPROACHING, OPENING, SMITHING, COLLECTING)
+- [x] NETHERITE_UPGRADES mapping for diamond to netherite conversions
+- [x] TameAnimalTask - Animal taming automation
+- [x] TameState enum (SEARCHING, APPROACHING, PREPARING, TAMING, WAITING)
+- [x] TameableAnimal enum (WOLF, CAT, PARROT, HORSE, etc.)
+- [x] TAME_ITEMS mapping for taming requirements
+- [x] RideEntityTask - Entity riding automation
+- [x] RideState enum (FINDING_MOUNT, APPROACHING, MOUNTING, RIDING, NAVIGATING, DISMOUNTING)
+- [x] RideableEntity enum (HORSE, PIG, STRIDER, CAMEL, etc.)
+- [x] CleanupTask - Area cleanup automation
+- [x] CleanupState enum (SCANNING, CLEARING_BLOCKS, COLLECTING_ITEMS, LEVELING)
+- [x] CleanupMode enum (CLEAR_DEBRIS, FLATTEN, CLEAR_VEGETATION, COLLECT_ITEMS, FULL)
+- [x] Tests for SmithingTask, TameAnimalTask, RideEntityTask, CleanupTask (27 new tests)
+
+## New Files (Iteration 24)
+```
+src/tasks/composite/
+├── SmithingTask.ts       # Smithing table automation
+├── TameAnimalTask.ts     # Animal taming
+├── RideEntityTask.ts     # Entity riding
+└── CleanupTask.ts        # Area cleanup
+```
+
 ## Test Results
-All 488 tests passing:
+All 515 tests passing:
 - TaskSystem.test.ts: 24 tests
 - ItemTarget.test.ts: 23 tests
 - Timers.test.ts: 15 tests
 - CraftingRecipe.test.ts: 34 tests
 - EventBus.test.ts: 24 tests
-- CompositeTasks.test.ts: 142 tests (133 + 9 new)
+- CompositeTasks.test.ts: 169 tests (142 + 27 new)
 - ConcreteTasks.test.ts: 40 tests
 - Plus existing pathfinding tests
 
@@ -508,6 +533,12 @@ The baritone-ts project now includes a comprehensive implementation of features 
 - Hunting: HuntTask (animal hunting with drop collection)
 - Defense: DefendAreaTask (area defense with patrol)
 - Following: FollowPlayerTask (player following automation)
+- Looting: LootChestTask (container looting automation)
+- Fleeing: FleeTask (escape/flee automation)
+- Smithing: SmithingTask (netherite upgrade automation)
+- Taming: TameAnimalTask (animal taming automation)
+- Riding: RideEntityTask (entity riding automation)
+- Cleanup: CleanupTask (area cleanup automation)
 
 ## Next Steps (Future Iterations)
 

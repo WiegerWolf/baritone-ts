@@ -243,3 +243,45 @@ export {
   emergencyFlee,
   type FleeConfig,
 } from './FleeTask';
+export {
+  SmithingTask,
+  SmithingType,
+  upgradeToNetherite,
+  upgradeSpecificItem,
+  upgradeSword,
+  upgradeArmor,
+  upgradeTools,
+  type SmithingConfig,
+} from './SmithingTask';
+export {
+  TameAnimalTask,
+  TameableAnimal,
+  tameWolf,
+  tameCat,
+  tameParrot,
+  tameHorse,
+  tameMultiple,
+  tameWolfPack,
+  type TameConfig,
+} from './TameAnimalTask';
+export {
+  RideEntityTask,
+  RideableEntity,
+  rideHorse,
+  ridePig,
+  rideStrider,
+  rideToPosition,
+  mountNearbyRideable,
+  type RideConfig,
+} from './RideEntityTask';
+export {
+  CleanupTask,
+  CleanupMode,
+  clearDebris,
+  clearVegetation,
+  flattenArea,
+  collectDroppedItems,
+  fullCleanup,
+  clearAroundPlayer,
+  type CleanupConfig,
+} from './CleanupTask';

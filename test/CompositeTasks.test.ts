@@ -47,6 +47,14 @@ import {
   LootChestTask,
   FleeTask,
   FleeTrigger,
+  SmithingTask,
+  SmithingType,
+  TameAnimalTask,
+  TameableAnimal,
+  RideEntityTask,
+  RideableEntity,
+  CleanupTask,
+  CleanupMode,
 } from '../src/tasks/composite';
 import { Vec3 } from 'vec3';
 
@@ -1269,6 +1277,200 @@ describe('Composite Tasks', () => {
       const task1 = new FleeTask(bot, { safeDistance: 32, healthThreshold: 6 });
       const task2 = new FleeTask(bot, { safeDistance: 32, healthThreshold: 6 });
       const task3 = new FleeTask(bot, { safeDistance: 50, healthThreshold: 6 });
+      expect(task1.isEqual(task2)).toBe(true);
+      expect(task1.isEqual(task3)).toBe(false);
+    });
+  });
+
+  describe('SmithingTask', () => {
+    it('should create with default config', () => {
+      const bot = createMockBot();
+      const task = new SmithingTask(bot);
+      expect(task.displayName).toContain('Smithing');
+    });
+
+    it('should create with target items', () => {
+      const bot = createMockBot();
+      const task = new SmithingTask(bot, { targetItems: ['diamond_sword'] });
+      expect(task.displayName).toContain('Smithing');
+    });
+
+    it('should start in FINDING_TABLE state', () => {
+      const bot = createMockBot();
+      const task = new SmithingTask(bot);
+      task.onStart();
+      expect(task.displayName).toContain('FINDING_TABLE');
+    });
+
+    it('should track upgrades completed', () => {
+      const bot = createMockBot();
+      const task = new SmithingTask(bot);
+      task.onStart();
+      expect(task.getUpgradesCompleted()).toBe(0);
+    });
+
+    it('should compare by target items', () => {
+      const bot = createMockBot();
+      const task1 = new SmithingTask(bot, { targetItems: ['diamond_sword'] });
+      const task2 = new SmithingTask(bot, { targetItems: ['diamond_sword'] });
+      const task3 = new SmithingTask(bot, { targetItems: ['diamond_pickaxe'] });
+      expect(task1.isEqual(task2)).toBe(true);
+      expect(task1.isEqual(task3)).toBe(false);
+    });
+  });
+
+  describe('TameAnimalTask', () => {
+    it('should create with default config', () => {
+      const bot = createMockBot();
+      const task = new TameAnimalTask(bot);
+      expect(task.displayName).toContain('TameAnimal');
+    });
+
+    it('should create with specific animal type', () => {
+      const bot = createMockBot();
+      const task = new TameAnimalTask(bot, { animalType: TameableAnimal.CAT });
+      expect(task.displayName).toContain('cat');
+    });
+
+    it('should create with multiple animals', () => {
+      const bot = createMockBot();
+      const task = new TameAnimalTask(bot, { maxAnimals: 3 });
+      expect(task.displayName).toContain('0/3');
+    });
+
+    it('should start in SEARCHING state', () => {
+      const bot = createMockBot();
+      const task = new TameAnimalTask(bot);
+      task.onStart();
+      expect(task.displayName).toContain('SEARCHING');
+    });
+
+    it('should track tamed count', () => {
+      const bot = createMockBot();
+      const task = new TameAnimalTask(bot);
+      task.onStart();
+      expect(task.getTamedCount()).toBe(0);
+    });
+
+    it('should have no target at start', () => {
+      const bot = createMockBot();
+      const task = new TameAnimalTask(bot);
+      task.onStart();
+      expect(task.getTargetAnimal()).toBeNull();
+    });
+
+    it('should compare by animal type and max count', () => {
+      const bot = createMockBot();
+      const task1 = new TameAnimalTask(bot, { animalType: TameableAnimal.WOLF, maxAnimals: 1 });
+      const task2 = new TameAnimalTask(bot, { animalType: TameableAnimal.WOLF, maxAnimals: 1 });
+      const task3 = new TameAnimalTask(bot, { animalType: TameableAnimal.CAT, maxAnimals: 1 });
+      expect(task1.isEqual(task2)).toBe(true);
+      expect(task1.isEqual(task3)).toBe(false);
+    });
+  });
+
+  describe('RideEntityTask', () => {
+    it('should create with default config', () => {
+      const bot = createMockBot();
+      const task = new RideEntityTask(bot);
+      expect(task.displayName).toContain('RideEntity');
+    });
+
+    it('should create with specific entity type', () => {
+      const bot = createMockBot();
+      const task = new RideEntityTask(bot, { entityType: RideableEntity.HORSE });
+      expect(task.displayName).toContain('horse');
+    });
+
+    it('should create with destination', () => {
+      const bot = createMockBot();
+      const destination = new Vec3(100, 64, 100);
+      const task = new RideEntityTask(bot, { destination });
+      expect(task.displayName).toContain('to 100,100');
+    });
+
+    it('should start in FINDING_MOUNT state', () => {
+      const bot = createMockBot();
+      const task = new RideEntityTask(bot);
+      task.onStart();
+      expect(task.displayName).toContain('FINDING_MOUNT');
+    });
+
+    it('should have no mount at start', () => {
+      const bot = createMockBot();
+      const task = new RideEntityTask(bot);
+      task.onStart();
+      expect(task.getMount()).toBeNull();
+    });
+
+    it('should not be riding at start', () => {
+      const bot = createMockBot();
+      const task = new RideEntityTask(bot);
+      task.onStart();
+      expect(task.isCurrentlyRiding()).toBe(false);
+    });
+
+    it('should compare by entity type', () => {
+      const bot = createMockBot();
+      const task1 = new RideEntityTask(bot, { entityType: RideableEntity.HORSE });
+      const task2 = new RideEntityTask(bot, { entityType: RideableEntity.HORSE });
+      const task3 = new RideEntityTask(bot, { entityType: RideableEntity.PIG });
+      expect(task1.isEqual(task2)).toBe(true);
+      expect(task1.isEqual(task3)).toBe(false);
+    });
+  });
+
+  describe('CleanupTask', () => {
+    it('should create with default config', () => {
+      const bot = createMockBot();
+      const task = new CleanupTask(bot);
+      expect(task.displayName).toContain('Cleanup');
+    });
+
+    it('should create with debris mode', () => {
+      const bot = createMockBot();
+      const task = new CleanupTask(bot, { mode: CleanupMode.CLEAR_DEBRIS });
+      expect(task.displayName).toContain('CLEAR_DEBRIS');
+    });
+
+    it('should create with flatten mode', () => {
+      const bot = createMockBot();
+      const task = new CleanupTask(bot, { mode: CleanupMode.FLATTEN, targetY: 64 });
+      expect(task.displayName).toContain('FLATTEN');
+    });
+
+    it('should create with custom radius', () => {
+      const bot = createMockBot();
+      const task = new CleanupTask(bot, { radius: 32 });
+      expect(task.displayName).toContain('Cleanup');
+    });
+
+    it('should start in SCANNING state', () => {
+      const bot = createMockBot();
+      const task = new CleanupTask(bot);
+      task.onStart();
+      expect(task.displayName).toContain('SCANNING');
+    });
+
+    it('should track blocks cleaned', () => {
+      const bot = createMockBot();
+      const task = new CleanupTask(bot);
+      task.onStart();
+      expect(task.getBlocksCleaned()).toBe(0);
+    });
+
+    it('should track items collected', () => {
+      const bot = createMockBot();
+      const task = new CleanupTask(bot);
+      task.onStart();
+      expect(task.getItemsCollected()).toBe(0);
+    });
+
+    it('should compare by mode and radius', () => {
+      const bot = createMockBot();
+      const task1 = new CleanupTask(bot, { mode: CleanupMode.CLEAR_DEBRIS, radius: 16 });
+      const task2 = new CleanupTask(bot, { mode: CleanupMode.CLEAR_DEBRIS, radius: 16 });
+      const task3 = new CleanupTask(bot, { mode: CleanupMode.CLEAR_VEGETATION, radius: 16 });
       expect(task1.isEqual(task2)).toBe(true);
       expect(task1.isEqual(task3)).toBe(false);
     });
