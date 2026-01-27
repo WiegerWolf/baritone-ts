@@ -148,6 +148,15 @@ src/tasks/concrete/
 - [x] gatherResources() - Convenience function for resource gathering
 - [x] GatherConfig - Configuration for gather behavior
 
+### Phase 10: Specialized Composite Tasks (Iteration 11)
+- [x] MineOresTask - Find and mine ore deposits with tool tier management
+- [x] mineDiamonds, mineIron, mineCoal, mineGold, mineAllOres - Convenience functions
+- [x] MineOreConfig - Configuration with priority, search radius, auto-tool
+- [x] FarmTask - Agricultural automation (plant, harvest, replant)
+- [x] FarmMode enum - HARVEST_ONLY, PLANT_ONLY, HARVEST_AND_REPLANT, MAINTAIN
+- [x] harvestCrops, harvestAndReplant, maintainFarm, harvestWheat - Convenience functions
+- [x] FarmConfig - Configuration for farming behavior
+
 ## New Files (Iteration 10)
 ```
 src/tasks/composite/
@@ -155,6 +164,13 @@ src/tasks/composite/
 ├── CollectWoodTask.ts    # Wood collection workflow
 ├── GetToolTask.ts        # Tool acquisition with crafting
 └── GatherResourcesTask.ts # Multi-item resource gathering
+```
+
+## New Files (Iteration 11)
+```
+src/tasks/composite/
+├── MineOresTask.ts       # Ore mining with tool tier management
+└── FarmTask.ts           # Agricultural automation
 ```
 
 ## Updated Architecture Overview
@@ -179,7 +195,9 @@ src/
 │   └── composite/        # High-level orchestrating tasks
 │       ├── CollectWoodTask.ts    # Wood gathering workflow
 │       ├── GetToolTask.ts        # Tool acquisition
-│       └── GatherResourcesTask.ts # Multi-item gathering
+│       ├── GatherResourcesTask.ts # Multi-item gathering
+│       ├── MineOresTask.ts       # Ore mining
+│       └── FarmTask.ts           # Agricultural automation
 ├── chains/          # Priority chains
 │   ├── FoodChain.ts
 │   ├── WorldSurvivalChain.ts
@@ -208,9 +226,9 @@ src/
 ## Next Steps (Future Iterations)
 
 1. **More Composite Tasks**
-   - MineOresTask (find and mine ore deposits)
    - BuildShelterTask (create basic shelter)
-   - FarmTask (plant/harvest crops)
+   - ExploreTask (explore and map terrain)
+   - CombatTask (coordinated combat behavior)
 
 2. **Testing and Polish**
    - Integration tests for concrete tasks
