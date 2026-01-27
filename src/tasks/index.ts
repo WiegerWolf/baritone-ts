@@ -26,3 +26,12 @@ export {
   createTaskRunner,
   type TaskRunnerEvents,
 } from './TaskRunner';
+export {
+  ResourceTask,
+  CollectItemTask,
+  GatherItemTask,
+  MineAndCollectTask,
+  ITEM_SOURCE_BLOCKS,
+  createSourceBlockMap,
+  type ResourceTaskConfig,
+} from './ResourceTask';
