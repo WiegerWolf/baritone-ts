@@ -30,6 +30,9 @@ import {
   FlightPhase,
   PortalTask,
   PortalType,
+  FishingTask,
+  SleepTask,
+  BoatTask,
 } from '../src/tasks/composite';
 import { Vec3 } from 'vec3';
 
@@ -594,6 +597,131 @@ describe('Composite Tasks', () => {
         buildIfNeeded: true,
       });
       expect(task.displayName).toContain('NETHER');
+    });
+  });
+
+  describe('FishingTask', () => {
+    it('should create with default config', () => {
+      const bot = createMockBot();
+      const task = new FishingTask(bot);
+      expect(task.displayName).toContain('Fishing');
+    });
+
+    it('should create with target count', () => {
+      const bot = createMockBot();
+      const task = new FishingTask(bot, { targetCount: 20 });
+      expect(task.displayName).toContain('0/20');
+    });
+
+    it('should start in FINDING_WATER state', () => {
+      const bot = createMockBot();
+      const task = new FishingTask(bot);
+      task.onStart();
+      expect(task.isFinished()).toBe(false);
+    });
+
+    it('should track caught count', () => {
+      const bot = createMockBot();
+      const task = new FishingTask(bot);
+      task.onStart();
+      expect(task.getCaughtCount()).toBe(0);
+    });
+
+    it('should compare by target count', () => {
+      const bot = createMockBot();
+      const task1 = new FishingTask(bot, { targetCount: 10 });
+      const task2 = new FishingTask(bot, { targetCount: 10 });
+      const task3 = new FishingTask(bot, { targetCount: 20 });
+      expect(task1.isEqual(task2)).toBe(true);
+      expect(task1.isEqual(task3)).toBe(false);
+    });
+  });
+
+  describe('SleepTask', () => {
+    it('should create with default config', () => {
+      const bot = createMockBot();
+      const task = new SleepTask(bot);
+      expect(task.displayName).toContain('Sleep');
+    });
+
+    it('should create with only at night option', () => {
+      const bot = createMockBot();
+      const task = new SleepTask(bot, { onlyAtNight: true });
+      expect(task.displayName).toContain('Sleep');
+    });
+
+    it('should create with place bed option', () => {
+      const bot = createMockBot();
+      const task = new SleepTask(bot, { placeBedIfNeeded: true });
+      expect(task.displayName).toContain('Sleep');
+    });
+
+    it('should start in CHECKING_TIME state', () => {
+      const bot = createMockBot();
+      const task = new SleepTask(bot);
+      task.onStart();
+      expect(task.displayName).toContain('CHECKING_TIME');
+    });
+
+    it('should track sleeping status', () => {
+      const bot = createMockBot();
+      const task = new SleepTask(bot);
+      task.onStart();
+      expect(task.isCurrentlySleeping()).toBe(false);
+    });
+
+    it('should compare by config', () => {
+      const bot = createMockBot();
+      const task1 = new SleepTask(bot, { onlyAtNight: true });
+      const task2 = new SleepTask(bot, { onlyAtNight: true });
+      const task3 = new SleepTask(bot, { onlyAtNight: false });
+      expect(task1.isEqual(task2)).toBe(true);
+      expect(task1.isEqual(task3)).toBe(false);
+    });
+  });
+
+  describe('BoatTask', () => {
+    it('should create with target coordinates', () => {
+      const bot = createMockBot();
+      const task = new BoatTask(bot, 100, 200);
+      expect(task.displayName).toContain('Boat');
+      expect(task.displayName).toContain('100');
+      expect(task.displayName).toContain('200');
+    });
+
+    it('should create with exit on arrival option', () => {
+      const bot = createMockBot();
+      const task = new BoatTask(bot, 50, 50, { exitOnArrival: true });
+      expect(task.displayName).toContain('Boat');
+    });
+
+    it('should create with place boat option', () => {
+      const bot = createMockBot();
+      const task = new BoatTask(bot, 50, 50, { placeBoatIfNeeded: true });
+      expect(task.displayName).toContain('Boat');
+    });
+
+    it('should start in FINDING_BOAT state', () => {
+      const bot = createMockBot();
+      const task = new BoatTask(bot, 100, 100);
+      task.onStart();
+      expect(task.displayName).toContain('FINDING_BOAT');
+    });
+
+    it('should track in-boat status', () => {
+      const bot = createMockBot();
+      const task = new BoatTask(bot, 100, 100);
+      task.onStart();
+      expect(task.isCurrentlyInBoat()).toBe(false);
+    });
+
+    it('should compare by target coordinates', () => {
+      const bot = createMockBot();
+      const task1 = new BoatTask(bot, 100, 200);
+      const task2 = new BoatTask(bot, 100, 200);
+      const task3 = new BoatTask(bot, 300, 400);
+      expect(task1.isEqual(task2)).toBe(true);
+      expect(task1.isEqual(task3)).toBe(false);
     });
   });
 });

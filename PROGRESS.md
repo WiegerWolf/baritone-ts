@@ -251,7 +251,10 @@ src/
 │       ├── SurviveTask.ts        # Survival automation
 │       ├── TradingTask.ts        # Villager trading
 │       ├── EnchantTask.ts        # Enchanting workflow
-│       └── BrewingTask.ts        # Potion brewing
+│       ├── BrewingTask.ts        # Potion brewing
+│       ├── FishingTask.ts        # Automated fishing
+│       ├── SleepTask.ts          # Bed sleeping automation
+│       └── BoatTask.ts           # Boat/vehicle navigation
 ├── chains/          # Priority chains
 │   ├── FoodChain.ts
 │   ├── WorldSurvivalChain.ts
@@ -339,14 +342,32 @@ src/tasks/composite/
 └── PortalTask.ts       # Dimension portal navigation
 ```
 
+### Phase 18: Utility Composite Tasks (Iteration 19)
+- [x] FishingTask - Automated fishing with rod management
+- [x] FishingState enum (FINDING_WATER, APPROACHING, EQUIPPING_ROD, CASTING, WAITING, REELING, COLLECTING)
+- [x] SleepTask - Bed sleeping automation with time checking
+- [x] SleepState enum (CHECKING_TIME, FINDING_BED, APPROACHING, PLACING_BED, ENTERING_BED, SLEEPING, WAKING)
+- [x] BoatTask - Boat/vehicle navigation for water travel
+- [x] BoatState enum (FINDING_BOAT, APPROACHING, ENTERING, NAVIGATING, EXITING)
+- [x] BOAT_TYPES constant for all boat variants
+- [x] Tests for FishingTask, SleepTask, BoatTask (17 new tests)
+
+## New Files (Iteration 19)
+```
+src/tasks/composite/
+├── FishingTask.ts      # Automated fishing
+├── SleepTask.ts        # Bed sleeping automation
+└── BoatTask.ts         # Boat/vehicle navigation
+```
+
 ## Test Results
-All 402 tests passing:
+All 419 tests passing:
 - TaskSystem.test.ts: 24 tests
 - ItemTarget.test.ts: 23 tests
 - Timers.test.ts: 15 tests
 - CraftingRecipe.test.ts: 34 tests
 - EventBus.test.ts: 24 tests
-- CompositeTasks.test.ts: 72 tests (61 + 11 new)
+- CompositeTasks.test.ts: 89 tests (72 + 17 new)
 - ConcreteTasks.test.ts: 40 tests
 - Plus existing pathfinding tests
 
@@ -387,14 +408,15 @@ The baritone-ts project now includes a comprehensive implementation of features 
 - Storage: StorageTask (deposit, withdraw, organize)
 - Flight: ElytraTask (takeoff, cruise, land)
 - Portals: PortalTask (nether, end navigation)
+- Fishing: FishingTask (automated fishing)
+- Sleep: SleepTask (bed sleeping automation)
+- Boats: BoatTask (boat/vehicle navigation)
 
 ## Next Steps (Future Iterations)
 
 1. **Advanced Features**
    - Schematic-based building from files
    - Advanced parkour (4-block jumps, ladder climbing)
-   - Boat/vehicle handling
-   - Fishing automation
 
 2. **Performance and Polish**
    - Performance optimization

@@ -138,3 +138,25 @@ export {
   findNearestPortal,
   type PortalConfig,
 } from './PortalTask';
+export {
+  FishingTask,
+  goFishing,
+  fishUntilFull,
+  fishForFood,
+  type FishingConfig,
+} from './FishingTask';
+export {
+  SleepTask,
+  sleepInBed,
+  sleepNow,
+  setSpawnAndSleep,
+  sleepWithoutPlacing,
+  type SleepConfig,
+} from './SleepTask';
+export {
+  BoatTask,
+  boatToPosition,
+  boatToVec3,
+  enterNearestBoat,
+  type BoatConfig,
+} from './BoatTask';
