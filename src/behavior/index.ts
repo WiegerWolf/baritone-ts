@@ -16,3 +16,4 @@ export { ExploreProcess, type ExploreConfig } from './ExploreProcess';
 export { GatherProcess, type GatherConfig } from './GatherProcess';
 export { FarmProcess, type FarmConfig } from './FarmProcess';
 export { BuildProcess, type BuildConfig, type PlaceInstruction } from './BuildProcess';
+export { CombatProcess, type CombatConfig, type CombatMode } from './CombatProcess';

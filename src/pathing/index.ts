@@ -14,3 +14,13 @@ export {
   type AsyncPathOptions,
   type AsyncPathProgress
 } from './AsyncPathfinder';
+export {
+  smoothPath,
+  simplifyPath,
+  calculatePathCost,
+  calculatePathDistance,
+  pathContains,
+  findInPath,
+  getPathSegment,
+  mergePaths
+} from './PathSmoother';

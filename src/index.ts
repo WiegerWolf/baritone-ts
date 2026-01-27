@@ -113,6 +113,7 @@ export { ExploreProcess, type ExploreConfig } from './behavior/ExploreProcess';
 export { GatherProcess, type GatherConfig } from './behavior/GatherProcess';
 export { FarmProcess, type FarmConfig } from './behavior/FarmProcess';
 export { BuildProcess, type BuildConfig, type PlaceInstruction } from './behavior/BuildProcess';
+export { CombatProcess, type CombatConfig, type CombatMode } from './behavior/CombatProcess';
 
 /**
  * Baritone-TS Pathfinder Plugin
