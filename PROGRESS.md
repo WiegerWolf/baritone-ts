@@ -291,25 +291,41 @@ src/tasks/composite/
 └── BrewingTask.ts        # Potion brewing
 ```
 
+### Phase 15: Concrete Task Tests (Iteration 16)
+- [x] ConcreteTasks.test.ts - Comprehensive tests for all concrete tasks
+- [x] Navigation task tests (GoToBlockTask, GetToBlockTask, GoToNearTask, GoToXZTask, FollowEntityTask)
+- [x] Mining task tests (MineBlockTask, MineBlockTypeTask)
+- [x] Placement task tests (PlaceBlockTask, PlaceAgainstTask)
+- [x] Crafting task tests (CraftTask, EnsureItemTask)
+- [x] Smelting task tests (SmeltTask, fuel utilities)
+- [x] Inventory task tests (PickupItemTask, EquipTask, DropItemTask, MoveItemTask)
+- [x] Interaction task tests (InteractBlockTask, InteractEntityTask, AttackEntityTask, UseItemTask)
+
+## New Files (Iteration 16)
+```
+test/
+└── ConcreteTasks.test.ts    # 40 tests for concrete tasks
+```
+
 ## Test Results
-All 334 tests passing:
+All 374 tests passing:
 - TaskSystem.test.ts: 24 tests
 - ItemTarget.test.ts: 23 tests
 - Timers.test.ts: 15 tests
 - CraftingRecipe.test.ts: 34 tests
 - EventBus.test.ts: 24 tests
-- CompositeTasks.test.ts: 44 tests (30 + 14 new)
+- CompositeTasks.test.ts: 44 tests
+- ConcreteTasks.test.ts: 40 tests (new)
 - Plus existing pathfinding tests
 
 ## Next Steps (Future Iterations)
 
-1. **Testing and Polish**
-   - Integration tests for concrete tasks
-   - Integration tests for composite tasks
-   - Performance optimization
-   - Error handling improvements
-
-2. **Additional Features**
+1. **Additional Features**
    - BuildTask - Build structures from patterns
    - RepairTask - Repair items at anvil/grindstone
    - StorageTask - Organize and manage inventory in containers
+
+2. **Performance and Polish**
+   - Performance optimization
+   - Error handling improvements
+   - Documentation updates
