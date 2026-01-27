@@ -30,3 +30,21 @@ export {
   harvestWheat,
   type FarmConfig,
 } from './FarmTask';
+export {
+  ExploreTask,
+  ExplorePattern,
+  exploreSpiral,
+  exploreTowards,
+  exploreRandom,
+  exploreArea,
+  type ExploreConfig,
+} from './ExploreTask';
+export {
+  BuildShelterTask,
+  ShelterType,
+  buildDirtHut,
+  buildWoodCabin,
+  digUnderground,
+  buildEmergencyShelter,
+  type ShelterConfig,
+} from './BuildShelterTask';

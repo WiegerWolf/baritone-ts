@@ -157,6 +157,16 @@ src/tasks/concrete/
 - [x] harvestCrops, harvestAndReplant, maintainFarm, harvestWheat - Convenience functions
 - [x] FarmConfig - Configuration for farming behavior
 
+### Phase 11: Exploration and Construction (Iteration 12)
+- [x] ExploreTask - Systematic terrain exploration
+- [x] ExplorePattern enum - SPIRAL, CARDINAL, RANDOM, TOWARDS
+- [x] exploreSpiral, exploreTowards, exploreRandom, exploreArea - Convenience functions
+- [x] ExploreConfig - Configuration with pattern, distance, chunk tracking
+- [x] BuildShelterTask - Emergency shelter construction
+- [x] ShelterType enum - DIRT_HUT, WOOD_CABIN, UNDERGROUND, NERD_POLE
+- [x] buildDirtHut, buildWoodCabin, digUnderground, buildEmergencyShelter - Convenience functions
+- [x] ShelterConfig - Configuration for shelter building
+
 ## New Files (Iteration 10)
 ```
 src/tasks/composite/
@@ -171,6 +181,13 @@ src/tasks/composite/
 src/tasks/composite/
 ├── MineOresTask.ts       # Ore mining with tool tier management
 └── FarmTask.ts           # Agricultural automation
+```
+
+## New Files (Iteration 12)
+```
+src/tasks/composite/
+├── ExploreTask.ts        # Terrain exploration with patterns
+└── BuildShelterTask.ts   # Emergency shelter construction
 ```
 
 ## Updated Architecture Overview
@@ -197,7 +214,9 @@ src/
 │       ├── GetToolTask.ts        # Tool acquisition
 │       ├── GatherResourcesTask.ts # Multi-item gathering
 │       ├── MineOresTask.ts       # Ore mining
-│       └── FarmTask.ts           # Agricultural automation
+│       ├── FarmTask.ts           # Agricultural automation
+│       ├── ExploreTask.ts        # Terrain exploration
+│       └── BuildShelterTask.ts   # Shelter construction
 ├── chains/          # Priority chains
 │   ├── FoodChain.ts
 │   ├── WorldSurvivalChain.ts
@@ -226,9 +245,9 @@ src/
 ## Next Steps (Future Iterations)
 
 1. **More Composite Tasks**
-   - BuildShelterTask (create basic shelter)
-   - ExploreTask (explore and map terrain)
    - CombatTask (coordinated combat behavior)
+   - TradingTask (villager trading automation)
+   - EnchantTask (enchanting workflow)
 
 2. **Testing and Polish**
    - Integration tests for concrete tasks
