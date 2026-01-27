@@ -225,3 +225,21 @@ export {
   followPlayerWithMimic,
   type FollowPlayerConfig,
 } from './FollowPlayerTask';
+export {
+  LootChestTask,
+  lootNearbyChests,
+  lootForItems,
+  lootAllContainers,
+  lootValuables,
+  type LootChestConfig,
+} from './LootChestTask';
+export {
+  FleeTask,
+  FleeTrigger,
+  flee,
+  fleeFromMobs,
+  fleeWhenLowHealth,
+  fleeFromCreepers,
+  emergencyFlee,
+  type FleeConfig,
+} from './FleeTask';

@@ -44,6 +44,9 @@ import {
   HuntTask,
   DefendAreaTask,
   FollowPlayerTask,
+  LootChestTask,
+  FleeTask,
+  FleeTrigger,
 } from '../src/tasks/composite';
 import { Vec3 } from 'vec3';
 
@@ -1153,6 +1156,121 @@ describe('Composite Tasks', () => {
       const bot = createMockBot();
       const task = new FollowPlayerTask(bot, 'TestPlayer', { mimicActions: true });
       expect(task.displayName).toContain('Follow');
+    });
+  });
+
+  describe('LootChestTask', () => {
+    it('should create with default config', () => {
+      const bot = createMockBot();
+      const task = new LootChestTask(bot);
+      expect(task.displayName).toContain('LootChest');
+    });
+
+    it('should create with target items', () => {
+      const bot = createMockBot();
+      const task = new LootChestTask(bot, { targetItems: ['diamond', 'emerald'] });
+      expect(task.displayName).toContain('LootChest');
+    });
+
+    it('should create with custom search radius', () => {
+      const bot = createMockBot();
+      const task = new LootChestTask(bot, { searchRadius: 64 });
+      expect(task.displayName).toContain('LootChest');
+    });
+
+    it('should start in SEARCHING state', () => {
+      const bot = createMockBot();
+      const task = new LootChestTask(bot);
+      task.onStart();
+      expect(task.displayName).toContain('SEARCHING');
+    });
+
+    it('should track containers looted', () => {
+      const bot = createMockBot();
+      const task = new LootChestTask(bot);
+      task.onStart();
+      expect(task.getContainersLooted()).toBe(0);
+    });
+
+    it('should track items collected', () => {
+      const bot = createMockBot();
+      const task = new LootChestTask(bot);
+      task.onStart();
+      expect(task.getItemsCollected()).toBe(0);
+    });
+
+    it('should compare by target items', () => {
+      const bot = createMockBot();
+      const task1 = new LootChestTask(bot, { targetItems: ['diamond'] });
+      const task2 = new LootChestTask(bot, { targetItems: ['diamond'] });
+      const task3 = new LootChestTask(bot, { targetItems: ['emerald'] });
+      expect(task1.isEqual(task2)).toBe(true);
+      expect(task1.isEqual(task3)).toBe(false);
+    });
+
+    it('should support clearing looted tracking', () => {
+      const bot = createMockBot();
+      const task = new LootChestTask(bot);
+      task.clearLootedTracking();
+      expect(task.getContainersLooted()).toBe(0);
+    });
+  });
+
+  describe('FleeTask', () => {
+    it('should create with default config', () => {
+      const bot = createMockBot();
+      const task = new FleeTask(bot);
+      expect(task.displayName).toContain('Flee');
+    });
+
+    it('should create with safe distance', () => {
+      const bot = createMockBot();
+      const task = new FleeTask(bot, { safeDistance: 50 });
+      expect(task.displayName).toContain('Flee');
+    });
+
+    it('should create with health threshold', () => {
+      const bot = createMockBot();
+      const task = new FleeTask(bot, { healthThreshold: 10 });
+      expect(task.displayName).toContain('Flee');
+    });
+
+    it('should start in ASSESSING state', () => {
+      const bot = createMockBot();
+      const task = new FleeTask(bot);
+      task.onStart();
+      expect(task.displayName).toContain('ASSESSING');
+    });
+
+    it('should have no threats at start', () => {
+      const bot = createMockBot();
+      const task = new FleeTask(bot);
+      task.onStart();
+      expect(task.getThreatCount()).toBe(0);
+    });
+
+    it('should return empty threats array at start', () => {
+      const bot = createMockBot();
+      const task = new FleeTask(bot);
+      task.onStart();
+      expect(task.getThreats()).toEqual([]);
+    });
+
+    it('should support manual trigger', () => {
+      const bot = createMockBot();
+      const task = new FleeTask(bot);
+      task.onStart();
+      task.triggerFlee();
+      expect(task.getTrigger()).toBe(FleeTrigger.MANUAL);
+    });
+
+    it('should compare by safe distance and health threshold', () => {
+      const bot = createMockBot();
+      const task1 = new FleeTask(bot, { safeDistance: 32, healthThreshold: 6 });
+      const task2 = new FleeTask(bot, { safeDistance: 32, healthThreshold: 6 });
+      const task3 = new FleeTask(bot, { safeDistance: 50, healthThreshold: 6 });
+      expect(task1.isEqual(task2)).toBe(true);
+      expect(task1.isEqual(task3)).toBe(false);
     });
   });
 });

@@ -430,8 +430,28 @@ src/tasks/composite/
 └── FollowPlayerTask.ts   # Player following
 ```
 
+### Phase 22: Looting and Escape Tasks (Iteration 23)
+- [x] LootChestTask - Container looting automation
+- [x] LootState enum (SEARCHING, APPROACHING, OPENING, LOOTING, CLOSING)
+- [x] CONTAINER_BLOCKS constant for all container types
+- [x] Target item filtering and ignore lists
+- [x] Looted container tracking to avoid re-looting
+- [x] FleeTask - Escape/flee automation
+- [x] FleeState enum (ASSESSING, FLEEING, HIDING, SAFE)
+- [x] FleeTrigger enum (LOW_HEALTH, MOB_NEARBY, CREEPER_FUSING, ENVIRONMENTAL, MANUAL)
+- [x] Threat assessment and flee direction calculation
+- [x] Line of sight breaking with hiding
+- [x] Tests for LootChestTask, FleeTask (16 new tests)
+
+## New Files (Iteration 23)
+```
+src/tasks/composite/
+├── LootChestTask.ts      # Container looting
+└── FleeTask.ts           # Escape/flee automation
+```
+
 ## Test Results
-All 472 tests passing:
+All 488 tests passing:
 - TaskSystem.test.ts: 24 tests
 - ItemTarget.test.ts: 23 tests
 - Timers.test.ts: 15 tests
