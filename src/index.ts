@@ -78,6 +78,17 @@ export {
   requiresRedstone
 } from './movements/MovementDoor';
 
+// Ladder/vine climbing movements
+export {
+  MovementClimbUp,
+  MovementClimbDown,
+  MovementMountLadder,
+  MovementDismountLadder,
+  isClimbable,
+  isLadder,
+  isVine
+} from './movements/MovementClimb';
+
 // Async pathfinding
 export {
   AsyncPathfinder,
@@ -100,6 +111,7 @@ export { MineProcess, type MineConfig } from './behavior/MineProcess';
 export { FollowProcess, type FollowConfig } from './behavior/FollowProcess';
 export { ExploreProcess, type ExploreConfig } from './behavior/ExploreProcess';
 export { GatherProcess, type GatherConfig } from './behavior/GatherProcess';
+export { FarmProcess, type FarmConfig } from './behavior/FarmProcess';
 
 /**
  * Baritone-TS Pathfinder Plugin

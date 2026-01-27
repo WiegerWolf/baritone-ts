@@ -302,6 +302,14 @@ export class AStar {
       this.checkDoor(x, y, z, dir.dx, dir.dz, neighbors);
     }
 
+    // Ladder/vine climbing movements
+    this.checkClimbUp(x, y, z, neighbors);
+    this.checkClimbDown(x, y, z, neighbors);
+    for (const dir of cardinals) {
+      this.checkMountLadder(x, y, z, dir.dx, dir.dz, neighbors);
+      this.checkDismountLadder(x, y, z, dir.dx, dir.dz, neighbors);
+    }
+
     return neighbors;
   }
 
@@ -934,6 +942,146 @@ export class AStar {
 
     // Cost: walk through door (2 blocks) + interact cost
     const cost = (4.633 * 2 + 2.0) * this.ctx.getFavoring(destX, y, destZ);
+
+    neighbors.push({
+      x: destX,
+      y: y,
+      z: destZ,
+      moveCost: cost,
+      hash: `${destX},${y},${destZ}`
+    });
+  }
+
+  /**
+   * Check if block is climbable (ladder or vine)
+   */
+  private isClimbable(block: any): boolean {
+    if (!block) return false;
+    const name = block.name || '';
+    return name === 'ladder' || name === 'vine' || name === 'twisting_vines' ||
+           name === 'weeping_vines' || name === 'twisting_vines_plant' ||
+           name === 'weeping_vines_plant' || name === 'cave_vines' ||
+           name === 'cave_vines_plant';
+  }
+
+  /**
+   * Check climb up movement (on ladder/vine)
+   */
+  private checkClimbUp(
+    x: number, y: number, z: number,
+    neighbors: NeighborMove[]
+  ): void {
+    // Check if standing on climbable
+    const currentBlock = this.ctx.getBlock(x, y, z);
+    if (!this.isClimbable(currentBlock)) return;
+
+    const destY = y + 1;
+
+    // Check destination is passable (either climbable continues or air)
+    const destBlock = this.ctx.getBlock(x, destY, z);
+    if (!this.ctx.canWalkThrough(destBlock) && !this.isClimbable(destBlock)) return;
+
+    // Check head space
+    const headSpace = this.ctx.getBlock(x, destY + 1, z);
+    if (!this.ctx.canWalkThrough(headSpace)) return;
+
+    // Cost: LADDER_UP_ONE_COST = 5.0 ticks (vines slightly slower)
+    const isVine = currentBlock && (currentBlock.name || '').includes('vine');
+    const cost = (isVine ? 6.0 : 5.0) * this.ctx.getFavoring(x, destY, z);
+
+    neighbors.push({
+      x: x,
+      y: destY,
+      z: z,
+      moveCost: cost,
+      hash: `${x},${destY},${z}`
+    });
+  }
+
+  /**
+   * Check climb down movement (on ladder/vine)
+   */
+  private checkClimbDown(
+    x: number, y: number, z: number,
+    neighbors: NeighborMove[]
+  ): void {
+    const destY = y - 1;
+
+    // Check if destination has climbable
+    const destBlock = this.ctx.getBlock(x, destY, z);
+    if (!this.isClimbable(destBlock)) return;
+
+    // Cost: LADDER_DOWN_ONE_COST ≈ 1.43 ticks (vines slightly slower)
+    const isVine = destBlock && (destBlock.name || '').includes('vine');
+    const cost = (isVine ? 1.57 : 1.43) * this.ctx.getFavoring(x, destY, z);
+
+    neighbors.push({
+      x: x,
+      y: destY,
+      z: z,
+      moveCost: cost,
+      hash: `${x},${destY},${z}`
+    });
+  }
+
+  /**
+   * Check mount ladder movement (step onto ladder/vine from ground)
+   */
+  private checkMountLadder(
+    x: number, y: number, z: number,
+    dx: number, dz: number,
+    neighbors: NeighborMove[]
+  ): void {
+    const destX = x + dx;
+    const destZ = z + dz;
+
+    // Check if destination has climbable
+    const destBlock = this.ctx.getBlock(destX, y, destZ);
+    if (!this.isClimbable(destBlock)) return;
+
+    // Source should be on solid ground
+    const srcFloor = this.ctx.getBlock(x, y - 1, z);
+    if (!this.ctx.canWalkOn(srcFloor)) return;
+
+    // Cost: walk + mount
+    const cost = (4.633 + 1.0) * this.ctx.getFavoring(destX, y, destZ);
+
+    neighbors.push({
+      x: destX,
+      y: y,
+      z: destZ,
+      moveCost: cost,
+      hash: `${destX},${y},${destZ}`
+    });
+  }
+
+  /**
+   * Check dismount ladder movement (step off ladder/vine to ground)
+   */
+  private checkDismountLadder(
+    x: number, y: number, z: number,
+    dx: number, dz: number,
+    neighbors: NeighborMove[]
+  ): void {
+    // Check if currently on climbable
+    const currentBlock = this.ctx.getBlock(x, y, z);
+    if (!this.isClimbable(currentBlock)) return;
+
+    const destX = x + dx;
+    const destZ = z + dz;
+
+    // Check destination floor
+    const destFloor = this.ctx.getBlock(destX, y - 1, destZ);
+    if (!this.ctx.canWalkOn(destFloor)) return;
+
+    // Check destination body space
+    const body1 = this.ctx.getBlock(destX, y, destZ);
+    const body2 = this.ctx.getBlock(destX, y + 1, destZ);
+    if (!this.ctx.canWalkThrough(body1)) return;
+    if (!this.ctx.canWalkThrough(body2)) return;
+
+    // Cost: dismount + walk
+    const cost = (4.633 + 1.0) * this.ctx.getFavoring(destX, y, destZ);
 
     neighbors.push({
       x: destX,

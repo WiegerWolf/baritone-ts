@@ -35,3 +35,14 @@ export {
   isOpenable,
   requiresRedstone
 } from './MovementDoor';
+
+// Ladder/vine climbing movements
+export {
+  MovementClimbUp,
+  MovementClimbDown,
+  MovementMountLadder,
+  MovementDismountLadder,
+  isClimbable,
+  isLadder,
+  isVine
+} from './MovementClimb';
