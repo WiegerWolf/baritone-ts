@@ -11,3 +11,6 @@ export {
   MovementPillar,
   MovementParkour
 } from './Movement';
+
+export { MovementFall, dynamicFallCost } from './MovementFall';
+export { MovementHelper, getMovementHelper } from './MovementHelper';
