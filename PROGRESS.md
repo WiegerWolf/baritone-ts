@@ -307,23 +307,40 @@ test/
 └── ConcreteTasks.test.ts    # 40 tests for concrete tasks
 ```
 
+### Phase 16: Advanced Composite Tasks (Iteration 17)
+- [x] BuildTask - Structure building from patterns/blueprints
+- [x] BUILD_PATTERNS - Common patterns (cube, platform, room, tower)
+- [x] RepairTask - Item repair with anvils and grindstones
+- [x] RepairMethod enum (ANVIL, GRINDSTONE, COMBINE)
+- [x] StorageTask - Container storage management
+- [x] StorageOperation enum (DEPOSIT, WITHDRAW, ORGANIZE, DUMP_ALL)
+- [x] Tests for BuildTask, RepairTask, StorageTask (17 new tests)
+
+## New Files (Iteration 17)
+```
+src/tasks/composite/
+├── BuildTask.ts        # Structure building with patterns
+├── RepairTask.ts       # Item repair automation
+└── StorageTask.ts      # Container storage management
+```
+
 ## Test Results
-All 374 tests passing:
+All 391 tests passing:
 - TaskSystem.test.ts: 24 tests
 - ItemTarget.test.ts: 23 tests
 - Timers.test.ts: 15 tests
 - CraftingRecipe.test.ts: 34 tests
 - EventBus.test.ts: 24 tests
-- CompositeTasks.test.ts: 44 tests
-- ConcreteTasks.test.ts: 40 tests (new)
+- CompositeTasks.test.ts: 61 tests (44 + 17 new)
+- ConcreteTasks.test.ts: 40 tests
 - Plus existing pathfinding tests
 
 ## Next Steps (Future Iterations)
 
-1. **Additional Features**
-   - BuildTask - Build structures from patterns
-   - RepairTask - Repair items at anvil/grindstone
-   - StorageTask - Organize and manage inventory in containers
+1. **Advanced Movement Features**
+   - Elytra flight handling
+   - Advanced parkour (4-block jumps, ladder climbing)
+   - Dimension portal navigation
 
 2. **Performance and Polish**
    - Performance optimization

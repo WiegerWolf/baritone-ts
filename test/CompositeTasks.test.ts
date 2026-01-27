@@ -20,7 +20,14 @@ import {
   TradingTask,
   EnchantTask,
   BrewingTask,
+  BuildTask,
+  BUILD_PATTERNS,
+  RepairTask,
+  RepairMethod,
+  StorageTask,
+  StorageOperation,
 } from '../src/tasks/composite';
+import { Vec3 } from 'vec3';
 
 // Mock bot for testing
 function createMockBot(): any {
@@ -364,6 +371,147 @@ describe('Composite Tasks', () => {
       const task = new BrewingTask(bot);
       task.onStart();
       expect(task.getBrewedCount()).toBe(0);
+    });
+  });
+
+  describe('BuildTask', () => {
+    it('should create with pattern', () => {
+      const bot = createMockBot();
+      const task = new BuildTask(bot, {
+        origin: new Vec3(0, 64, 0),
+        pattern: BUILD_PATTERNS.CUBE_3X3,
+        clearArea: true,
+        verifyBuild: true,
+        gatherRadius: 32,
+      });
+      expect(task.displayName).toContain('Build');
+      expect(task.displayName).toContain('cube_3x3');
+    });
+
+    it('should create with platform pattern', () => {
+      const bot = createMockBot();
+      const task = new BuildTask(bot, {
+        origin: new Vec3(0, 64, 0),
+        pattern: BUILD_PATTERNS.PLATFORM_5X5,
+        clearArea: true,
+        verifyBuild: true,
+        gatherRadius: 32,
+      });
+      expect(task.displayName).toContain('platform_5x5');
+    });
+
+    it('should start in ANALYZING state', () => {
+      const bot = createMockBot();
+      const task = new BuildTask(bot, {
+        origin: new Vec3(0, 64, 0),
+        pattern: BUILD_PATTERNS.CUBE_3X3,
+        clearArea: true,
+        verifyBuild: true,
+        gatherRadius: 32,
+      });
+      task.onStart();
+      expect(task.isFinished()).toBe(false);
+    });
+
+    it('should track build progress', () => {
+      const bot = createMockBot();
+      const task = new BuildTask(bot, {
+        origin: new Vec3(0, 64, 0),
+        pattern: BUILD_PATTERNS.CUBE_3X3,
+        clearArea: true,
+        verifyBuild: true,
+        gatherRadius: 32,
+      });
+      task.onStart();
+      expect(task.getProgress()).toBe(0);
+    });
+  });
+
+  describe('RepairTask', () => {
+    it('should create with default config', () => {
+      const bot = createMockBot();
+      const task = new RepairTask(bot);
+      expect(task.displayName).toContain('Repair');
+    });
+
+    it('should create with specific item', () => {
+      const bot = createMockBot();
+      const task = new RepairTask(bot, { itemToRepair: 'diamond_pickaxe' });
+      expect(task.displayName).toContain('diamond_pickaxe');
+    });
+
+    it('should create with anvil method', () => {
+      const bot = createMockBot();
+      const task = new RepairTask(bot, { method: RepairMethod.ANVIL });
+      expect(task.displayName).toContain('ANVIL');
+    });
+
+    it('should create with grindstone method', () => {
+      const bot = createMockBot();
+      const task = new RepairTask(bot, { method: RepairMethod.GRINDSTONE });
+      expect(task.displayName).toContain('GRINDSTONE');
+    });
+
+    it('should start in FINDING_STATION state', () => {
+      const bot = createMockBot();
+      const task = new RepairTask(bot);
+      task.onStart();
+      expect(task.isFinished()).toBe(false);
+    });
+
+    it('should provide repair material info', () => {
+      expect(RepairTask.getRepairMaterial('diamond_pickaxe')).toBe('diamond');
+      expect(RepairTask.getRepairMaterial('iron_sword')).toBe('iron_ingot');
+      expect(RepairTask.getRepairMaterial('elytra')).toBe('phantom_membrane');
+    });
+  });
+
+  describe('StorageTask', () => {
+    it('should create with default config', () => {
+      const bot = createMockBot();
+      const task = new StorageTask(bot);
+      expect(task.displayName).toContain('Storage');
+    });
+
+    it('should create with deposit operation', () => {
+      const bot = createMockBot();
+      const task = new StorageTask(bot, { operation: StorageOperation.DEPOSIT });
+      expect(task.displayName).toContain('DEPOSIT');
+    });
+
+    it('should create with withdraw operation', () => {
+      const bot = createMockBot();
+      const task = new StorageTask(bot, { operation: StorageOperation.WITHDRAW });
+      expect(task.displayName).toContain('WITHDRAW');
+    });
+
+    it('should create with organize operation', () => {
+      const bot = createMockBot();
+      const task = new StorageTask(bot, { operation: StorageOperation.ORGANIZE });
+      expect(task.displayName).toContain('ORGANIZE');
+    });
+
+    it('should start in FINDING_CONTAINER state', () => {
+      const bot = createMockBot();
+      const task = new StorageTask(bot);
+      task.onStart();
+      expect(task.isFinished()).toBe(false);
+    });
+
+    it('should track transferred count', () => {
+      const bot = createMockBot();
+      const task = new StorageTask(bot);
+      task.onStart();
+      expect(task.getTransferredCount()).toBe(0);
+    });
+
+    it('should accept target items', () => {
+      const bot = createMockBot();
+      const task = new StorageTask(bot, {
+        operation: StorageOperation.DEPOSIT,
+        targetItems: ['cobblestone', 'dirt'],
+      });
+      expect(task.displayName).toContain('DEPOSIT');
     });
   });
 });

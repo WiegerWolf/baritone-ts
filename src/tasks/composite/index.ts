@@ -89,3 +89,33 @@ export {
   brewSpeedPotions,
   type BrewingConfig,
 } from './BrewingTask';
+export {
+  BuildTask,
+  BUILD_PATTERNS,
+  buildCube,
+  buildPlatform,
+  buildWall,
+  buildFromPattern,
+  type BuildConfig,
+  type BuildPattern,
+  type BlockPlacement,
+} from './BuildTask';
+export {
+  RepairTask,
+  RepairMethod,
+  repairWithAnvil,
+  repairWithGrindstone,
+  combineItems,
+  repairDamagedItems,
+  type RepairConfig,
+} from './RepairTask';
+export {
+  StorageTask,
+  StorageOperation,
+  depositItems,
+  depositAll,
+  withdrawItems,
+  organizeStorage,
+  depositKeepMinimum,
+  type StorageConfig,
+} from './StorageTask';
