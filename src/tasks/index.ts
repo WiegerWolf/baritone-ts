@@ -44,3 +44,19 @@ export {
   type TaskProvider,
   type SmeltingRecipe,
 } from './TaskCatalogue';
+
+// Concrete task implementations
+export {
+  GoToTask,
+  GoToBlockTask,
+  GetToBlockTask,
+  GoToNearTask,
+  GoToXZTask,
+  FollowEntityTask,
+  MineBlockTask,
+  MineBlockTypeTask,
+  PlaceBlockTask,
+  PlaceAgainstTask,
+  CraftTask,
+  EnsureItemTask,
+} from './concrete';

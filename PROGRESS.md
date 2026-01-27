@@ -95,26 +95,48 @@ src/
     └── Settings.ts
 ```
 
+### Phase 7: Concrete Task Implementations (Iteration 8)
+- [x] GoToTask - Base navigation task with pathfinder integration
+- [x] GoToBlockTask - Navigate to specific block
+- [x] GetToBlockTask - Get within reach of a block
+- [x] GoToNearTask - Get within radius of position
+- [x] GoToXZTask - Navigate to XZ coordinates
+- [x] FollowEntityTask - Follow a moving entity
+- [x] MineBlockTask - Mine a specific block
+- [x] MineBlockTypeTask - Find and mine block types
+- [x] PlaceBlockTask - Place a block at position
+- [x] PlaceAgainstTask - Place against existing block
+- [x] CraftTask - Craft items using recipes
+- [x] EnsureItemTask - Ensure have item (craft if needed)
+
+## New Files (Iteration 8)
+```
+src/tasks/concrete/
+├── index.ts           # Exports all concrete tasks
+├── GoToTask.ts        # Navigation tasks
+├── MineBlockTask.ts   # Mining tasks
+├── PlaceBlockTask.ts  # Placement tasks
+└── CraftTask.ts       # Crafting tasks
+```
+
 ## Next Steps (Future Iterations)
 
-1. **Concrete Task Implementations**
-   - GetItemTask - acquire specific items
-   - MineBlockTask - mine specific block types
-   - PlaceBlockTask - place blocks
-   - CraftTask - craft items
-   - SmeltTask - smelt items in furnace
+1. **SmeltTask**
+   - Smelt items in furnace
+   - Manage fuel and ingredients
 
-2. **Movement Integration**
-   - Integrate task system with existing pathfinder
-   - GoToBlockTask, GoToEntityTask
-   - FollowTask for following entities
-
-3. **Complex Task Chains**
+2. **Complex Task Chains**
    - CollectWoodTask (find tree, mine logs, collect drops)
    - BuildShelterTask (gather materials, find location, build)
    - GetToolTask (ensure have tool for task)
 
-4. **Testing and Polish**
+3. **Testing and Polish**
    - Integration tests with mock Minecraft world
    - Performance optimization
    - Error handling improvements
+
+4. **Additional Concrete Tasks**
+   - InteractTask - Interact with blocks/entities
+   - PickupItemTask - Pick up dropped items
+   - EquipTask - Equip items to slots
+   - DropItemTask - Drop items
