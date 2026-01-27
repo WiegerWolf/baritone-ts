@@ -177,8 +177,10 @@ For each ported task, we need tests that verify:
 
 ## Next Steps
 
-1. Implement DeathMenuChain for auto-respawn
-2. Implement slot management tasks for inventory operations
-3. Add container interaction base classes
-4. Improve resource collection tasks
-5. Add comprehensive tests
+1. ~~Implement DeathMenuChain for auto-respawn~~ ✅ Done
+2. ~~Implement PlayerInteractionFixChain~~ ✅ Done
+3. Implement slot management tasks for inventory operations (ClickSlotTask, MoveItemToSlotTask, etc.)
+4. Add container interaction base classes (DoStuffInContainerTask)
+5. Implement movement utility tasks (TimeoutWanderTask, PickupDroppedItemTask)
+6. Improve resource collection tasks
+7. Add comprehensive tests for new tasks
