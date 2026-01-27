@@ -48,3 +48,20 @@ export {
   buildEmergencyShelter,
   type ShelterConfig,
 } from './BuildShelterTask';
+export {
+  CombatTask,
+  CombatStyle,
+  fightMobs,
+  fightEntity,
+  hitAndRun,
+  defensiveCombat,
+  type CombatConfig,
+} from './CombatTask';
+export {
+  SurviveTask,
+  SurvivalPriority,
+  survive,
+  survivePassive,
+  surviveAndProgress,
+  type SurvivalGoals,
+} from './SurviveTask';

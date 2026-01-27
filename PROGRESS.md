@@ -167,6 +167,16 @@ src/tasks/concrete/
 - [x] buildDirtHut, buildWoodCabin, digUnderground, buildEmergencyShelter - Convenience functions
 - [x] ShelterConfig - Configuration for shelter building
 
+### Phase 12: Combat and Survival Automation (Iteration 13)
+- [x] CombatTask - Coordinated combat behavior
+- [x] CombatStyle enum - MELEE, RANGED, HIT_AND_RUN, DEFENSIVE
+- [x] fightMobs, fightEntity, hitAndRun, defensiveCombat - Convenience functions
+- [x] CombatConfig - Configuration for combat engagement
+- [x] SurviveTask - High-level survival automation
+- [x] SurvivalPriority enum - CRITICAL, URGENT, NORMAL, LOW
+- [x] survive, survivePassive, surviveAndProgress - Convenience functions
+- [x] SurvivalGoals - Configuration for survival behavior
+
 ## New Files (Iteration 10)
 ```
 src/tasks/composite/
@@ -188,6 +198,13 @@ src/tasks/composite/
 src/tasks/composite/
 ├── ExploreTask.ts        # Terrain exploration with patterns
 └── BuildShelterTask.ts   # Emergency shelter construction
+```
+
+## New Files (Iteration 13)
+```
+src/tasks/composite/
+├── CombatTask.ts         # Combat behavior with styles
+└── SurviveTask.ts        # Automated survival gameplay
 ```
 
 ## Updated Architecture Overview
@@ -216,7 +233,9 @@ src/
 │       ├── MineOresTask.ts       # Ore mining
 │       ├── FarmTask.ts           # Agricultural automation
 │       ├── ExploreTask.ts        # Terrain exploration
-│       └── BuildShelterTask.ts   # Shelter construction
+│       ├── BuildShelterTask.ts   # Shelter construction
+│       ├── CombatTask.ts         # Combat behavior
+│       └── SurviveTask.ts        # Survival automation
 ├── chains/          # Priority chains
 │   ├── FoodChain.ts
 │   ├── WorldSurvivalChain.ts
@@ -245,9 +264,9 @@ src/
 ## Next Steps (Future Iterations)
 
 1. **More Composite Tasks**
-   - CombatTask (coordinated combat behavior)
    - TradingTask (villager trading automation)
    - EnchantTask (enchanting workflow)
+   - BrewingTask (potion brewing automation)
 
 2. **Testing and Polish**
    - Integration tests for concrete tasks
