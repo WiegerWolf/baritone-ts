@@ -115,7 +115,7 @@ export class MovementProgressChecker implements IProgressChecker<Vec3> {
     if (!heldItem) return false;
 
     // Check if actively using the item
-    return this.bot.player?.isUsingItem ?? false;
+    return (this.bot.player as any)?.isUsingItem ?? false;
   }
 
   /**

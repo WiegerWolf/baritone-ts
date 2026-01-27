@@ -148,7 +148,7 @@ class EatFoodTask extends Task {
     }
 
     // Check if done eating
-    if (!this.bot.player?.isUsingItem) {
+    if (!(this.bot.player as any)?.isUsingItem) {
       this.finished = true;
     }
 
@@ -170,7 +170,7 @@ class EatFoodTask extends Task {
 
   onStop(): void {
     // Stop eating if interrupted
-    if (this.bot.player?.isUsingItem) {
+    if ((this.bot.player as any)?.isUsingItem) {
       this.bot.deactivateItem();
     }
   }

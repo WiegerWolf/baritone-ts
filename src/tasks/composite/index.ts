@@ -285,3 +285,121 @@ export {
   clearAroundPlayer,
   type CleanupConfig,
 } from './CleanupTask';
+export {
+  WaterBucketTask,
+  mlgWaterBucket,
+  mlgWithCollect,
+  mlgNoCollect,
+  mlgSensitive,
+  type WaterBucketConfig,
+} from './WaterBucketTask';
+export {
+  EscapeDangerTask,
+  DangerType,
+  escapeDanger,
+  escapeLava,
+  escapeFire,
+  escapeDrowning,
+  escapeAllDangers,
+  type EscapeDangerConfig,
+} from './EscapeDangerTask';
+export {
+  ThrowEnderEyeTask,
+  throwEnderEye,
+  throwAndTrack,
+  throwAndCollect,
+  throwWithPitch,
+  type ThrowEnderEyeConfig,
+  type EyeThrowResult,
+} from './ThrowEnderEyeTask';
+export {
+  BridgeTask,
+  BridgeDirection,
+  bridgeTo,
+  bridgeNorth,
+  bridgeSouth,
+  bridgeEast,
+  bridgeWest,
+  bridgeWithRailings,
+  type BridgeConfig,
+} from './BridgeTask';
+export {
+  ScaffoldTask,
+  ScaffoldMode,
+  scaffoldUp,
+  scaffoldDown,
+  scaffoldToY,
+  nerdPole,
+  safeDescend,
+  type ScaffoldConfig,
+} from './ScaffoldTask';
+export {
+  MineLayerTask,
+  MinePattern,
+  mineLayer,
+  stripMine,
+  branchMine,
+  clearArea,
+  diamondMine,
+  type MineLayerConfig,
+} from './MineLayerTask';
+export {
+  TorchTask,
+  TorchMode,
+  placeTorches,
+  lightArea,
+  torchGrid,
+  wallTorches,
+  floodLight,
+  type TorchConfig,
+} from './TorchTask';
+export {
+  ShearTask,
+  shearSheep,
+  shearAllNearby,
+  shearColor,
+  shearWhite,
+  collectWool,
+  type ShearConfig,
+  type WoolColor,
+} from './ShearTask';
+export {
+  RespawnTask,
+  handleRespawn,
+  respawnAndRecover,
+  respawnOnly,
+  recoverItems,
+  type RespawnConfig,
+} from './RespawnTask';
+export {
+  PlantTreeTask,
+  plantTrees,
+  plantOakTrees,
+  plantSpruceTrees,
+  plantBirchTrees,
+  plantWithBonemeal,
+  plantAndGrow,
+  type PlantTreeConfig,
+  type SaplingType,
+} from './PlantTreeTask';
+export {
+  CompostTask,
+  compost,
+  compostAll,
+  compostSeeds,
+  compostPlants,
+  type CompostConfig,
+} from './CompostTask';
+export {
+  UseEffectTask,
+  EffectType,
+  EffectTrigger,
+  useHealing,
+  useStrength,
+  useFireResistance,
+  useWaterBreathing,
+  useSlowFalling,
+  maintainEffect,
+  useGoldenApple,
+  type UseEffectConfig,
+} from './UseEffectTask';

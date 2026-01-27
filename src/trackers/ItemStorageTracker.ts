@@ -241,7 +241,7 @@ export class ItemStorageTracker extends Tracker {
     }
 
     // Also check cursor
-    const cursor = this.bot.inventory.cursor;
+    const cursor = (this.bot.inventory as any).cursor;
     if (cursor && itemNames.includes(cursor.name)) {
       count += cursor.count;
     }

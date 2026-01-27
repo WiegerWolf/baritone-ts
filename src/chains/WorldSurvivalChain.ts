@@ -205,7 +205,7 @@ class ExtinguishFireTask extends Task {
   }
 
   isFinished(): boolean {
-    return this.bot.entity.isOnFire !== true;
+    return (this.bot.entity as any).isOnFire !== true;
   }
 }
 
@@ -229,7 +229,7 @@ class SwimUpTask extends Task {
 
   isFinished(): boolean {
     // Finished when we have enough air
-    return (this.bot as any).oxygenLevel > 10 || !this.bot.entity.isInWater;
+    return (this.bot as any).oxygenLevel > 10 || !(this.bot.entity as any).isInWater;
   }
 }
 
@@ -409,14 +409,14 @@ export class WorldSurvivalChain extends SingleTaskChain {
    * Check if player is on fire
    */
   isOnFire(): boolean {
-    return this.bot.entity.isOnFire === true;
+    return (this.bot.entity as any).isOnFire === true;
   }
 
   /**
    * Check if player is drowning
    */
   isDrowning(): boolean {
-    if (!this.bot.entity.isInWater) return false;
+    if (!(this.bot.entity as any).isInWater) return false;
     const oxygen = (this.bot as any).oxygenLevel ?? 20;
     return oxygen <= this.config.drowningThreshold;
   }

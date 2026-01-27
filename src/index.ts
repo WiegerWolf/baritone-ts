@@ -535,7 +535,7 @@ export {
   WorldSurvivalChain,
   type WorldSurvivalConfig,
   MLGBucketChain,
-  type MLGConfig,
+  type MLGBucketConfig,
   MobDefenseChain,
   type MobDefenseConfig,
 } from './chains';
@@ -621,8 +621,6 @@ export {
   TimerGame,
   TimerReal,
   Stopwatch,
-  createGameTimer,
-  createRealTimer,
   // Progress Checkers
   type IProgressChecker,
   withRetry,

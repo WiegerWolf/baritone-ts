@@ -18,7 +18,7 @@ import type { Bot } from 'mineflayer';
  */
 export abstract class Tracker {
   protected bot: Bot;
-  private dirty: boolean = true;
+  protected dirty: boolean = true;
   private enabled: boolean = true;
 
   constructor(bot: Bot) {

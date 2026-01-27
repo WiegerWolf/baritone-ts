@@ -55,6 +55,25 @@ import {
   RideableEntity,
   CleanupTask,
   CleanupMode,
+  WaterBucketTask,
+  EscapeDangerTask,
+  DangerType,
+  ThrowEnderEyeTask,
+  BridgeTask,
+  BridgeDirection,
+  ScaffoldTask,
+  ScaffoldMode,
+  MineLayerTask,
+  MinePattern,
+  TorchTask,
+  TorchMode,
+  ShearTask,
+  RespawnTask,
+  PlantTreeTask,
+  CompostTask,
+  UseEffectTask,
+  EffectType,
+  EffectTrigger,
 } from '../src/tasks/composite';
 import { Vec3 } from 'vec3';
 
@@ -1471,6 +1490,608 @@ describe('Composite Tasks', () => {
       const task1 = new CleanupTask(bot, { mode: CleanupMode.CLEAR_DEBRIS, radius: 16 });
       const task2 = new CleanupTask(bot, { mode: CleanupMode.CLEAR_DEBRIS, radius: 16 });
       const task3 = new CleanupTask(bot, { mode: CleanupMode.CLEAR_VEGETATION, radius: 16 });
+      expect(task1.isEqual(task2)).toBe(true);
+      expect(task1.isEqual(task3)).toBe(false);
+    });
+  });
+
+  describe('WaterBucketTask', () => {
+    it('should create with default config', () => {
+      const bot = createMockBot();
+      bot.entity.velocity = { y: 0 };
+      const task = new WaterBucketTask(bot);
+      expect(task.displayName).toContain('WaterBucket');
+    });
+
+    it('should start in MONITORING state', () => {
+      const bot = createMockBot();
+      bot.entity.velocity = { y: 0 };
+      const task = new WaterBucketTask(bot);
+      task.onStart();
+      expect(task.displayName).toContain('MONITORING');
+    });
+
+    it('should have no landing position at start', () => {
+      const bot = createMockBot();
+      bot.entity.velocity = { y: 0 };
+      const task = new WaterBucketTask(bot);
+      task.onStart();
+      expect(task.getLandingPosition()).toBeNull();
+    });
+
+    it('should not have placed water at start', () => {
+      const bot = createMockBot();
+      bot.entity.velocity = { y: 0 };
+      const task = new WaterBucketTask(bot);
+      task.onStart();
+      expect(task.wasWaterPlaced()).toBe(false);
+    });
+
+    it('should support manual trigger', () => {
+      const bot = createMockBot();
+      bot.entity.velocity = { y: 0 };
+      const task = new WaterBucketTask(bot);
+      task.onStart();
+      task.triggerMLG();
+      expect(task.displayName).toContain('FALLING');
+    });
+
+    it('should compare as equal', () => {
+      const bot = createMockBot();
+      bot.entity.velocity = { y: 0 };
+      const task1 = new WaterBucketTask(bot);
+      const task2 = new WaterBucketTask(bot);
+      expect(task1.isEqual(task2)).toBe(true);
+    });
+  });
+
+  describe('EscapeDangerTask', () => {
+    it('should create with default config', () => {
+      const bot = createMockBot();
+      const task = new EscapeDangerTask(bot);
+      expect(task.displayName).toContain('EscapeDanger');
+    });
+
+    it('should start in ASSESSING state', () => {
+      const bot = createMockBot();
+      const task = new EscapeDangerTask(bot);
+      task.onStart();
+      expect(task.displayName).toContain('ASSESSING');
+    });
+
+    it('should have no danger at start', () => {
+      const bot = createMockBot();
+      const task = new EscapeDangerTask(bot);
+      task.onStart();
+      expect(task.getCurrentDanger()).toBe(DangerType.NONE);
+    });
+
+    it('should have no safe spot at start', () => {
+      const bot = createMockBot();
+      const task = new EscapeDangerTask(bot);
+      task.onStart();
+      expect(task.getSafeSpot()).toBeNull();
+    });
+
+    it('should create with lava-only config', () => {
+      const bot = createMockBot();
+      const task = new EscapeDangerTask(bot, {
+        checkLava: true,
+        checkFire: false,
+        checkDrowning: false,
+      });
+      expect(task.displayName).toContain('EscapeDanger');
+    });
+
+    it('should compare as equal', () => {
+      const bot = createMockBot();
+      const task1 = new EscapeDangerTask(bot);
+      const task2 = new EscapeDangerTask(bot);
+      expect(task1.isEqual(task2)).toBe(true);
+    });
+  });
+
+  describe('ThrowEnderEyeTask', () => {
+    it('should create with default config', () => {
+      const bot = createMockBot();
+      bot.entity.yaw = 0;
+      const task = new ThrowEnderEyeTask(bot);
+      expect(task.displayName).toContain('ThrowEnderEye');
+    });
+
+    it('should start in PREPARING state', () => {
+      const bot = createMockBot();
+      bot.entity.yaw = 0;
+      const task = new ThrowEnderEyeTask(bot);
+      task.onStart();
+      expect(task.displayName).toContain('PREPARING');
+    });
+
+    it('should have no result at start', () => {
+      const bot = createMockBot();
+      bot.entity.yaw = 0;
+      const task = new ThrowEnderEyeTask(bot);
+      task.onStart();
+      expect(task.getResult()).toBeNull();
+    });
+
+    it('should have no direction at start', () => {
+      const bot = createMockBot();
+      bot.entity.yaw = 0;
+      const task = new ThrowEnderEyeTask(bot);
+      task.onStart();
+      expect(task.getDirection()).toBeNull();
+    });
+
+    it('should have empty eye positions at start', () => {
+      const bot = createMockBot();
+      bot.entity.yaw = 0;
+      const task = new ThrowEnderEyeTask(bot);
+      task.onStart();
+      expect(task.getEyePositions()).toEqual([]);
+    });
+
+    it('should create with custom pitch', () => {
+      const bot = createMockBot();
+      bot.entity.yaw = 0;
+      const task = new ThrowEnderEyeTask(bot, { throwPitch: -45 });
+      expect(task.displayName).toContain('ThrowEnderEye');
+    });
+
+    it('should compare as equal', () => {
+      const bot = createMockBot();
+      bot.entity.yaw = 0;
+      const task1 = new ThrowEnderEyeTask(bot);
+      const task2 = new ThrowEnderEyeTask(bot);
+      expect(task1.isEqual(task2)).toBe(true);
+    });
+  });
+
+  describe('BridgeTask', () => {
+    it('should create with default config', () => {
+      const bot = createMockBot();
+      const task = new BridgeTask(bot);
+      expect(task.displayName).toContain('Bridge');
+    });
+
+    it('should create with direction and distance', () => {
+      const bot = createMockBot();
+      const task = new BridgeTask(bot, {
+        direction: BridgeDirection.NORTH,
+        distance: 20,
+      });
+      expect(task.displayName).toContain('north');
+      expect(task.displayName).toContain('0/20');
+    });
+
+    it('should start with zero blocks placed', () => {
+      const bot = createMockBot();
+      const task = new BridgeTask(bot);
+      task.onStart();
+      expect(task.getBlocksPlaced()).toBe(0);
+    });
+
+    it('should have no selected material at start', () => {
+      const bot = createMockBot();
+      const task = new BridgeTask(bot);
+      task.onStart();
+      expect(task.getSelectedMaterial()).toBeNull();
+    });
+
+    it('should compare direction and distance for equality', () => {
+      const bot = createMockBot();
+      const task1 = new BridgeTask(bot, { direction: BridgeDirection.EAST, distance: 10 });
+      const task2 = new BridgeTask(bot, { direction: BridgeDirection.EAST, distance: 10 });
+      const task3 = new BridgeTask(bot, { direction: BridgeDirection.WEST, distance: 10 });
+      expect(task1.isEqual(task2)).toBe(true);
+      expect(task1.isEqual(task3)).toBe(false);
+    });
+
+    it('should create with railings option', () => {
+      const bot = createMockBot();
+      const task = new BridgeTask(bot, { placeRailings: true });
+      expect(task.displayName).toContain('Bridge');
+    });
+  });
+
+  describe('ScaffoldTask', () => {
+    it('should create with default config', () => {
+      const bot = createMockBot();
+      const task = new ScaffoldTask(bot);
+      expect(task.displayName).toContain('Scaffold');
+    });
+
+    it('should create in ascend mode', () => {
+      const bot = createMockBot();
+      const task = new ScaffoldTask(bot, { mode: ScaffoldMode.ASCEND });
+      expect(task.displayName).toContain('ascend');
+    });
+
+    it('should create in descend mode', () => {
+      const bot = createMockBot();
+      const task = new ScaffoldTask(bot, { mode: ScaffoldMode.DESCEND });
+      expect(task.displayName).toContain('descend');
+    });
+
+    it('should create with target Y', () => {
+      const bot = createMockBot();
+      const task = new ScaffoldTask(bot, {
+        mode: ScaffoldMode.TO_Y,
+        targetY: 100,
+      });
+      expect(task.displayName).toContain('to_y');
+    });
+
+    it('should start with zero blocks used', () => {
+      const bot = createMockBot();
+      const task = new ScaffoldTask(bot);
+      task.onStart();
+      expect(task.getBlocksUsed()).toBe(0);
+    });
+
+    it('should track height change', () => {
+      const bot = createMockBot();
+      const task = new ScaffoldTask(bot);
+      task.onStart();
+      expect(task.getHeightChange()).toBe(0);
+    });
+
+    it('should compare mode and target for equality', () => {
+      const bot = createMockBot();
+      const task1 = new ScaffoldTask(bot, { mode: ScaffoldMode.TO_Y, targetY: 100 });
+      const task2 = new ScaffoldTask(bot, { mode: ScaffoldMode.TO_Y, targetY: 100 });
+      const task3 = new ScaffoldTask(bot, { mode: ScaffoldMode.TO_Y, targetY: 200 });
+      expect(task1.isEqual(task2)).toBe(true);
+      expect(task1.isEqual(task3)).toBe(false);
+    });
+  });
+
+  describe('MineLayerTask', () => {
+    it('should create with default config', () => {
+      const bot = createMockBot();
+      const task = new MineLayerTask(bot);
+      expect(task.displayName).toContain('MineLayer');
+      expect(task.displayName).toContain('Y:-59');
+    });
+
+    it('should create with custom Y level', () => {
+      const bot = createMockBot();
+      const task = new MineLayerTask(bot, { yLevel: 11 });
+      expect(task.displayName).toContain('Y:11');
+    });
+
+    it('should start with zero blocks mined', () => {
+      const bot = createMockBot();
+      const task = new MineLayerTask(bot);
+      task.onStart();
+      expect(task.getBlocksMined()).toBe(0);
+    });
+
+    it('should have empty ores found at start', () => {
+      const bot = createMockBot();
+      const task = new MineLayerTask(bot);
+      task.onStart();
+      expect(task.getOresFound().size).toBe(0);
+    });
+
+    it('should track progress', () => {
+      const bot = createMockBot();
+      const task = new MineLayerTask(bot, { width: 10, length: 10 });
+      task.onStart();
+      expect(task.getProgress()).toBe(0);
+    });
+
+    it('should create with strip pattern', () => {
+      const bot = createMockBot();
+      const task = new MineLayerTask(bot, { pattern: MinePattern.STRIP });
+      expect(task.displayName).toContain('MineLayer');
+    });
+
+    it('should create with spiral pattern', () => {
+      const bot = createMockBot();
+      const task = new MineLayerTask(bot, { pattern: MinePattern.SPIRAL });
+      expect(task.displayName).toContain('MineLayer');
+    });
+
+    it('should create with grid pattern', () => {
+      const bot = createMockBot();
+      const task = new MineLayerTask(bot, { pattern: MinePattern.GRID });
+      expect(task.displayName).toContain('MineLayer');
+    });
+
+    it('should compare dimensions for equality', () => {
+      const bot = createMockBot();
+      const task1 = new MineLayerTask(bot, { yLevel: -59, width: 16, length: 32 });
+      const task2 = new MineLayerTask(bot, { yLevel: -59, width: 16, length: 32 });
+      const task3 = new MineLayerTask(bot, { yLevel: 11, width: 16, length: 32 });
+      expect(task1.isEqual(task2)).toBe(true);
+      expect(task1.isEqual(task3)).toBe(false);
+    });
+
+    it('should configure torch interval', () => {
+      const bot = createMockBot();
+      const task = new MineLayerTask(bot, { torchInterval: 4 });
+      expect(task.displayName).toContain('MineLayer');
+    });
+  });
+
+  describe('TorchTask', () => {
+    it('should create with default config', () => {
+      const bot = createMockBot();
+      const task = new TorchTask(bot);
+      expect(task.displayName).toContain('Torch');
+    });
+
+    it('should create with dark spots mode', () => {
+      const bot = createMockBot();
+      const task = new TorchTask(bot, { mode: TorchMode.DARK_SPOTS });
+      expect(task.displayName).toContain('dark_spots');
+    });
+
+    it('should create with grid mode', () => {
+      const bot = createMockBot();
+      const task = new TorchTask(bot, { mode: TorchMode.GRID });
+      expect(task.displayName).toContain('grid');
+    });
+
+    it('should create with walls mode', () => {
+      const bot = createMockBot();
+      const task = new TorchTask(bot, { mode: TorchMode.WALLS });
+      expect(task.displayName).toContain('walls');
+    });
+
+    it('should start with zero torches placed', () => {
+      const bot = createMockBot();
+      const task = new TorchTask(bot);
+      task.onStart();
+      expect(task.getTorchesPlaced()).toBe(0);
+    });
+
+    it('should track remaining spots', () => {
+      const bot = createMockBot();
+      const task = new TorchTask(bot);
+      task.onStart();
+      expect(task.getRemainingSpots()).toBe(0);
+    });
+
+    it('should compare mode and radius for equality', () => {
+      const bot = createMockBot();
+      const task1 = new TorchTask(bot, { mode: TorchMode.GRID, radius: 16 });
+      const task2 = new TorchTask(bot, { mode: TorchMode.GRID, radius: 16 });
+      const task3 = new TorchTask(bot, { mode: TorchMode.FLOOD, radius: 16 });
+      expect(task1.isEqual(task2)).toBe(true);
+      expect(task1.isEqual(task3)).toBe(false);
+    });
+  });
+
+  describe('ShearTask', () => {
+    it('should create with default config', () => {
+      const bot = createMockBot();
+      const task = new ShearTask(bot);
+      expect(task.displayName).toContain('Shear');
+    });
+
+    it('should create with max sheep count', () => {
+      const bot = createMockBot();
+      const task = new ShearTask(bot, { maxSheep: 20 });
+      expect(task.displayName).toContain('0/20');
+    });
+
+    it('should start with zero sheep sheared', () => {
+      const bot = createMockBot();
+      const task = new ShearTask(bot);
+      task.onStart();
+      expect(task.getSheepSheared()).toBe(0);
+    });
+
+    it('should have no current target at start', () => {
+      const bot = createMockBot();
+      const task = new ShearTask(bot);
+      task.onStart();
+      expect(task.getCurrentTarget()).toBeNull();
+    });
+
+    it('should compare max sheep and color for equality', () => {
+      const bot = createMockBot();
+      const task1 = new ShearTask(bot, { maxSheep: 10, targetColor: 'white' });
+      const task2 = new ShearTask(bot, { maxSheep: 10, targetColor: 'white' });
+      const task3 = new ShearTask(bot, { maxSheep: 10, targetColor: 'black' });
+      expect(task1.isEqual(task2)).toBe(true);
+      expect(task1.isEqual(task3)).toBe(false);
+    });
+
+    it('should create with specific color target', () => {
+      const bot = createMockBot();
+      const task = new ShearTask(bot, { targetColor: 'blue' });
+      expect(task.displayName).toContain('Shear');
+    });
+  });
+
+  describe('RespawnTask', () => {
+    it('should create with default config', () => {
+      const bot = createMockBot();
+      const task = new RespawnTask(bot);
+      expect(task.displayName).toContain('Respawn');
+    });
+
+    it('should start in CHECKING_STATUS state', () => {
+      const bot = createMockBot();
+      const task = new RespawnTask(bot);
+      task.onStart();
+      expect(task.displayName).toContain('CHECKING_STATUS');
+    });
+
+    it('should have no death location at start', () => {
+      const bot = createMockBot();
+      const task = new RespawnTask(bot);
+      task.onStart();
+      expect(task.getDeathLocation()).toBeNull();
+    });
+
+    it('should store death location when set', () => {
+      const bot = createMockBot();
+      const task = new RespawnTask(bot);
+      task.onStart();
+      task.setDeathLocation(new Vec3(100, 64, 200));
+      const loc = task.getDeathLocation();
+      expect(loc).not.toBeNull();
+      expect(loc!.x).toBe(100);
+      expect(loc!.z).toBe(200);
+    });
+
+    it('should create with return to death disabled', () => {
+      const bot = createMockBot();
+      const task = new RespawnTask(bot, { returnToDeathLocation: false });
+      expect(task.displayName).toContain('Respawn');
+    });
+
+    it('should report not respawned initially', () => {
+      const bot = createMockBot();
+      const task = new RespawnTask(bot);
+      task.onStart();
+      // Since bot is not dead, it will go to FINISHED
+      task.onTick();
+      expect(task.hasRespawned()).toBe(true);
+    });
+
+    it('should compare as equal', () => {
+      const bot = createMockBot();
+      const task1 = new RespawnTask(bot);
+      const task2 = new RespawnTask(bot);
+      expect(task1.isEqual(task2)).toBe(true);
+    });
+  });
+
+  describe('PlantTreeTask', () => {
+    it('should create with default config', () => {
+      const bot = createMockBot();
+      const task = new PlantTreeTask(bot);
+      expect(task.displayName).toContain('PlantTree');
+    });
+
+    it('should create with count', () => {
+      const bot = createMockBot();
+      const task = new PlantTreeTask(bot, { count: 10 });
+      expect(task.displayName).toContain('0/10');
+    });
+
+    it('should start with zero trees planted', () => {
+      const bot = createMockBot();
+      const task = new PlantTreeTask(bot);
+      task.onStart();
+      expect(task.getTreesPlanted()).toBe(0);
+    });
+
+    it('should have empty planted positions at start', () => {
+      const bot = createMockBot();
+      const task = new PlantTreeTask(bot);
+      task.onStart();
+      expect(task.getPlantedPositions()).toEqual([]);
+    });
+
+    it('should create with specific sapling type', () => {
+      const bot = createMockBot();
+      const task = new PlantTreeTask(bot, { saplingType: 'oak_sapling' });
+      expect(task.displayName).toContain('PlantTree');
+    });
+
+    it('should compare sapling type and count for equality', () => {
+      const bot = createMockBot();
+      const task1 = new PlantTreeTask(bot, { saplingType: 'oak_sapling', count: 5 });
+      const task2 = new PlantTreeTask(bot, { saplingType: 'oak_sapling', count: 5 });
+      const task3 = new PlantTreeTask(bot, { saplingType: 'spruce_sapling', count: 5 });
+      expect(task1.isEqual(task2)).toBe(true);
+      expect(task1.isEqual(task3)).toBe(false);
+    });
+  });
+
+  describe('CompostTask', () => {
+    it('should create with default config', () => {
+      const bot = createMockBot();
+      const task = new CompostTask(bot);
+      expect(task.displayName).toContain('Compost');
+    });
+
+    it('should create with target bone meal', () => {
+      const bot = createMockBot();
+      const task = new CompostTask(bot, { targetBonemeal: 32 });
+      expect(task.displayName).toContain('0/32');
+    });
+
+    it('should start with zero bone meal collected', () => {
+      const bot = createMockBot();
+      const task = new CompostTask(bot);
+      task.onStart();
+      expect(task.getBonemealCollected()).toBe(0);
+    });
+
+    it('should start with zero materials used', () => {
+      const bot = createMockBot();
+      const task = new CompostTask(bot);
+      task.onStart();
+      expect(task.getMaterialsUsed()).toBe(0);
+    });
+
+    it('should compare target bone meal for equality', () => {
+      const bot = createMockBot();
+      const task1 = new CompostTask(bot, { targetBonemeal: 16 });
+      const task2 = new CompostTask(bot, { targetBonemeal: 16 });
+      const task3 = new CompostTask(bot, { targetBonemeal: 32 });
+      expect(task1.isEqual(task2)).toBe(true);
+      expect(task1.isEqual(task3)).toBe(false);
+    });
+  });
+
+  describe('UseEffectTask', () => {
+    it('should create with default config', () => {
+      const bot = createMockBot();
+      const task = new UseEffectTask(bot);
+      expect(task.displayName).toContain('UseEffect');
+    });
+
+    it('should create with healing effect', () => {
+      const bot = createMockBot();
+      const task = new UseEffectTask(bot, { effectType: EffectType.HEALING });
+      expect(task.displayName).toContain('healing');
+    });
+
+    it('should create with strength effect', () => {
+      const bot = createMockBot();
+      const task = new UseEffectTask(bot, { effectType: EffectType.STRENGTH });
+      expect(task.displayName).toContain('strength');
+    });
+
+    it('should start with zero uses', () => {
+      const bot = createMockBot();
+      const task = new UseEffectTask(bot);
+      task.onStart();
+      expect(task.getUsesCount()).toBe(0);
+    });
+
+    it('should create with low health trigger', () => {
+      const bot = createMockBot();
+      const task = new UseEffectTask(bot, {
+        effectType: EffectType.HEALING,
+        trigger: EffectTrigger.LOW_HEALTH,
+        healthThreshold: 8,
+      });
+      expect(task.displayName).toContain('UseEffect');
+    });
+
+    it('should create with immediate trigger', () => {
+      const bot = createMockBot();
+      const task = new UseEffectTask(bot, {
+        effectType: EffectType.SPEED,
+        trigger: EffectTrigger.IMMEDIATE,
+      });
+      expect(task.displayName).toContain('speed');
+    });
+
+    it('should compare effect type and trigger for equality', () => {
+      const bot = createMockBot();
+      const task1 = new UseEffectTask(bot, { effectType: EffectType.HEALING, trigger: EffectTrigger.LOW_HEALTH });
+      const task2 = new UseEffectTask(bot, { effectType: EffectType.HEALING, trigger: EffectTrigger.LOW_HEALTH });
+      const task3 = new UseEffectTask(bot, { effectType: EffectType.STRENGTH, trigger: EffectTrigger.LOW_HEALTH });
       expect(task1.isEqual(task2)).toBe(true);
       expect(task1.isEqual(task3)).toBe(false);
     });

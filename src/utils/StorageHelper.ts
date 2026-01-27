@@ -464,13 +464,13 @@ export class StorageHelper {
    * Get cursor item (item held by mouse in GUI)
    */
   getCursorItem(): Item | null {
-    return this.bot.inventory.cursor ?? null;
+    return (this.bot.inventory as any).cursor ?? null;
   }
 
   /**
    * Check if cursor has an item
    */
   hasCursorItem(): boolean {
-    return this.bot.inventory.cursor !== null;
+    return (this.bot.inventory as any).cursor !== null;
   }
 }

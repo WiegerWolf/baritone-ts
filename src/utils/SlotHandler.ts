@@ -372,7 +372,7 @@ export class SlotHandler {
       ? click.hotbarSlot ?? 0
       : params.button;
 
-    await window.click(click.slot, button, params.mode);
+    await (window as any).click(click.slot, button, params.mode);
     this.lastClickTime = Date.now();
   }
 

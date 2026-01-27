@@ -228,7 +228,7 @@ class MLGBucketTask extends Task {
     // Simple physics: t = (-v + sqrt(v² + 2gh)) / g
     const g = GRAVITY;
     const v = Math.abs(initialVelocity);
-    const h = Math.max(0, height - (this.bot.game?.minY ?? -64));
+    const h = Math.max(0, height - ((this.bot.game as any)?.minY ?? -64));
 
     return (-v + Math.sqrt(v * v + 2 * g * h)) / g;
   }
@@ -352,7 +352,7 @@ class MLGBucketTask extends Task {
       }
 
       // Stop at world bottom
-      if (pos.y < (this.bot.game?.minY ?? -64)) {
+      if (pos.y < ((this.bot.game as any)?.minY ?? -64)) {
         return null;
       }
     }
@@ -366,7 +366,7 @@ class MLGBucketTask extends Task {
 
   isFinished(): boolean {
     // Finished when on ground or in water
-    return this.bot.entity.onGround || this.bot.entity.isInWater;
+    return this.bot.entity.onGround || (this.bot.entity as any).isInWater;
   }
 }
 
@@ -428,7 +428,7 @@ export class MLGBucketChain extends SingleTaskChain {
     const health = this.bot.health;
 
     // Find ground below
-    let groundY = this.bot.game?.minY ?? -64;
+    let groundY = (this.bot.game as any)?.minY ?? -64;
     for (let dy = 0; dy < 100; dy++) {
       const pos = playerPos.offset(0, -dy, 0);
       const block = this.bot.blockAt(pos);

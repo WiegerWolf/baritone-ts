@@ -329,7 +329,7 @@ export class BlockTracker extends AsyncTracker {
           const z = centerZ + dz;
 
           // Skip if out of world bounds
-          if (y < this.bot.game.minY || y > this.bot.game.maxY) continue;
+          if (y < ((this.bot.game as any).minY ?? -64) || y > ((this.bot.game as any).maxY ?? 320)) continue;
 
           const pos = new Vec3(x, y, z);
           const block = this.bot.blockAt(pos);

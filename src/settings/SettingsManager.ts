@@ -58,7 +58,7 @@ export class SettingsManager {
   private config: SettingsManagerConfig;
   private settings: BotSettings;
   private lastMtime: number = 0;
-  private watchInterval: NodeJS.Timer | null = null;
+  private watchInterval: ReturnType<typeof setInterval> | null = null;
   private changeCallbacks: SettingsChangeCallback[] = [];
 
   constructor(config: Partial<SettingsManagerConfig> = {}) {
