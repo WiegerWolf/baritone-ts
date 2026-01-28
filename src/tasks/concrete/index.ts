@@ -79,3 +79,24 @@ export {
   WaitTask,
   LookAtBlockTask,
 } from './MovementUtilTask';
+
+// Container interaction tasks
+export {
+  ContainerType,
+  getContainerBlocks,
+  isContainerBlock,
+  DoStuffInContainerTask,
+  AbstractDoToStorageContainerTask,
+  CraftInTableTask,
+  SmeltInFurnaceBaseTask,
+  UpgradeInSmithingTableTask,
+  CraftInAnvilTask,
+} from './ContainerTask';
+
+// Construction tasks
+export {
+  DestroyBlockTask,
+  PlaceBlockNearbyTask,
+  ClearLiquidTask,
+  PutOutFireTask,
+} from './ConstructionTask';

@@ -5,7 +5,7 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 ## Summary
 
 **Status**: In Progress
-**Last Updated**: Iteration 2
+**Last Updated**: Iteration 3
 
 ### BaritonePlus Java Statistics:
 - Total Tasks: 173 Java files in tasks/
@@ -14,9 +14,9 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 
 ### baritone-ts TypeScript Statistics (Current):
 - Composite Tasks: 46 files
-- Concrete Tasks: 7 modules (GoTo, MineBlock, PlaceBlock, Craft, Smelt, Inventory, Interact)
-- Chains: 4 files (FoodChain, MLGBucketChain, MobDefenseChain, WorldSurvivalChain)
-- Tests: 15 test files
+- Concrete Tasks: 11 modules (GoTo, MineBlock, PlaceBlock, Craft, Smelt, Inventory, Interact, Slot, MovementUtil, Container, Construction)
+- Chains: 6 files (FoodChain, MLGBucketChain, MobDefenseChain, WorldSurvivalChain, DeathMenuChain, PlayerInteractionFixChain)
+- Tests: 20 test files
 
 ## Missing Components to Port
 
@@ -37,16 +37,15 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [x] ReceiveCraftingOutputTask
 - [x] ThrowCursorTask
 
-#### Container Tasks (Partially Exists)
+#### Container Tasks (Completed Iteration 3)
 - [x] LootChestTask (exists as LootChestTask)
 - [x] StorageTask (exists - deposits/withdraws)
-- [ ] DoStuffInContainerTask (base class)
-- [ ] CraftInTableTask
-- [ ] CraftInAnvilTask
-- [ ] UpgradeInSmithingTableTask
-- [ ] SmeltInFurnaceTask (basic exists as SmeltTask)
-- [ ] SmeltInBlastFurnaceTask
-- [ ] SmeltInSmokerTask
+- [x] DoStuffInContainerTask (base class)
+- [x] AbstractDoToStorageContainerTask (base class)
+- [x] CraftInTableTask
+- [x] CraftInAnvilTask
+- [x] UpgradeInSmithingTableTask
+- [x] SmeltInFurnaceBaseTask (furnace, blast_furnace, smoker)
 - [ ] StoreInStashTask
 - [ ] PickupFromContainerTask
 - [ ] ContainerStoredTracker
@@ -99,19 +98,19 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [ ] KillPlayerTask
 - [ ] HeroTask
 
-#### Construction Tasks (Partially Exists)
+#### Construction Tasks (Completed Iteration 3)
 - [x] BuildTask (exists)
 - [x] BridgeTask (exists)
 - [x] ScaffoldTask (exists)
-- [ ] DestroyBlockTask
-- [ ] PlaceBlockNearbyTask
+- [x] DestroyBlockTask (Completed Iteration 3)
+- [x] PlaceBlockNearbyTask (Completed Iteration 3)
 - [ ] PlaceSignTask
 - [ ] PlaceObsidianBucketTask
 - [ ] PlaceStructureBlockTask
-- [ ] ClearLiquidTask
+- [x] ClearLiquidTask (Completed Iteration 3)
 - [ ] ClearRegionTask
 - [ ] CoverWithBlocksTask
-- [ ] PutOutFireTask
+- [x] PutOutFireTask (Completed Iteration 3)
 - [ ] ConstructNetherPortalBucketTask
 - [ ] ConstructNetherPortalObsidianTask
 - [ ] ConstructIronGolemTask
@@ -174,6 +173,47 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [x] Updated concrete task exports in index.ts
 - [x] All 683 tests passing
 
+### Iteration 3 (Complete)
+- [x] Implemented container interaction tasks (ContainerTask.ts):
+  - ContainerType enum with all Minecraft container types
+  - getContainerBlocks() and isContainerBlock() utility functions
+  - DoStuffInContainerTask - abstract base for container interactions
+    - Handles finding, approaching, and opening containers
+    - Supports placing new containers if none found
+    - Delegates actual container work to subclasses
+  - AbstractDoToStorageContainerTask - base for storage containers
+    - Handles chest, barrel, shulker box interactions
+    - Wanders when no container found
+  - CraftInTableTask - crafting table interaction
+  - SmeltInFurnaceBaseTask - furnace/blast furnace/smoker support
+  - UpgradeInSmithingTableTask - smithing table interaction
+  - CraftInAnvilTask - anvil interaction (all damage states)
+- [x] Implemented construction tasks (ConstructionTask.ts):
+  - DestroyBlockTask - destroy a block at a position
+    - Handles stuck detection in annoying blocks (vines, cobwebs, etc.)
+    - Automatic tool equipping for block type
+    - Safety checks for standing on target block
+    - Movement progress checking with timeout
+  - PlaceBlockNearbyTask - place a block at nearest valid position
+    - Finds placement spots with adjacent solid blocks
+    - Avoids placing inside player
+    - Supports custom placement predicates
+    - Wandering retry on failure
+  - ClearLiquidTask - clear water/lava by placing block
+  - PutOutFireTask - extinguish fire
+- [x] Added comprehensive tests for container tasks (ContainerTasks.test.ts):
+  - 30 tests covering ContainerType utilities
+  - Container task creation and initialization
+  - State machine transitions
+  - Edge cases (missing containers, blocked chests)
+- [x] Added comprehensive tests for construction tasks (ConstructionTasks.test.ts):
+  - 37 tests covering DestroyBlockTask
+  - PlaceBlockNearbyTask placement logic
+  - ClearLiquidTask and PutOutFireTask
+  - Stuck detection, tool equipping, safety checks
+- [x] Updated concrete task exports in index.ts
+- [x] All 750 tests passing
+
 ## Test Coverage Goals
 
 For each ported task, we need tests that verify:
@@ -204,8 +244,9 @@ For each ported task, we need tests that verify:
 2. ~~Implement PlayerInteractionFixChain~~ ✅ Done
 3. ~~Implement slot management tasks~~ ✅ Done
 4. ~~Implement movement utility tasks~~ ✅ Done
-5. Add container interaction base classes (DoStuffInContainerTask)
-6. Implement resource collection tasks (CollectBlazeRodsTask, CollectFuelTask)
-7. Implement entity interaction base classes (AbstractDoToEntityTask)
-8. Implement construction tasks (DestroyBlockTask, PlaceBlockNearbyTask)
-9. Add comprehensive tests for new tasks
+5. ~~Add container interaction base classes (DoStuffInContainerTask)~~ ✅ Done
+6. ~~Implement construction tasks (DestroyBlockTask, PlaceBlockNearbyTask)~~ ✅ Done
+7. Implement entity interaction base classes (AbstractDoToEntityTask, DoToClosestEntityTask)
+8. Implement resource collection tasks (CollectBlazeRodsTask, CollectFuelTask)
+9. Implement escape/safety tasks (EscapeFromLavaTask, RunAwayFromCreepersTask)
+10. Add comprehensive tests for new tasks
