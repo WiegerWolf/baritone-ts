@@ -23,13 +23,24 @@ import {
   CoverWithBlocksState,
   ConstructIronGolemTask,
   ConstructIronGolemState,
+  PlaceStructureBlockTask,
+  PlaceStructureBlockState,
   placeSign,
   clearRegion,
   coverWithBlocks,
   constructIronGolem,
+  placeStructureBlock,
+  placeStructureBlockAt,
   THROWAWAY_BLOCKS,
   WOOD_SIGNS,
 } from '../src/tasks/concrete/AdvancedConstructionTask';
+import {
+  AbstractDoToClosestObjectTask,
+  DoToClosestObjectTask,
+  doToClosestObject,
+  DoToClosestObjectConfig,
+} from '../src/tasks/concrete/AbstractDoToClosestObjectTask';
+import { Task } from '../src/tasks/Task';
 
 // Mock Bot
 function createMockBot(): Bot {
@@ -536,6 +547,377 @@ describe('Integration Concepts', () => {
 
       // Task needs iron blocks and carved pumpkin
       expect(golem.getState()).toBe(ConstructIronGolemState.GETTING_MATERIALS);
+    });
+  });
+});
+
+describe('PlaceStructureBlockTask', () => {
+  let bot: Bot;
+
+  beforeEach(() => {
+    bot = createMockBot();
+  });
+
+  describe('Task Creation', () => {
+    it('WHY: Creates task to place any throwaway block at position', () => {
+      const pos = new BlockPos(10, 65, 20);
+      const task = new PlaceStructureBlockTask(bot, pos);
+
+      expect(task.displayName).toContain('PlaceStructureBlock');
+      expect(task.displayName).toContain('10');
+      expect(task.displayName).toContain('65');
+      expect(task.displayName).toContain('20');
+    });
+
+    it('WHY: fromCoords factory creates task from coordinates', () => {
+      const task = PlaceStructureBlockTask.fromCoords(bot, 5, 60, 15);
+
+      expect(task).toBeInstanceOf(PlaceStructureBlockTask);
+      expect(task.getPosition().x).toBe(5);
+      expect(task.getPosition().y).toBe(60);
+      expect(task.getPosition().z).toBe(15);
+    });
+  });
+
+  describe('State Machine', () => {
+    it('WHY: Starts in GETTING_BLOCK state', () => {
+      const task = new PlaceStructureBlockTask(bot, new BlockPos(0, 65, 0));
+
+      task.onStart();
+      expect(task.getState()).toBe(PlaceStructureBlockState.GETTING_BLOCK);
+    });
+
+    it('WHY: All structure block states are defined', () => {
+      expect(PlaceStructureBlockState.GETTING_BLOCK).toBeDefined();
+      expect(PlaceStructureBlockState.PLACING).toBeDefined();
+      expect(PlaceStructureBlockState.FINISHED).toBeDefined();
+      expect(PlaceStructureBlockState.FAILED).toBeDefined();
+    });
+
+    it('WHY: Selects block from inventory', () => {
+      // Ensure position is empty so we proceed to block selection
+      (bot.blockAt as jest.Mock).mockReturnValue({ name: 'air', boundingBox: 'empty' });
+      // Mock inventory with cobblestone
+      (bot.inventory.items as jest.Mock).mockReturnValue([
+        { name: 'cobblestone', count: 64 },
+      ]);
+
+      const task = new PlaceStructureBlockTask(bot, new BlockPos(0, 65, 0));
+      task.onStart();
+      task.onTick();
+
+      expect(task.getSelectedBlock()).toBe('cobblestone');
+      expect(task.getState()).toBe(PlaceStructureBlockState.PLACING);
+    });
+
+    it('WHY: Fails when no throwaway blocks available', () => {
+      // Ensure position is empty so we proceed to block selection
+      (bot.blockAt as jest.Mock).mockReturnValue({ name: 'air', boundingBox: 'empty' });
+      // Mock inventory with no throwaway blocks
+      (bot.inventory.items as jest.Mock).mockReturnValue([
+        { name: 'diamond', count: 64 },
+      ]);
+
+      const task = new PlaceStructureBlockTask(bot, new BlockPos(0, 65, 0));
+      task.onStart();
+      task.onTick();
+
+      expect(task.getState()).toBe(PlaceStructureBlockState.FAILED);
+      expect(task.isFailed()).toBe(true);
+    });
+  });
+
+  describe('Completion', () => {
+    it('WHY: Finishes when block already placed at position', () => {
+      (bot.blockAt as jest.Mock).mockReturnValue({ name: 'stone', boundingBox: 'block' });
+
+      const task = new PlaceStructureBlockTask(bot, new BlockPos(0, 65, 0));
+      task.onStart();
+      task.onTick();
+
+      expect(task.getState()).toBe(PlaceStructureBlockState.FINISHED);
+      expect(task.isFinished()).toBe(true);
+    });
+  });
+
+  describe('Equality', () => {
+    it('WHY: Tasks with same position are equal', () => {
+      const task1 = new PlaceStructureBlockTask(bot, new BlockPos(10, 65, 20));
+      const task2 = new PlaceStructureBlockTask(bot, new BlockPos(10, 65, 20));
+
+      expect(task1.isEqual(task2)).toBe(true);
+    });
+
+    it('WHY: Tasks with different positions are not equal', () => {
+      const task1 = new PlaceStructureBlockTask(bot, new BlockPos(10, 65, 20));
+      const task2 = new PlaceStructureBlockTask(bot, new BlockPos(30, 65, 40));
+
+      expect(task1.isEqual(task2)).toBe(false);
+    });
+  });
+
+  describe('Convenience Functions', () => {
+    it('WHY: placeStructureBlock creates task with BlockPos', () => {
+      const pos = new BlockPos(5, 65, 10);
+      const task = placeStructureBlock(bot, pos);
+
+      expect(task).toBeInstanceOf(PlaceStructureBlockTask);
+      expect(task.getPosition()).toBe(pos);
+    });
+
+    it('WHY: placeStructureBlockAt creates task with coordinates', () => {
+      const task = placeStructureBlockAt(bot, 5, 65, 10);
+
+      expect(task).toBeInstanceOf(PlaceStructureBlockTask);
+      expect(task.getPosition().x).toBe(5);
+    });
+  });
+
+  describe('Block Selection', () => {
+    it('WHY: Uses first matching throwaway block found in inventory', () => {
+      // Ensure position is air so we proceed to block selection
+      (bot.blockAt as jest.Mock).mockReturnValue({ name: 'air', boundingBox: 'empty' });
+      (bot.inventory.items as jest.Mock).mockReturnValue([
+        { name: 'dirt', count: 64 },
+        { name: 'cobblestone', count: 64 },
+      ]);
+
+      const task = new PlaceStructureBlockTask(bot, new BlockPos(0, 65, 0));
+      task.onStart();
+      task.onTick();
+
+      // Uses first matching block found in inventory that's in THROWAWAY_BLOCKS
+      // (dirt appears first in inventory, so it's selected first)
+      expect(task.getSelectedBlock()).toBe('dirt');
+    });
+
+    it('WHY: Uses any throwaway block', () => {
+      // Ensure position is air so we proceed to block selection
+      (bot.blockAt as jest.Mock).mockReturnValue({ name: 'air', boundingBox: 'empty' });
+      (bot.inventory.items as jest.Mock).mockReturnValue([
+        { name: 'netherrack', count: 64 },
+      ]);
+
+      const task = new PlaceStructureBlockTask(bot, new BlockPos(0, 65, 0));
+      task.onStart();
+      task.onTick();
+
+      expect(task.getSelectedBlock()).toBe('netherrack');
+    });
+  });
+});
+
+describe('AbstractDoToClosestObjectTask', () => {
+  let bot: Bot;
+
+  beforeEach(() => {
+    bot = createMockBot();
+  });
+
+  // Test objects with positions
+  interface TestObject {
+    id: number;
+    pos: Vec3;
+    valid: boolean;
+  }
+
+  // Simple mock task for testing
+  class MockGoalTask extends Task {
+    constructor(bot: Bot, public readonly targetId: number) {
+      super(bot);
+    }
+    get displayName() { return `MockGoal(${this.targetId})`; }
+    onTick() { return null; }
+    isFinished() { return false; }
+    isEqual(other: any) { return other?.targetId === this.targetId; }
+  }
+
+  describe('DoToClosestObjectTask', () => {
+    it('WHY: Creates task with configuration', () => {
+      const objects: TestObject[] = [
+        { id: 1, pos: new Vec3(10, 65, 10), valid: true },
+      ];
+
+      const config: DoToClosestObjectConfig<TestObject> = {
+        getPos: (obj) => obj.pos,
+        getClosestTo: (pos) => {
+          if (objects.length === 0) return null;
+          return objects.reduce((closest, obj) =>
+            obj.pos.distanceTo(pos) < closest.pos.distanceTo(pos) ? obj : closest
+          );
+        },
+        getGoalTask: (obj) => new MockGoalTask(bot, obj.id),
+        isValid: (obj) => obj.valid,
+      };
+
+      const task = new DoToClosestObjectTask(bot, config);
+      expect(task.displayName).toBe('DoToClosestObject');
+    });
+
+    it('WHY: Starts without a target', () => {
+      const config: DoToClosestObjectConfig<TestObject> = {
+        getPos: (obj) => obj.pos,
+        getClosestTo: () => null,
+        getGoalTask: (obj) => new MockGoalTask(bot, obj.id),
+        isValid: () => true,
+      };
+
+      const task = new DoToClosestObjectTask(bot, config);
+      task.onStart();
+
+      expect(task.getCurrentTarget()).toBeNull();
+    });
+
+    it('WHY: Finds closest object on tick', () => {
+      const objects: TestObject[] = [
+        { id: 1, pos: new Vec3(10, 65, 10), valid: true },
+        { id: 2, pos: new Vec3(50, 65, 50), valid: true },
+      ];
+
+      const config: DoToClosestObjectConfig<TestObject> = {
+        getPos: (obj) => obj.pos,
+        getClosestTo: (pos) => {
+          if (objects.length === 0) return null;
+          return objects.reduce((closest, obj) =>
+            obj.pos.distanceTo(pos) < closest.pos.distanceTo(pos) ? obj : closest
+          );
+        },
+        getGoalTask: (obj) => new MockGoalTask(bot, obj.id),
+        isValid: (obj) => obj.valid,
+      };
+
+      const task = new DoToClosestObjectTask(bot, config);
+      task.onStart();
+      task.onTick();
+
+      // Should select the closest object (id=1)
+      expect(task.getCurrentTarget()?.id).toBe(1);
+    });
+
+    it('WHY: Wanders when no objects found', () => {
+      const config: DoToClosestObjectConfig<TestObject> = {
+        getPos: (obj) => obj.pos,
+        getClosestTo: () => null,
+        getGoalTask: (obj) => new MockGoalTask(bot, obj.id),
+        isValid: () => true,
+      };
+
+      const task = new DoToClosestObjectTask(bot, config);
+      task.onStart();
+      const subtask = task.onTick();
+
+      expect(task.wasWandering()).toBe(true);
+      expect(subtask).not.toBeNull();
+    });
+
+    it('WHY: Invalidates target when no longer valid', () => {
+      const objects: TestObject[] = [
+        { id: 1, pos: new Vec3(10, 65, 10), valid: true },
+      ];
+
+      const config: DoToClosestObjectConfig<TestObject> = {
+        getPos: (obj) => obj.pos,
+        // Return null when object is invalid (simulating it being removed/destroyed)
+        getClosestTo: () => objects[0]?.valid ? objects[0] : null,
+        getGoalTask: (obj) => new MockGoalTask(bot, obj.id),
+        isValid: (obj) => obj.valid,
+      };
+
+      const task = new DoToClosestObjectTask(bot, config);
+      task.onStart();
+      task.onTick();
+
+      expect(task.getCurrentTarget()?.id).toBe(1);
+
+      // Invalidate the object
+      objects[0].valid = false;
+      task.onTick();
+
+      // Target should be cleared (invalidated at start of tick)
+      expect(task.getCurrentTarget()).toBeNull();
+    });
+
+    it('WHY: resetSearch clears target and heuristics', () => {
+      const objects: TestObject[] = [
+        { id: 1, pos: new Vec3(10, 65, 10), valid: true },
+      ];
+
+      const config: DoToClosestObjectConfig<TestObject> = {
+        getPos: (obj) => obj.pos,
+        getClosestTo: () => objects[0],
+        getGoalTask: (obj) => new MockGoalTask(bot, obj.id),
+        isValid: () => true,
+      };
+
+      const task = new DoToClosestObjectTask(bot, config);
+      task.onStart();
+      task.onTick();
+
+      expect(task.getCurrentTarget()).not.toBeNull();
+
+      task.resetSearch();
+
+      expect(task.getCurrentTarget()).toBeNull();
+    });
+  });
+
+  describe('doToClosestObject convenience function', () => {
+    it('WHY: Creates DoToClosestObjectTask with config', () => {
+      const config: DoToClosestObjectConfig<TestObject> = {
+        getPos: (obj) => obj.pos,
+        getClosestTo: () => null,
+        getGoalTask: (obj) => new MockGoalTask(bot, obj.id),
+        isValid: () => true,
+      };
+
+      const task = doToClosestObject(bot, config);
+      expect(task).toBeInstanceOf(DoToClosestObjectTask);
+    });
+  });
+
+  describe('Heuristic Caching', () => {
+    it('WHY: Caches target heuristics for better switching decisions', () => {
+      const objects: TestObject[] = [
+        { id: 1, pos: new Vec3(10, 65, 10), valid: true },
+        { id: 2, pos: new Vec3(15, 65, 15), valid: true },
+      ];
+
+      let currentClosest = objects[0];
+
+      const config: DoToClosestObjectConfig<TestObject> = {
+        getPos: (obj) => obj.pos,
+        getClosestTo: () => currentClosest,
+        getGoalTask: (obj) => new MockGoalTask(bot, obj.id),
+        isValid: () => true,
+      };
+
+      const task = new DoToClosestObjectTask(bot, config);
+      task.onStart();
+
+      // First tick - select object 1
+      task.onTick();
+      expect(task.getCurrentTarget()?.id).toBe(1);
+
+      // Change closest to object 2
+      currentClosest = objects[1];
+
+      // Next tick - should consider switching
+      task.onTick();
+
+      // Since object 2 has no cached heuristic, should try it
+      expect(task.getCurrentTarget()?.id).toBe(2);
+    });
+
+    it('WHY: Continues tasks that never finish by design', () => {
+      const config: DoToClosestObjectConfig<TestObject> = {
+        getPos: (obj) => obj.pos,
+        getClosestTo: () => null,
+        getGoalTask: (obj) => new MockGoalTask(bot, obj.id),
+        isValid: () => true,
+      };
+
+      const task = new DoToClosestObjectTask(bot, config);
+      expect(task.isFinished()).toBe(false);
     });
   });
 });

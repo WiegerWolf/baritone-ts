@@ -399,10 +399,14 @@ export {
   CoverWithBlocksState,
   ConstructIronGolemTask,
   ConstructIronGolemState,
+  PlaceStructureBlockTask,
+  PlaceStructureBlockState,
   placeSign,
   clearRegion,
   coverWithBlocks,
   constructIronGolem,
+  placeStructureBlock,
+  placeStructureBlockAt,
   THROWAWAY_BLOCKS,
   WOOD_SIGNS,
 } from './AdvancedConstructionTask';
@@ -434,3 +438,11 @@ export {
   HOSTILE_MOB_DROPS,
   OBSIDIAN_CAST_FRAME,
 } from './MiscTask';
+
+// Abstract closest object base class
+export {
+  AbstractDoToClosestObjectTask,
+  DoToClosestObjectTask,
+  doToClosestObject,
+} from './AbstractDoToClosestObjectTask';
+export type { DoToClosestObjectConfig } from './AbstractDoToClosestObjectTask';
