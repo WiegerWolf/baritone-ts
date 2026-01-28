@@ -507,3 +507,11 @@ export {
   throwEnderPearl,
 } from './ThrowEnderPearlTask';
 export type { ThrowEnderPearlConfig } from './ThrowEnderPearlTask';
+
+// Outer End islands task
+export {
+  GetToOuterEndIslandsTask,
+  OuterEndIslandsState,
+  getToOuterEndIslands,
+  END_ISLAND_START_RADIUS,
+} from './GetToOuterEndIslandsTask';
