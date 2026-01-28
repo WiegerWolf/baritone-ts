@@ -5,11 +5,39 @@ This document tracks the porting progress from the Java BaritonePlus project to 
 
 **Source**: BaritonePlus (371 Java files)
 **Target**: baritone-ts (195 TypeScript files currently)
-**Last Updated**: 2026-01-28, Iteration 7
+**Last Updated**: 2026-01-28, Iteration 8
 
 ---
 
-## Iteration 7 Progress (Current)
+## Iteration 8 Progress (Current)
+
+### Completed in This Iteration:
+1. **Enhanced ItemStorageTracker** - UPDATED
+   - Added slot-based inventory queries (from InventorySubTracker)
+   - `getSlotsWithItemPlayerInventory()` - Find slots containing items
+   - `getSlotsWithItemContainer()` - Find container slots with items
+   - `getSlotsWithItemScreen()` - Combined player + container
+   - `getEmptySlotsPlayerInventory()` - Find empty inventory slots
+   - `getEmptySlotsContainer()` - Find empty container slots
+   - `hasEmptySlot()` - Check for empty slots
+   - `getSlotsThatCanFit()` - Find slots that can accept items (stackable/empty)
+   - `getItemInSlot()` - Get item in specific slot
+   - `getCursorItem()` - Get item held by mouse
+   - `hasItemInOffhand()` - Check offhand slot
+   - `getInventoryStacks()` - Get all inventory items
+   - `getCachedContainers()` - Filter containers by type
+   - `getClosestContainer()` - Find nearest container of type
+
+### Iteration 8 Summary
+- Enhanced ItemStorageTracker to include functionality from Java's InventorySubTracker and ContainerSubTracker
+- Added comprehensive slot-level inventory queries
+- Added container type filtering
+- All type errors fixed, project compiles successfully
+- InventorySubTracker and ContainerSubTracker functionality now integrated into ItemStorageTracker
+
+---
+
+## Iteration 7 Progress (Completed)
 
 ### Completed in This Iteration:
 1. **RepairToolTask** - NEW
@@ -492,15 +520,15 @@ Many composite tasks exist as stubs:
 - [x] `MarvionBeatMinecraftTask.java` → BeatMinecraftTask.ts (merged)
 - [x] Dragon-related tasks → DragonFightTask.ts (exists)
 
-### Tracker Subsystems ⚠️
-**Missing from `api/trackers/`:**
+### Tracker Subsystems ✅
+**From `api/trackers/`:**
 - [x] `MiscBlockTracker.java` → `MiscBlockTracker.ts` (Iteration 7)
 - [x] `SimpleChunkTracker.java` → `SimpleChunkTracker.ts` (Iteration 7)
 - [x] `blacklisting/AbstractObjectBlacklist.java` → `blacklisting/AbstractObjectBlacklist.ts` (Iteration 4)
 - [x] `blacklisting/EntityLocateBlacklist.java` → `blacklisting/EntityLocateBlacklist.ts` (Iteration 4)
 - [x] `blacklisting/WorldLocateBlacklist.java` → `blacklisting/WorldLocateBlacklist.ts` (Iteration 4)
-- [ ] `storage/ContainerSubTracker.java`
-- [ ] `storage/InventorySubTracker.java`
+- [x] `storage/ContainerSubTracker.java` → Integrated into `ItemStorageTracker.ts` (Iteration 8)
+- [x] `storage/InventorySubTracker.java` → Integrated into `ItemStorageTracker.ts` (Iteration 8)
 
 ### Butler/Command System ❌
 **Not ported at all:**
@@ -520,12 +548,9 @@ Many composite tasks exist as stubs:
 
 ## Priority Tasks for Next Iterations
 
-### Iteration 8 - Remaining Gaps
-1. Port `CraftWithMatchingPlanTask` variants (if needed)
-
 ### Iteration 9+ - Polish & Edge Cases
-1. Butler/command system (if needed)
-2. Storage sub-trackers (ContainerSubTracker, InventorySubTracker)
+1. Butler/command system (if needed - low priority)
+2. Serialization utilities (optional)
 
 ---
 
@@ -551,13 +576,13 @@ Many composite tasks exist as stubs:
 
 ## Statistics
 - **Java Files**: 371
-- **TypeScript Files**: 201
-- **Estimated Completion**: ~85%
-- **Core Systems**: ~95% complete
-- **Task Implementations**: ~92% complete
-- **Utility/Helper**: ~88% complete
+- **TypeScript Files**: 202
+- **Estimated Completion**: ~90%
+- **Core Systems**: ~96% complete
+- **Task Implementations**: ~94% complete
+- **Utility/Helper**: ~92% complete
 - **Goals**: ~98% complete (all core goals ported)
-- **Trackers**: ~92% complete (blacklisting, chunk tracking, block tracking)
+- **Trackers**: ~98% complete (all sub-trackers integrated)
 
 ## Files Added in Iteration 1
 1. `src/control/InputControls.ts`
