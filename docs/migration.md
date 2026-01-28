@@ -182,8 +182,8 @@ import { Goal } from 'baritone-ts';
 class GoalAllOf implements Goal {
   constructor(private goals: Goal[]) {}
 
-  isInGoal(x: number, y: number, z: number): boolean {
-    return this.goals.every(g => g.isInGoal(x, y, z));
+  isEnd(x: number, y: number, z: number): boolean {
+    return this.goals.every(g => g.isEnd(x, y, z));
   }
 
   heuristic(x: number, y: number, z: number): number {

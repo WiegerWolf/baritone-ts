@@ -340,7 +340,7 @@ Implement the Goal interface:
 import { Goal } from 'baritone-ts';
 
 class GoalDiamond implements Goal {
-  isInGoal(x: number, y: number, z: number): boolean {
+  isEnd(x: number, y: number, z: number): boolean {
     // Check if standing on diamond ore
     const block = bot.blockAt(new Vec3(x, y - 1, z));
     return block?.name === 'diamond_ore';

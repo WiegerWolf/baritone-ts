@@ -152,8 +152,7 @@ const cost = movement.calculateCost(ctx);
 Each movement runs as a state machine:
 
 ```typescript
-enum MovementState {
-  NOT_STARTED,  // Initial state
+enum MovementStatus {
   PREPPING,     // Setting up (equipping tools)
   WAITING,      // Waiting (chunk loading, block break)
   RUNNING,      // Actively moving

@@ -12,7 +12,7 @@ import { Goal } from 'baritone-ts';
 class GoalDiamond implements Goal {
   constructor(private bot: Bot) {}
 
-  isInGoal(x: number, y: number, z: number): boolean {
+  isEnd(x: number, y: number, z: number): boolean {
     // Goal is satisfied when standing on diamond ore
     const block = this.bot.blockAt(new Vec3(x, y - 1, z));
     return block?.name === 'diamond_ore' || block?.name === 'deepslate_diamond_ore';
@@ -47,7 +47,7 @@ class GoalClosestOre implements Goal {
     this.targetPos = nearest;
   }
 
-  isInGoal(x: number, y: number, z: number): boolean {
+  isEnd(x: number, y: number, z: number): boolean {
     this.updateTarget();
     if (!this.targetPos) return false;
 
@@ -78,8 +78,8 @@ class GoalClosestOre implements Goal {
 class GoalAnyOf implements Goal {
   constructor(private goals: Goal[]) {}
 
-  isInGoal(x: number, y: number, z: number): boolean {
-    return this.goals.some(g => g.isInGoal(x, y, z));
+  isEnd(x: number, y: number, z: number): boolean {
+    return this.goals.some(g => g.isEnd(x, y, z));
   }
 
   heuristic(x: number, y: number, z: number): number {
@@ -91,8 +91,8 @@ class GoalAnyOf implements Goal {
 class GoalAllOf implements Goal {
   constructor(private goals: Goal[]) {}
 
-  isInGoal(x: number, y: number, z: number): boolean {
-    return this.goals.every(g => g.isInGoal(x, y, z));
+  isEnd(x: number, y: number, z: number): boolean {
+    return this.goals.every(g => g.isEnd(x, y, z));
   }
 
   heuristic(x: number, y: number, z: number): number {

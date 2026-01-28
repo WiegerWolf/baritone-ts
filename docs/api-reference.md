@@ -669,8 +669,7 @@ interface Goal {
   heuristic(x: number, y: number, z: number): number;
 }
 
-enum MovementState {
-  NOT_STARTED = 'NOT_STARTED',
+enum MovementStatus {
   PREPPING = 'PREPPING',
   WAITING = 'WAITING',
   RUNNING = 'RUNNING',

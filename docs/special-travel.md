@@ -415,6 +415,7 @@ import {
   pathfinder,
   ElytraController,
   BoatController,
+  GoalXZ,
   hasElytraEquipped,
   isOverWater
 } from 'baritone-ts';
