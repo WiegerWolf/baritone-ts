@@ -341,7 +341,7 @@ Baritone-TS is optimized for performance:
 
 ## License
 
-GNU AFFERO GENERAL PUBLIC LICENSE
+GNU AGPL-3.0
 
 ## Credits
 
