@@ -545,3 +545,14 @@ export {
   flyToPositionWithElytra,
 } from './GetToXZWithElytraTask';
 export type { GetToXZWithElytraConfig } from './GetToXZWithElytraTask';
+
+// Craft with matching materials tasks
+export {
+  CraftWithMatchingMaterialsTask,
+  CraftWithMatchingPlanksTask,
+  CraftWithMatchingWoolTask,
+  craftBed,
+  craftFence,
+  craftSlot,
+} from './CraftWithMatchingMaterialsTask';
+export type { CraftingSlot, CraftingRecipe } from './CraftWithMatchingMaterialsTask';
