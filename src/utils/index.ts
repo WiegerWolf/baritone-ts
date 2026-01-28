@@ -40,3 +40,10 @@ export {
   type LookRotation,
   type LookConfig,
 } from './LookHelper';
+
+// Block Range
+export {
+  BlockRange,
+  blockRange,
+  blockRangeAround,
+} from './BlockRange';

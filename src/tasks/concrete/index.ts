@@ -344,3 +344,23 @@ export {
   lootDesertTempleFor,
 } from './LootDesertTempleTask';
 export type { LootDesertTempleConfig } from './LootDesertTempleTask';
+
+// Stash storage tasks
+export {
+  StoreInStashTask,
+  StashStorageState,
+  storeInStash,
+  STORAGE_BLOCKS,
+} from './StoreInStashTask';
+export type { StoreInStashConfig } from './StoreInStashTask';
+
+// Structure ravaging tasks
+export {
+  RavageDesertTemplesTask,
+  RavageRuinedPortalsTask,
+  RavageState,
+  ravageDesertTemples,
+  ravageRuinedPortals,
+  DESERT_TEMPLE_LOOT,
+  RUINED_PORTAL_LOOT,
+} from './RavageStructuresTask';

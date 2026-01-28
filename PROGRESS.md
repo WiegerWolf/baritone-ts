@@ -5,7 +5,7 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 ## Summary
 
 **Status**: In Progress
-**Last Updated**: Iteration 9
+**Last Updated**: Iteration 10
 
 ### BaritonePlus Java Statistics:
 - Total Tasks: 173 Java files in tasks/
@@ -14,9 +14,10 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 
 ### baritone-ts TypeScript Statistics (Current):
 - Composite Tasks: 46 files
-- Concrete Tasks: 31 modules (GoTo, MineBlock, PlaceBlock, Craft, Smelt, Inventory, Interact, Slot, MovementUtil, Container, Construction, Entity, Escape, Resource, MineAndCollect, KillAndLoot, CollectFuel, BlockSearch, Portal, Armor, Bed, CollectLiquid, Dodge, Trade, MLG, ChunkSearch, InteractWithBlock, StorageContainer, CraftInInventory, GetToChunk, CollectFood, CollectBlazeRods, FastTravel, CollectObsidian, ConstructNetherPortal, LootDesertTemple)
+- Concrete Tasks: 33 modules (GoTo, MineBlock, PlaceBlock, Craft, Smelt, Inventory, Interact, Slot, MovementUtil, Container, Construction, Entity, Escape, Resource, MineAndCollect, KillAndLoot, CollectFuel, BlockSearch, Portal, Armor, Bed, CollectLiquid, Dodge, Trade, MLG, ChunkSearch, InteractWithBlock, StorageContainer, CraftInInventory, GetToChunk, CollectFood, CollectBlazeRods, FastTravel, CollectObsidian, ConstructNetherPortal, LootDesertTemple, StoreInStash, RavageStructures)
 - Chains: 6 files (FoodChain, MLGBucketChain, MobDefenseChain, WorldSurvivalChain, DeathMenuChain, PlayerInteractionFixChain)
-- Tests: 29 test files
+- Tests: 30 test files
+- Utilities: BlockRange (3D region definition)
 
 ## Missing Components to Port
 
@@ -49,8 +50,8 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [x] StoreInContainerTask (Completed Iteration 7)
 - [x] PickupFromContainerTask (Completed Iteration 7)
 - [x] LootContainerTask (Completed Iteration 7)
-- [ ] StoreInStashTask (needs BlockRange utility)
-- [ ] ContainerStoredTracker
+- [x] StoreInStashTask (Completed Iteration 10 - with BlockRange utility)
+- [x] StoredItemTracker (Completed Iteration 10 - internal to StoreInStashTask)
 
 #### Resource Collection Tasks (Completed Iteration 5 & 8)
 - [x] CollectWoodTask (exists)
@@ -129,8 +130,8 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [x] EquipArmorTask (exists)
 - [x] PlaceBedAndSetSpawnTask (exists)
 - [x] LootDesertTempleTask (Completed Iteration 9)
-- [ ] RavageDesertTemplesTask
-- [ ] RavageRuinedPortalsTask
+- [x] RavageDesertTemplesTask (Completed Iteration 10)
+- [x] RavageRuinedPortalsTask (Completed Iteration 10)
 
 ### Priority 3: Speedrun/Advanced Tasks
 - [ ] BeatMinecraft2Task
@@ -513,6 +514,49 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [x] Updated concrete task exports in index.ts
 - [x] All 1111 tests passing
 
+### Iteration 10 (Complete)
+- [x] Implemented BlockRange utility class (BlockRange.ts):
+  - BlockRange class - 3D rectangular region definition
+  - Start/end position normalization (min/max corners)
+  - Dimension awareness (overworld, nether, end)
+  - contains(), containsVec3() - position containment checking
+  - getCenter(), getSize(), getVolume() - geometry methods
+  - expand() - region expansion
+  - positions() generator - iterate all blocks in range
+  - fromPositions(), aroundPoint(), aroundPointUniform() factory methods
+  - blockRange(), blockRangeAround() convenience functions
+- [x] Implemented stash storage task (StoreInStashTask.ts):
+  - StoreInStashTask - stores items in containers within designated stash area
+  - State machine: CHECKING_INVENTORY -> FINDING_CONTAINER -> STORING -> TRAVELING_TO_STASH
+  - StoredItemTracker - tracks what items have been deposited
+  - STORAGE_BLOCKS - all valid container types (chest, barrel, shulker boxes)
+  - Finds containers within BlockRange
+  - Navigates to stash center if no containers visible
+  - storeItems() factory method, storeInStash() helper function
+- [x] Implemented structure ravaging tasks (RavageStructuresTask.ts):
+  - RavageDesertTemplesTask - continuously finds and loots desert temples
+    - Identifies temples by stone pressure plate (trap indicator)
+    - Uses SearchChunkForBlockTask for discovery
+    - Tracks looted temples to avoid revisiting
+    - DESERT_TEMPLE_LOOT array - all valuable temple items
+  - RavageRuinedPortalsTask - continuously finds and loots ruined portals
+    - Identifies portals by netherrack proximity to chests
+    - Skips underwater chests (shipwrecks) and low-level chests (mineshafts)
+    - Dimension awareness (only works in overworld)
+    - RUINED_PORTAL_LOOT array - portal chest items
+  - RavageState enum, ravageDesertTemples(), ravageRuinedPortals() helpers
+- [x] Added comprehensive tests (StashAndRavageTasks.test.ts):
+  - 49 tests covering all new tasks
+  - BlockRange construction, normalization, containment tests
+  - Geometry methods (center, size, volume, expand) tests
+  - Position generator tests
+  - StoreInStashTask creation, state management, container detection tests
+  - RavageDesertTemplesTask loot config, state machine, temple detection tests
+  - RavageRuinedPortalsTask portal identification, dimension awareness tests
+  - Integration scenario tests
+- [x] Updated exports in index.ts (tasks and utils)
+- [x] All 1160 tests passing
+
 ## Test Coverage Goals
 
 For each ported task, we need tests that verify:
@@ -561,6 +605,7 @@ For each ported task, we need tests that verify:
 20. ~~Implement remaining resource tasks (CollectObsidianTask)~~ ✅ Done
 21. ~~Implement portal construction tasks (ConstructNetherPortalTask)~~ ✅ Done
 22. ~~Implement structure looting tasks (LootDesertTempleTask)~~ ✅ Done
-23. Implement stash management (StoreInStashTask - needs BlockRange utility)
-24. Implement remaining structure tasks (RavageDesertTemplesTask, RavageRuinedPortalsTask)
+23. ~~Implement stash management (StoreInStashTask - needs BlockRange utility)~~ ✅ Done
+24. ~~Implement remaining structure tasks (RavageDesertTemplesTask, RavageRuinedPortalsTask)~~ ✅ Done
 25. Implement speedrun tasks (BeatMinecraft2Task, KillEnderDragonTask)
+26. Implement remaining misc tasks (HeroTask, PlaceSignTask, ClearRegionTask)
