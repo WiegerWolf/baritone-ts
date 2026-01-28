@@ -5,6 +5,33 @@
 // Item Target
 export { ItemTarget, ItemTargets } from './ItemTarget';
 
+// Recipe Target
+export { RecipeTarget, simpleRecipeTarget } from './RecipeTarget';
+
+// Smelt Target
+export {
+  SmeltTarget,
+  SmeltTargets,
+  smeltIronIngots,
+  smeltGoldIngots,
+  smeltCopperIngots,
+  smeltCookedBeef,
+  smeltCookedPorkchop,
+  smeltCookedChicken,
+  smeltCookedMutton,
+  smeltCookedRabbit,
+  smeltCookedCod,
+  smeltCookedSalmon,
+  smeltBakedPotato,
+  smeltGlass,
+  smeltCharcoal,
+  smeltSmoothStone,
+  smeltStone,
+  smeltBrick,
+  smeltNetherBrick,
+  smeltDriedKelp,
+} from './SmeltTarget';
+
 // Storage Helper
 export {
   StorageHelper,
