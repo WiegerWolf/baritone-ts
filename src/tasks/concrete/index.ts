@@ -500,3 +500,10 @@ export {
   DodgeProjectilesTask as FleeFromProjectilesTask,
 } from './FleeFromEntitiesTask';
 export type { EntitySupplier } from './FleeFromEntitiesTask';
+
+// Ender pearl throwing tasks
+export {
+  ThrowEnderPearlSimpleProjectileTask,
+  throwEnderPearl,
+} from './ThrowEnderPearlTask';
+export type { ThrowEnderPearlConfig } from './ThrowEnderPearlTask';

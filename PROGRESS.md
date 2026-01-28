@@ -4,12 +4,42 @@
 This document tracks the porting progress from the Java BaritonePlus project to the TypeScript baritone-ts implementation.
 
 **Source**: BaritonePlus (371 Java files)
-**Target**: baritone-ts (185 TypeScript files currently)
-**Last Updated**: 2026-01-28, Iteration 3
+**Target**: baritone-ts (195 TypeScript files currently)
+**Last Updated**: 2026-01-28, Iteration 4
 
 ---
 
-## Iteration 3 Progress (Current)
+## Iteration 4 Progress (Current)
+
+### Completed in This Iteration:
+1. **Blacklisting System** - NEW
+   - `trackers/blacklisting/AbstractObjectBlacklist.ts` - Base class for intelligent failure tracking
+   - `trackers/blacklisting/WorldLocateBlacklist.ts` - Block position blacklisting
+   - `trackers/blacklisting/EntityLocateBlacklist.ts` - Entity blacklisting
+   - `trackers/blacklisting/index.ts` - Module exports
+   - Features distance-based reset (closer = reset failures) and tool tier tracking
+
+2. **ThrowEnderPearlTask** - NEW
+   - `tasks/concrete/ThrowEnderPearlTask.ts` - Ender pearl throwing for travel
+   - Calculates projectile motion angles for accurate throws
+   - Checks line of sight before throwing
+   - Uses ProjectileHelper utilities
+
+3. **Updated Exports**
+   - `trackers/index.ts` updated with blacklisting exports
+   - `tasks/concrete/index.ts` updated with ThrowEnderPearlTask exports
+
+4. **Verified Existing (Container Tasks)**
+   - `ContainerTask.ts` already well-implemented with:
+     - DoStuffInContainerTask - Abstract base for container interactions
+     - CraftInTableTask - Crafting table operations
+     - SmeltInFurnaceBaseTask - Furnace smelting
+     - UpgradeInSmithingTableTask - Smithing table upgrades
+     - CraftInAnvilTask - Anvil operations
+
+---
+
+## Iteration 3 Progress (Completed)
 
 ### Completed in This Iteration:
 1. **Pickup Item Tasks** - NEW
@@ -231,7 +261,7 @@ Many composite tasks exist as stubs:
 - [x] `RunAwayFrom*Task.java` → FleeFromEntitiesTask.ts (Iteration 3)
 - [x] `SafeRandomShimmyTask.java` → MovementUtilTask.ts
 - [x] `SearchChunk*Task.java` → ChunkSearchTask.ts
-- [ ] `ThrowEnderPearlSimpleProjectileTask.java`
+- [x] `ThrowEnderPearlSimpleProjectileTask.java` → `ThrowEnderPearlTask.ts` (Iteration 4)
 - [x] `TimeoutWanderTask.java` → MovementUtilTask.ts
 
 #### Construction Tasks (~20 files)
@@ -310,9 +340,9 @@ Many composite tasks exist as stubs:
 **Missing from `api/trackers/`:**
 - [ ] `MiscBlockTracker.java`
 - [ ] `SimpleChunkTracker.java`
-- [ ] `blacklisting/AbstractObjectBlacklist.java`
-- [ ] `blacklisting/EntityLocateBlacklist.java`
-- [ ] `blacklisting/WorldLocateBlacklist.java`
+- [x] `blacklisting/AbstractObjectBlacklist.java` → `blacklisting/AbstractObjectBlacklist.ts` (Iteration 4)
+- [x] `blacklisting/EntityLocateBlacklist.java` → `blacklisting/EntityLocateBlacklist.ts` (Iteration 4)
+- [x] `blacklisting/WorldLocateBlacklist.java` → `blacklisting/WorldLocateBlacklist.ts` (Iteration 4)
 - [ ] `storage/ContainerSubTracker.java`
 - [ ] `storage/InventorySubTracker.java`
 

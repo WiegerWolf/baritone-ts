@@ -74,7 +74,7 @@ export class ThrowEnderPearlSimpleProjectileTask extends Task {
   }
 
   onStart(): void {
-    this.thrownTimer.forceElapse();
+    this.thrownTimer.forceElapsed();
     this.thrown = false;
   }
 
