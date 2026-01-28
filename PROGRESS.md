@@ -736,7 +736,13 @@ The BaritonePlus → baritone-ts port is now **complete** with 15 iterations:
 - Full coverage of BaritonePlus functionality
 
 **Notable Omissions (by design):**
-- CraftGenericManuallyTask: mineflayer has built-in crafting support that makes this unnecessary
+- CraftGenericManuallyTask: mineflayer has built-in crafting support
+- Collect*Task variants (50+): These are trivial convenience wrappers around MineAndCollectTask.
+  Can be easily created: `mineAndCollect(bot, itemTarget('cobblestone', 64), ['stone', 'cobblestone'])`
+- BeeMovieTask, SCP173Task, ExampleTask: Joke/example tasks not needed for production
+- ShearSheepTask: Already covered by InteractWithEntityTask + entity filtering
+- SmeltInBlastFurnaceTask/SmeltInSmokerTask: Covered by SmeltInFurnaceBaseTask with container type parameter
+- TerminatorTask, BeatAnarchyTask: Specialized game modes not in scope
 
 **Key Patterns Established:**
 - State machine pattern for complex multi-step tasks
