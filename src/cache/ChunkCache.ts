@@ -1,5 +1,6 @@
 import { PathingBlockType, BlockPos } from '../types';
 import type { Bot } from 'mineflayer';
+import { Vec3 } from 'vec3';
 
 /**
  * ChunkCache provides 2-bit encoded block type caching for fast pathfinding lookups
@@ -275,7 +276,7 @@ export class ChunkCache {
         for (let localZ = 0; localZ < 16; localZ++) {
           const x = worldX + localX;
           const z = worldZ + localZ;
-          const block = this.bot.blockAt({ x, y, z } as any);
+          const block = this.bot.blockAt(new Vec3(x, y, z));
           const type = this.classifyBlock(block);
           column.setBlockType(x, y, z, type);
         }
@@ -292,7 +293,7 @@ export class ChunkCache {
     const column = this.columns.get(this.getColumnKey(chunkX, chunkZ));
 
     if (column) {
-      const block = this.bot.blockAt({ x, y, z } as any);
+      const block = this.bot.blockAt(new Vec3(x, y, z));
       const type = this.classifyBlock(block);
       column.setBlockType(x, y, z, type);
     }

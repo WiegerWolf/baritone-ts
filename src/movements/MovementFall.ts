@@ -6,6 +6,7 @@ import {
   PLACE_ONE_BLOCK_COST
 } from '../core/ActionCosts';
 import { getMovementHelper } from './MovementHelper';
+import { Vec3 } from 'vec3';
 
 /**
  * MovementFall handles extended falls with optional water bucket cushioning
@@ -207,7 +208,7 @@ export class MovementFall extends Movement {
 
       // Look at water
       const waterPos = this.dest;
-      const waterBlock = bot.blockAt({ x: waterPos.x, y: waterPos.y, z: waterPos.z });
+      const waterBlock = bot.blockAt(new Vec3(waterPos.x, waterPos.y, waterPos.z));
 
       if (waterBlock && (waterBlock.name === 'water' || waterBlock.name === 'flowing_water')) {
         await bot.lookAt({

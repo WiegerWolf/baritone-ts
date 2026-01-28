@@ -1,5 +1,6 @@
 import type { Bot } from 'mineflayer';
 import type { Block } from 'prismarine-block';
+import { Vec3 } from 'vec3';
 import { CalculationContext } from '../types';
 import { PrecomputedData } from '../cache/PrecomputedData';
 import { Favoring, buildFavoring, createAvoidances } from '../pathing/Favoring';
@@ -75,7 +76,7 @@ export class CalculationContextImpl implements CalculationContext {
    * Get block at position
    */
   getBlock(x: number, y: number, z: number): Block | null {
-    return this.bot.blockAt({ x, y, z } as any) ?? null;
+    return this.bot.blockAt(new Vec3(x, y, z)) ?? null;
   }
 
   /**

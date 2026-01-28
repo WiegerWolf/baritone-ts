@@ -22,6 +22,7 @@
 import type { Bot } from 'mineflayer';
 import type { Block } from 'prismarine-block';
 import type { Item } from 'prismarine-item';
+import { Vec3 } from 'vec3';
 import { TaskChain, ChainPriority } from '../tasks/TaskChain';
 import { TimerGame } from '../utils/timers/TimerGame';
 
@@ -270,7 +271,7 @@ export class PlayerInteractionFixChain extends TaskChain {
     this.toolSwitchTimer.reset();
 
     // Get the block being broken
-    const block = this.bot.blockAt(this.breakingBlockPos as any);
+    const block = this.bot.blockAt(new Vec3(this.breakingBlockPos.x, this.breakingBlockPos.y, this.breakingBlockPos.z));
     if (!block) return;
 
     // Find best tool for this block
@@ -529,7 +530,7 @@ export class PlayerInteractionFixChain extends TaskChain {
   forceEquipBestTool(): void {
     if (!this.isBreakingBlock || !this.breakingBlockPos) return;
 
-    const block = this.bot.blockAt(this.breakingBlockPos as any);
+    const block = this.bot.blockAt(new Vec3(this.breakingBlockPos.x, this.breakingBlockPos.y, this.breakingBlockPos.z));
     if (!block) return;
 
     const bestTool = this.findBestToolForBlock(block);

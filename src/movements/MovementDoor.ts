@@ -2,6 +2,7 @@ import { BlockPos, CalculationContext, MovementStatus, COST_INF } from '../types
 import { Movement, MovementState } from './Movement';
 import { WALK_ONE_BLOCK_COST } from '../core/ActionCosts';
 import { getMovementHelper } from './MovementHelper';
+import { Vec3 } from 'vec3';
 
 /**
  * MovementDoor handles movement through doors and fence gates
@@ -158,11 +159,7 @@ export class MovementThroughDoor extends Movement {
 
       case MovementState.BREAKING: // Opening door
         if (this.doorPos && !this.doorOpened) {
-          const doorBlock = bot.blockAt({
-            x: this.doorPos.x,
-            y: this.doorPos.y,
-            z: this.doorPos.z
-          });
+          const doorBlock = bot.blockAt(new Vec3(this.doorPos.x, this.doorPos.y, this.doorPos.z));
 
           if (doorBlock && isOpenable(doorBlock.name)) {
             // Check if already open
@@ -276,11 +273,7 @@ export class MovementThroughTrapdoor extends Movement {
       case MovementState.BREAKING:
         if (!this.trapdoorOpened) {
           const trapdoorY = this.direction === 'up' ? this.src.y + 1 : this.src.y;
-          const trapdoorBlock = bot.blockAt({
-            x: this.src.x,
-            y: trapdoorY,
-            z: this.src.z
-          });
+          const trapdoorBlock = bot.blockAt(new Vec3(this.src.x, trapdoorY, this.src.z));
 
           if (trapdoorBlock && isTrapdoor(trapdoorBlock.name)) {
             const isOpen = trapdoorBlock.getProperties?.()?.open === 'true' ||

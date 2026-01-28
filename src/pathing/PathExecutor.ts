@@ -249,7 +249,7 @@ export class PathExecutor {
     // Check if we're already breaking something ahead
     if (this.currentlyBreakingAhead) {
       // Check if the block is gone
-      const block = this.bot.blockAt(this.currentlyBreakingAhead);
+      const block = this.bot.blockAt(new Vec3(this.currentlyBreakingAhead.x, this.currentlyBreakingAhead.y, this.currentlyBreakingAhead.z));
       if (!block || block.name === 'air') {
         this.currentlyBreakingAhead = null;
       } else {
@@ -274,7 +274,7 @@ export class PathExecutor {
           if (dist > reach) continue;
 
           // Check if block exists and needs breaking
-          const block = this.bot.blockAt(breakPos);
+          const block = this.bot.blockAt(new Vec3(breakPos.x, breakPos.y, breakPos.z));
           if (!block || block.name === 'air') continue;
 
           // Start breaking this block
