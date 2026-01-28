@@ -5,7 +5,7 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 ## Summary
 
 **Status**: In Progress
-**Last Updated**: Iteration 6
+**Last Updated**: Iteration 7
 
 ### BaritonePlus Java Statistics:
 - Total Tasks: 173 Java files in tasks/
@@ -14,9 +14,9 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 
 ### baritone-ts TypeScript Statistics (Current):
 - Composite Tasks: 46 files
-- Concrete Tasks: 21 modules (GoTo, MineBlock, PlaceBlock, Craft, Smelt, Inventory, Interact, Slot, MovementUtil, Container, Construction, Entity, Escape, Resource, MineAndCollect, KillAndLoot, CollectFuel, BlockSearch, Portal, Armor, Bed, CollectLiquid, Dodge, Trade, MLG, ChunkSearch)
+- Concrete Tasks: 24 modules (GoTo, MineBlock, PlaceBlock, Craft, Smelt, Inventory, Interact, Slot, MovementUtil, Container, Construction, Entity, Escape, Resource, MineAndCollect, KillAndLoot, CollectFuel, BlockSearch, Portal, Armor, Bed, CollectLiquid, Dodge, Trade, MLG, ChunkSearch, InteractWithBlock, StorageContainer, CraftInInventory)
 - Chains: 6 files (FoodChain, MLGBucketChain, MobDefenseChain, WorldSurvivalChain, DeathMenuChain, PlayerInteractionFixChain)
-- Tests: 26 test files
+- Tests: 27 test files
 
 ## Missing Components to Port
 
@@ -37,7 +37,7 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [x] ReceiveCraftingOutputTask
 - [x] ThrowCursorTask
 
-#### Container Tasks (Completed Iteration 3)
+#### Container Tasks (Completed Iteration 3 & 7)
 - [x] LootChestTask (exists as LootChestTask)
 - [x] StorageTask (exists - deposits/withdraws)
 - [x] DoStuffInContainerTask (base class)
@@ -46,8 +46,10 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [x] CraftInAnvilTask
 - [x] UpgradeInSmithingTableTask
 - [x] SmeltInFurnaceBaseTask (furnace, blast_furnace, smoker)
-- [ ] StoreInStashTask
-- [ ] PickupFromContainerTask
+- [x] StoreInContainerTask (Completed Iteration 7)
+- [x] PickupFromContainerTask (Completed Iteration 7)
+- [x] LootContainerTask (Completed Iteration 7)
+- [ ] StoreInStashTask (needs BlockRange utility)
 - [ ] ContainerStoredTracker
 
 #### Resource Collection Tasks (Completed Iteration 5)
@@ -138,10 +140,10 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [ ] WaitForDragonAndPearlTask
 
 ### Priority 4: Utility Tasks
-- [ ] CraftInInventoryTask
-- [ ] CraftGenericManuallyTask
-- [ ] CraftGenericWithRecipeBooksTask
-- [ ] InteractWithBlockTask
+- [x] CraftInInventoryTask (Completed Iteration 7)
+- [x] CraftWithRecipeBookTask (Completed Iteration 7 - simplified version)
+- [x] InteractWithBlockTask (Completed Iteration 7 - enhanced version with direction, item, stuck detection)
+- [ ] CraftGenericManuallyTask (low priority - mineflayer has built-in crafting)
 
 ## Completed This Iteration
 
@@ -375,6 +377,51 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [x] Updated concrete task exports in index.ts
 - [x] All 959 tests passing
 
+### Iteration 7 (Complete)
+- [x] Implemented enhanced block interaction task (InteractWithBlockTask.ts):
+  - Direction enum for specifying block face to interact from
+  - InteractInput enum for left/right click
+  - ClickResponse for interaction state machine
+  - Item equipping before interaction
+  - Stuck detection in annoying blocks (vines, tall grass, etc.)
+  - Nether portal escape handling
+  - Progress checking with wandering fallback
+  - interactWithBlock(), placeBlockAt() helper functions
+- [x] Implemented storage container tasks (StorageContainerTask.ts):
+  - ContainerItemTarget interface for specifying items to pickup/store
+  - containerItemTarget(), itemMatchesTarget() helpers
+  - PickupFromContainerTask - retrieves items from containers
+    - Smart slot selection prioritizing optimal stack sizes
+    - Handles full inventory scenarios
+  - StoreInContainerTask - stores items in containers
+    - Shift-click for quick transfer
+    - Container full detection
+  - LootContainerTask - grab all matching items from container
+  - pickupFromContainer(), storeInContainer(), lootContainer() helpers
+- [x] Implemented inventory crafting tasks (CraftInInventoryTask.ts):
+  - InventoryRecipe interface for 2x2 crafting recipes
+  - InventoryRecipeTarget for specifying what to craft
+  - INVENTORY_RECIPES - pre-defined common recipes (planks, sticks, crafting_table, torches)
+  - CraftInInventoryTask - crafts using 2x2 inventory grid
+    - State machine: OPENING -> CLEARING -> PLACING -> RECEIVING -> FINISHED
+    - Ingredient checking
+    - Output collection
+  - CraftWithRecipeBookTask - faster crafting via recipe book (when supported)
+  - craftPlanks(), craftSticks(), craftCraftingTable() convenience functions
+- [x] Added comprehensive tests (StorageAndCraftingTasks.test.ts):
+  - 58 tests covering all new tasks
+  - WHY/intent tests explaining purpose
+  - containerItemTarget and itemMatchesTarget helper tests
+  - PickupFromContainerTask creation, finishing, equality
+  - StoreInContainerTask creation and state
+  - LootContainerTask with custom filters
+  - INVENTORY_RECIPES coverage
+  - CraftInInventoryTask state machine
+  - InteractWithBlockTask direction and input handling
+  - Integration scenarios (loot-and-store, early game crafting)
+- [x] Updated concrete task exports in index.ts
+- [x] All 1017 tests passing
+
 ## Test Coverage Goals
 
 For each ported task, we need tests that verify:
@@ -415,7 +462,11 @@ For each ported task, we need tests that verify:
 12. ~~Implement search/exploration tasks (SearchChunkForBlockTask)~~ ✅ Done
 13. ~~Implement misc tasks (EquipArmorTask, PlaceBedAndSetSpawnTask, DodgeProjectilesTask)~~ ✅ Done
 14. ~~Implement MLG/fall prevention tasks~~ ✅ Done
-15. Implement remaining container tasks (StoreInStashTask, PickupFromContainerTask)
-16. Implement remaining movement tasks (GetToChunkTask, FastTravelTask)
-17. Implement crafting tasks (CraftInInventoryTask, CraftGenericManuallyTask)
-18. Implement construction compound tasks (ConstructNetherPortalBucketTask)
+15. ~~Implement container storage tasks (PickupFromContainerTask, StoreInContainerTask)~~ ✅ Done
+16. ~~Implement enhanced interaction task (InteractWithBlockTask)~~ ✅ Done
+17. ~~Implement inventory crafting tasks (CraftInInventoryTask)~~ ✅ Done
+18. Implement remaining movement tasks (GetToChunkTask, FastTravelTask)
+19. Implement resource collection tasks (CollectBlazeRodsTask, CollectFoodTask, CollectObsidianTask)
+20. Implement construction compound tasks (ConstructNetherPortalBucketTask, ConstructNetherPortalObsidianTask)
+21. Implement stash management (StoreInStashTask - needs BlockRange utility)
+22. Implement structure looting tasks (LootDesertTempleTask, RavageDesertTemplesTask)

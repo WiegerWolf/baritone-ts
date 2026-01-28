@@ -248,3 +248,38 @@ export {
   searchForNetherFortress,
 } from './ChunkSearchTask';
 export type { ChunkPos, ChunkSearchConfig } from './ChunkSearchTask';
+
+// Enhanced block interaction tasks
+export {
+  Direction,
+  InteractInput,
+  ClickResponse,
+  InteractWithBlockTask,
+  interactWithBlock,
+  placeBlockAt,
+} from './InteractWithBlockTask';
+export type { InteractWithBlockConfig } from './InteractWithBlockTask';
+
+// Storage container tasks
+export {
+  containerItemTarget,
+  itemMatchesTarget,
+  PickupFromContainerTask,
+  StoreInContainerTask,
+  LootContainerTask,
+  pickupFromContainer,
+  storeInContainer,
+  lootContainer,
+} from './StorageContainerTask';
+export type { ContainerItemTarget } from './StorageContainerTask';
+
+// Inventory crafting tasks
+export {
+  INVENTORY_RECIPES,
+  CraftInInventoryTask,
+  CraftWithRecipeBookTask,
+  craftPlanks,
+  craftSticks,
+  craftCraftingTable,
+} from './CraftInInventoryTask';
+export type { RecipeSlot, InventoryRecipe, InventoryRecipeTarget } from './CraftInInventoryTask';
