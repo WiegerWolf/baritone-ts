@@ -124,3 +124,68 @@ export {
   getWoodItems,
   type WoodItems,
 } from './ItemHelper';
+
+// Entity Helper
+export {
+  ENTITY_GRAVITY,
+  isAngryAtPlayer,
+  isGenerallyHostileToPlayer,
+  isTradingPiglin,
+  isGrounded,
+  isPlayerGrounded,
+  DamageSource,
+  damageBypassesArmor,
+  calculateArmorReduction,
+  calculateProtectionReduction,
+  calculateResultingPlayerDamage,
+  getPlayerArmor,
+  getPlayerArmorToughness,
+  getPlayerProtectionLevel,
+  getPlayerAbsorption,
+  getEntityDistance,
+  getEntityHorizontalDistance,
+  isPlayer,
+  isHostileMob,
+  isPassiveMob,
+  isNeutralMob,
+  getNearestEntity,
+  getEntitiesInRange,
+  EntityHelperInstance,
+  createEntityHelper,
+} from './EntityHelper';
+
+// Mining Requirement
+export {
+  MiningRequirement,
+  PICKAXE_TIERS,
+  MINIMUM_PICKAXE,
+  getMinimumRequirementForBlock,
+  getMinimumPickaxe,
+  pickaxeMeetsRequirement,
+  getPickaxeTier,
+  isPickaxe as isPickaxeTool, // Alias to avoid conflict with ItemHelper.isPickaxe
+  getSuitablePickaxes,
+  compareMiningRequirements,
+} from './MiningRequirement';
+
+// Projectile Helper
+export {
+  ARROW_GRAVITY_ACCEL,
+  THROWN_ENTITY_GRAVITY_ACCEL,
+  FIREBALL_GRAVITY_ACCEL,
+  ProjectileType,
+  PROJECTILE_GRAVITY,
+  hasGravity,
+  getClosestPointOnFlatLine,
+  getFlatDistanceSquared,
+  getProjectileHeight,
+  calculateArrowClosestApproach,
+  calculateProjectileClosestApproach,
+  calculateAnglesForSimpleProjectileMotion,
+  getThrowOrigin,
+  predictProjectilePosition,
+  getTimeToDistance,
+  willProjectileHit,
+  calculateRequiredVelocity,
+  type CachedProjectile,
+} from './ProjectileHelper';

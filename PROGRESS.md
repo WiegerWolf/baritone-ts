@@ -5,11 +5,37 @@ This document tracks the porting progress from the Java BaritonePlus project to 
 
 **Source**: BaritonePlus (371 Java files)
 **Target**: baritone-ts (185 TypeScript files currently)
-**Last Updated**: 2026-01-28, Iteration 1
+**Last Updated**: 2026-01-28, Iteration 2
 
 ---
 
-## Iteration 1 Progress (Current)
+## Iteration 2 Progress (Current)
+
+### Completed in This Iteration:
+1. **Entity Helper** - NEW
+   - `EntityHelper.ts` - Entity state interpretation (hostility, damage calc, etc.)
+   - Includes entity classification (hostile, neutral, passive mobs)
+   - Damage calculation with armor/protection reduction
+   - Utility functions for finding/filtering entities
+
+2. **Mining Requirement** - NEW
+   - `MiningRequirement.ts` - Tool tier requirements for mining blocks
+   - Complete block-to-pickaxe-tier mapping
+   - Functions for checking tool suitability
+
+3. **Projectile Helper** - NEW
+   - `ProjectileHelper.ts` - Projectile motion physics
+   - Trajectory calculation and prediction
+   - Launch angle calculations
+   - Intercept point calculations
+
+4. **Updated Exports**
+   - `utils/index.ts` updated with all new exports
+   - Main `index.ts` updated with new exports
+
+---
+
+## Iteration 1 Progress (Completed)
 
 ### Completed in This Iteration:
 1. **Control System** - NEW
@@ -118,16 +144,16 @@ Many composite tasks exist as stubs:
 - [x] `PlayerExtraController.java` → `PlayerExtraController.ts` - Extended player actions
 - [x] `SlotHandler.java` - Already ported (in utils/)
 
-### Utility Helpers (Partial) ⚠️
+### Utility Helpers (Mostly Complete) ✅
 **From `api/util/helpers/`:**
-- [ ] `BaritoneHelper.java` - Baritone API integration
-- [ ] `ConfigHelper.java` - Configuration file handling
-- [ ] `EntityHelper.java` - Entity utility functions
-- [ ] `InputHelper.java` - Input state management
+- [ ] `BaritoneHelper.java` - Baritone API integration (not needed for mineflayer)
+- [ ] `ConfigHelper.java` - Configuration file handling (using SettingsManager instead)
+- [x] `EntityHelper.java` → `EntityHelper.ts` - Entity utility functions (Iteration 2)
+- [ ] `InputHelper.java` - Input state management (covered by InputControls)
 - [x] `ItemHelper.java` → `ItemHelper.ts` - Item manipulation utilities (Iteration 1)
-- [ ] `MathsHelper.java` - Math utility functions
-- [ ] `ProjectileHelper.java` - Projectile calculations
-- [ ] `StlHelper.java` - Stream/collection utilities
+- [ ] `MathsHelper.java` - Math utility functions (basic - will add as needed)
+- [x] `ProjectileHelper.java` → `ProjectileHelper.ts` - Projectile calculations (Iteration 2)
+- [ ] `StlHelper.java` - Stream/collection utilities (not needed in TypeScript)
 - [x] `WorldHelper.java` → `WorldHelper.ts` - World/dimension utilities (Iteration 1)
 
 ### Baritone Goal Types ⚠️
@@ -143,11 +169,11 @@ Many composite tasks exist as stubs:
 ### Data Types ⚠️
 - [ ] `ArmorRequirement.java`
 - [ ] `CraftingRecipe.java` - Partially ported
-- [ ] `Dimension.java` - Dimension enum
-- [ ] `MiningRequirement.java`
+- [x] `Dimension.java` → in `WorldHelper.ts` - Dimension enum (Iteration 1)
+- [x] `MiningRequirement.java` → `MiningRequirement.ts` (Iteration 2)
 - [ ] `RecipeTarget.java`
 - [ ] `SmeltTarget.java`
-- [ ] `WoodType.java`
+- [x] `WoodType.java` → in `ItemHelper.ts` - Wood type enum (Iteration 1)
 
 ### Main Tasks ❌
 **BaritonePlus `main/tasks/` - Core task implementations:**
@@ -282,11 +308,6 @@ Many composite tasks exist as stubs:
 
 ## Priority Tasks for Next Iterations
 
-### Iteration 2 - Entity Helper & Mining Requirements
-1. Port `EntityHelper.java` → `EntityHelper.ts`
-2. Port `MiningRequirement.java` → `MiningRequirement.ts`
-3. Port `ProjectileHelper.java` → `ProjectileHelper.ts`
-
 ### Iteration 3 - Core Movement Tasks
 1. Full port of `TimeoutWanderTask`
 2. Full port of `PickupDroppedItemTask`
@@ -326,11 +347,11 @@ Many composite tasks exist as stubs:
 
 ## Statistics
 - **Java Files**: 371
-- **TypeScript Files**: 185 (was 179)
-- **Estimated Completion**: ~45%
-- **Core Systems**: ~80% complete (up from ~70%)
+- **TypeScript Files**: 188 (was 185)
+- **Estimated Completion**: ~50%
+- **Core Systems**: ~85% complete (up from ~80%)
 - **Task Implementations**: ~20% complete
-- **Utility/Helper**: ~50% complete (up from ~30%)
+- **Utility/Helper**: ~70% complete (up from ~50%)
 
 ## Files Added in Iteration 1
 1. `src/control/InputControls.ts`
@@ -345,4 +366,15 @@ Many composite tasks exist as stubs:
 - Added WorldHelper with dimension detection, terrain utilities, and more
 - Added ItemHelper with comprehensive item category definitions
 - All type errors fixed, project compiles successfully
-- Ready for next iteration focusing on EntityHelper and MiningRequirement
+
+## Files Added in Iteration 2
+1. `src/utils/EntityHelper.ts`
+2. `src/utils/MiningRequirement.ts`
+3. `src/utils/ProjectileHelper.ts`
+
+### Iteration 2 Summary
+- Added EntityHelper for entity state interpretation, hostility detection, damage calculation
+- Added MiningRequirement for tool tier requirements and block mining capabilities
+- Added ProjectileHelper for projectile physics and trajectory calculations
+- All type errors fixed, project compiles successfully
+- Ready for next iteration focusing on core movement tasks
