@@ -5,7 +5,7 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 ## Summary
 
 **Status**: In Progress
-**Last Updated**: Iteration 8
+**Last Updated**: Iteration 9
 
 ### BaritonePlus Java Statistics:
 - Total Tasks: 173 Java files in tasks/
@@ -14,9 +14,9 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 
 ### baritone-ts TypeScript Statistics (Current):
 - Composite Tasks: 46 files
-- Concrete Tasks: 28 modules (GoTo, MineBlock, PlaceBlock, Craft, Smelt, Inventory, Interact, Slot, MovementUtil, Container, Construction, Entity, Escape, Resource, MineAndCollect, KillAndLoot, CollectFuel, BlockSearch, Portal, Armor, Bed, CollectLiquid, Dodge, Trade, MLG, ChunkSearch, InteractWithBlock, StorageContainer, CraftInInventory, GetToChunk, CollectFood, CollectBlazeRods, FastTravel)
+- Concrete Tasks: 31 modules (GoTo, MineBlock, PlaceBlock, Craft, Smelt, Inventory, Interact, Slot, MovementUtil, Container, Construction, Entity, Escape, Resource, MineAndCollect, KillAndLoot, CollectFuel, BlockSearch, Portal, Armor, Bed, CollectLiquid, Dodge, Trade, MLG, ChunkSearch, InteractWithBlock, StorageContainer, CraftInInventory, GetToChunk, CollectFood, CollectBlazeRods, FastTravel, CollectObsidian, ConstructNetherPortal, LootDesertTemple)
 - Chains: 6 files (FoodChain, MLGBucketChain, MobDefenseChain, WorldSurvivalChain, DeathMenuChain, PlayerInteractionFixChain)
-- Tests: 28 test files
+- Tests: 29 test files
 
 ## Missing Components to Port
 
@@ -63,7 +63,7 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [x] CollectBlazeRodsTask (Completed Iteration 8)
 - [x] CollectFoodTask (Completed Iteration 8)
 - [x] CollectBucketLiquidTask (exists)
-- [ ] CollectObsidianTask
+- [x] CollectObsidianTask (Completed Iteration 9)
 - [ ] CarveThenCollectTask
 - [x] TradeWithPiglinsTask (Completed Iteration 6)
 
@@ -119,8 +119,8 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [ ] ClearRegionTask
 - [ ] CoverWithBlocksTask
 - [x] PutOutFireTask (Completed Iteration 3)
-- [ ] ConstructNetherPortalBucketTask
-- [ ] ConstructNetherPortalObsidianTask
+- [x] ConstructNetherPortalBucketTask (Completed Iteration 9 - as ConstructNetherPortalTask)
+- [x] ConstructNetherPortalObsidianTask (Completed Iteration 9 - as ConstructNetherPortalTask)
 - [ ] ConstructIronGolemTask
 
 #### Misc Tasks
@@ -128,7 +128,7 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [x] RepairTask (exists)
 - [x] EquipArmorTask (exists)
 - [x] PlaceBedAndSetSpawnTask (exists)
-- [ ] LootDesertTempleTask
+- [x] LootDesertTempleTask (Completed Iteration 9)
 - [ ] RavageDesertTemplesTask
 - [ ] RavageRuinedPortalsTask
 
@@ -477,6 +477,42 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [x] Updated concrete task exports in index.ts
 - [x] All 1066 tests passing
 
+### Iteration 9 (Complete)
+- [x] Implemented obsidian collection task (CollectObsidianTask.ts):
+  - CollectObsidianTask - collects obsidian blocks
+  - Requires diamond or netherite pickaxe (hardness 50)
+  - Mines existing obsidian or creates from lava sources
+  - Dimension awareness (can't place water in Nether)
+  - Lava blacklisting for unreachable sources
+  - forPortal() and forFullPortal() factory methods
+  - collectObsidian(), collectObsidianForPortal() helpers
+- [x] Implemented nether portal construction task (ConstructNetherPortalTask.ts):
+  - ConstructNetherPortalTask - builds nether portal using bucket method
+  - State machine: GETTING_MATERIALS -> SEARCHING_LOCATION -> BUILDING_FRAME -> CLEARING_INTERIOR -> LIGHTING_PORTAL
+  - PORTAL_FRAME and PORTAL_INTERIOR position arrays
+  - Lava lake finding with flood-fill counting
+  - Portal spot validation (no lava/water/bedrock in region)
+  - Progress checking with wander fallback
+  - constructPortalAt(), constructPortal() helpers
+- [x] Implemented desert temple looting task (LootDesertTempleTask.ts):
+  - LootDesertTempleTask - safely loots desert temple chests
+  - CHEST_POSITIONS_RELATIVE for 4 chest locations
+  - Pressure plate (TNT trap) disarming before looting
+  - State machine: CHECKING_TRAP -> DISARMING_TRAP -> LOOTING_CHEST -> FINISHED
+  - Wanted items filtering
+  - lootDesertTemple(), lootDesertTempleFor() helpers
+- [x] Added comprehensive tests (ObsidianAndPortalTasks.test.ts):
+  - 45 tests covering all new tasks
+  - WHY/intent tests for each feature
+  - Pickaxe requirement tests (diamond/netherite)
+  - Dimension awareness tests
+  - Material checking tests
+  - Trap disarming tests
+  - Completion state tests
+  - Integration scenarios (obsidian to portal flow)
+- [x] Updated concrete task exports in index.ts
+- [x] All 1111 tests passing
+
 ## Test Coverage Goals
 
 For each ported task, we need tests that verify:
@@ -522,7 +558,9 @@ For each ported task, we need tests that verify:
 17. ~~Implement inventory crafting tasks (CraftInInventoryTask)~~ ✅ Done
 18. ~~Implement movement tasks (GetToChunkTask, FastTravelTask)~~ ✅ Done
 19. ~~Implement resource collection tasks (CollectBlazeRodsTask, CollectFoodTask)~~ ✅ Done
-20. Implement remaining resource tasks (CollectObsidianTask)
-21. Implement construction compound tasks (ConstructNetherPortalBucketTask, ConstructNetherPortalObsidianTask)
-22. Implement stash management (StoreInStashTask - needs BlockRange utility)
-23. Implement structure looting tasks (LootDesertTempleTask, RavageDesertTemplesTask)
+20. ~~Implement remaining resource tasks (CollectObsidianTask)~~ ✅ Done
+21. ~~Implement portal construction tasks (ConstructNetherPortalTask)~~ ✅ Done
+22. ~~Implement structure looting tasks (LootDesertTempleTask)~~ ✅ Done
+23. Implement stash management (StoreInStashTask - needs BlockRange utility)
+24. Implement remaining structure tasks (RavageDesertTemplesTask, RavageRuinedPortalsTask)
+25. Implement speedrun tasks (BeatMinecraft2Task, KillEnderDragonTask)

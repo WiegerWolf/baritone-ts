@@ -317,3 +317,30 @@ export {
   fastTravelToPos,
 } from './FastTravelTask';
 export type { FastTravelConfig } from './FastTravelTask';
+
+// Obsidian collection tasks
+export {
+  CollectObsidianTask,
+  ObsidianCollectionState,
+  collectObsidian,
+  collectObsidianForPortal,
+} from './CollectObsidianTask';
+export type { CollectObsidianConfig } from './CollectObsidianTask';
+
+// Nether portal construction tasks
+export {
+  ConstructNetherPortalTask,
+  PortalConstructionState,
+  constructPortalAt,
+  constructPortal,
+} from './ConstructNetherPortalTask';
+export type { ConstructNetherPortalConfig } from './ConstructNetherPortalTask';
+
+// Desert temple looting tasks
+export {
+  LootDesertTempleTask,
+  TempleLootState,
+  lootDesertTemple,
+  lootDesertTempleFor,
+} from './LootDesertTempleTask';
+export type { LootDesertTempleConfig } from './LootDesertTempleTask';
