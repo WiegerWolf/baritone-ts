@@ -22,3 +22,14 @@ export {
   MobDefenseChain,
   type MobDefenseConfig,
 } from './MobDefenseChain';
+
+export {
+  DeathMenuChain,
+  DeathState,
+  type DeathMenuConfig,
+} from './DeathMenuChain';
+
+export {
+  PlayerInteractionFixChain,
+  type PlayerInteractionFixConfig,
+} from './PlayerInteractionFixChain';
