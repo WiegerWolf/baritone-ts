@@ -5,7 +5,7 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 ## Summary
 
 **Status**: In Progress
-**Last Updated**: Iteration 12
+**Last Updated**: Iteration 13
 
 ### BaritonePlus Java Statistics:
 - Total Tasks: 173 Java files in tasks/
@@ -14,9 +14,9 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 
 ### baritone-ts TypeScript Statistics (Current):
 - Composite Tasks: 46 files
-- Concrete Tasks: 36 modules (GoTo, MineBlock, PlaceBlock, Craft, Smelt, Inventory, Interact, Slot, MovementUtil, Container, Construction, Entity, Escape, Resource, MineAndCollect, KillAndLoot, CollectFuel, BlockSearch, Portal, Armor, Bed, CollectLiquid, Dodge, Trade, MLG, ChunkSearch, InteractWithBlock, StorageContainer, CraftInInventory, GetToChunk, CollectFood, CollectBlazeRods, FastTravel, CollectObsidian, ConstructNetherPortal, LootDesertTemple, StoreInStash, RavageStructures, Stronghold, DragonFight, AdvancedConstruction)
+- Concrete Tasks: 37 modules (GoTo, MineBlock, PlaceBlock, Craft, Smelt, Inventory, Interact, Slot, MovementUtil, Container, Construction, Entity, Escape, Resource, MineAndCollect, KillAndLoot, CollectFuel, BlockSearch, Portal, Armor, Bed, CollectLiquid, Dodge, Trade, MLG, ChunkSearch, InteractWithBlock, StorageContainer, CraftInInventory, GetToChunk, CollectFood, CollectBlazeRods, FastTravel, CollectObsidian, ConstructNetherPortal, LootDesertTemple, StoreInStash, RavageStructures, Stronghold, DragonFight, AdvancedConstruction, BeatMinecraft)
 - Chains: 6 files (FoodChain, MLGBucketChain, MobDefenseChain, WorldSurvivalChain, DeathMenuChain, PlayerInteractionFixChain)
-- Tests: 32 test files
+- Tests: 33 test files
 - Utilities: BlockRange (3D region definition)
 
 ## Missing Components to Port
@@ -134,9 +134,9 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [x] RavageRuinedPortalsTask (Completed Iteration 10)
 
 ### Priority 3: Speedrun/Advanced Tasks
-- [ ] BeatMinecraft2Task
+- [x] BeatMinecraft2Task (Completed Iteration 13 - as BeatMinecraftTask)
 - [x] KillEnderDragonTask (Completed Iteration 11)
-- [ ] MarvionBeatMinecraftTask
+- [x] MarvionBeatMinecraftTask (Completed Iteration 13 - merged into BeatMinecraftTask)
 - [x] LocateStrongholdCoordinatesTask (Completed Iteration 11)
 - [x] WaitForDragonAndPearlTask (Completed Iteration 11)
 - [x] GoToStrongholdPortalTask (Completed Iteration 11)
@@ -631,6 +631,40 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [x] Updated exports in index.ts
 - [x] All 1245 tests passing
 
+### Iteration 13 (Complete)
+- [x] Implemented BeatMinecraftTask (BeatMinecraftTask.ts):
+  - BeatMinecraftTask - main speedrun orchestrator task
+    - Combines features from BeatMinecraft2Task.java and MarvionBeatMinecraftTask.java
+    - State machine: GETTING_FOOD -> GETTING_GEAR -> GETTING_BEDS -> GOING_TO_NETHER -> GETTING_BLAZE_RODS -> GETTING_ENDER_PEARLS -> LEAVING_NETHER -> LOCATING_STRONGHOLD -> OPENING_PORTAL -> SETTING_SPAWN -> ENTERING_END -> FIGHTING_DRAGON -> FINISHED
+    - BeatMinecraftConfig interface with all configurable options:
+      - targetEyes, minimumEyes for eye of ender requirements
+      - placeSpawnNearEndPortal, barterPearlsInsteadOfEndermanHunt strategies
+      - sleepThroughNight, searchRuinedPortals, searchDesertTemples options
+      - minFoodUnits, foodUnits, requiredBeds, minBuildMaterialCount thresholds
+    - DEFAULT_CONFIG with balanced speedrun settings
+    - DIAMOND_ARMOR, IRON_ARMOR constants
+    - END_PORTAL_FRAME_OFFSETS for portal detection
+    - Dimension handling (overworld, nether, the_end)
+    - Resource tracking (eyes, blaze rods, ender pearls, beds, food)
+    - End portal detection and frame counting
+  - beatMinecraft() convenience function
+  - speedrunMinecraft() with aggressive speedrun settings (no sleep, barter for pearls)
+- [x] Added comprehensive tests (BeatMinecraftTask.test.ts):
+  - 37 tests covering all aspects
+  - Task creation and config tests
+  - State machine phase tests
+  - Default config value tests
+  - Armor constant tests
+  - Dimension handling tests
+  - Resource tracking tests
+  - Equality tests
+  - Speedrun strategy tests (bartering vs hunting, sleep, structure looting)
+  - Phase progression logic tests
+  - Eye/blaze rod/pearl requirement calculation tests
+  - Dragon fight preparation tests
+- [x] Updated exports in index.ts
+- [x] All 1282 tests passing
+
 ## Test Coverage Goals
 
 For each ported task, we need tests that verify:
@@ -682,6 +716,7 @@ For each ported task, we need tests that verify:
 23. ~~Implement stash management (StoreInStashTask - needs BlockRange utility)~~ ✅ Done
 24. ~~Implement remaining structure tasks (RavageDesertTemplesTask, RavageRuinedPortalsTask)~~ ✅ Done
 25. ~~Implement speedrun tasks (KillEnderDragonTask, LocateStrongholdCoordinatesTask)~~ ✅ Done
-26. Implement remaining speedrun tasks (BeatMinecraft2Task, MarvionBeatMinecraftTask)
+26. ~~Implement speedrun tasks (BeatMinecraft2Task, MarvionBeatMinecraftTask)~~ ✅ Done (as BeatMinecraftTask)
 27. ~~Implement construction tasks (PlaceSignTask, ClearRegionTask, CoverWithBlocksTask, ConstructIronGolemTask)~~ ✅ Done
-28. Implement remaining misc tasks (HeroTask)
+28. Implement remaining misc tasks (HeroTask, CarveThenCollectTask)
+29. Implement remaining construction tasks (PlaceObsidianBucketTask, PlaceStructureBlockTask)

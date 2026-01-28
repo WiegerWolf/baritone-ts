@@ -406,3 +406,15 @@ export {
   THROWAWAY_BLOCKS,
   WOOD_SIGNS,
 } from './AdvancedConstructionTask';
+
+// Beat Minecraft (speedrun) task
+export {
+  BeatMinecraftTask,
+  BeatMinecraftState,
+  beatMinecraft,
+  speedrunMinecraft,
+  BEAT_MINECRAFT_DEFAULT_CONFIG,
+  DIAMOND_ARMOR as SPEEDRUN_DIAMOND_ARMOR,
+  IRON_ARMOR,
+} from './BeatMinecraftTask';
+export type { BeatMinecraftConfig } from './BeatMinecraftTask';
