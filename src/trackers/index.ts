@@ -22,3 +22,10 @@ export {
   type CachedItem,
   type StorageTrackerConfig,
 } from './ItemStorageTracker';
+
+// Blacklisting system
+export {
+  AbstractObjectBlacklist,
+  WorldLocateBlacklist,
+  EntityLocateBlacklist,
+} from './blacklisting';
