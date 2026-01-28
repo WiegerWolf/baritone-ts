@@ -16,6 +16,33 @@ Baritone-TS is a high-performance pathfinding implementation that brings the adv
 - **2-bit chunk caching** - Memory-efficient block storage with disk persistence
 - **Anti-detection** - Smooth rotation and human-like movement patterns
 
+## Documentation
+
+**[Full Documentation](./docs/README.md)** - Comprehensive guides and API reference
+
+### Quick Links
+
+- **[Quick Start Guide](./docs/quick-start.md)** - Get up and running in 5 minutes
+- **[Installation](./docs/installation.md)** - Detailed setup instructions
+- **[Basic Concepts](./docs/concepts.md)** - Understanding the architecture
+
+### Deep Dives
+
+- **[Goals](./docs/goals.md)** - All goal types and custom goals
+- **[Movements](./docs/movements.md)** - Movement types and cost model
+- **[Configuration](./docs/configuration.md)** - All settings and options
+- **[Processes](./docs/processes.md)** - High-level automation (mining, following, farming, combat, building)
+- **[Tasks](./docs/tasks.md)** - Hierarchical task system for complex workflows
+- **[Survival Chains](./docs/survival-chains.md)** - Emergency behaviors (food, fall protection, mob defense)
+- **[Async Pathfinding](./docs/async-pathfinding.md)** - Non-blocking path computation
+- **[Special Travel](./docs/special-travel.md)** - Elytra flight and boat navigation
+- **[Trackers](./docs/trackers.md)** - Block, entity, and storage tracking
+- **[Custom Extensions](./docs/custom-extensions.md)** - Creating custom goals, movements, and tasks
+- **[Debugging](./docs/debugging.md)** - Path visualization and troubleshooting
+- **[API Reference](./docs/api-reference.md)** - Complete API documentation
+- **[Examples](./docs/examples.md)** - Code examples and recipes
+- **[Migration from mineflayer-pathfinder](./docs/migration.md)** - Migration guide
+
 ## Installation
 
 ```bash
@@ -338,6 +365,19 @@ Baritone-TS is optimized for performance:
 | Processes | 7 automation types | None |
 | Elytra/Boat | Full support | None |
 | Path smoothing | Line-of-sight | None |
+
+## More Information
+
+For comprehensive documentation, see the [docs folder](./docs/README.md):
+
+- **Getting Started**: [Quick Start](./docs/quick-start.md), [Installation](./docs/installation.md), [Basic Concepts](./docs/concepts.md)
+- **Core Features**: [Goals](./docs/goals.md), [Movements](./docs/movements.md), [Configuration](./docs/configuration.md)
+- **Automation**: [Processes](./docs/processes.md), [Tasks](./docs/tasks.md), [Survival Chains](./docs/survival-chains.md)
+- **Advanced**: [Async Pathfinding](./docs/async-pathfinding.md), [Special Travel](./docs/special-travel.md), [Trackers](./docs/trackers.md)
+- **Extending**: [Custom Extensions](./docs/custom-extensions.md), [Debugging](./docs/debugging.md)
+- **Reference**: [API Reference](./docs/api-reference.md), [Events](./docs/events.md), [Examples](./docs/examples.md)
+
+Coming from mineflayer-pathfinder? See the [Migration Guide](./docs/migration.md).
 
 ## License
 
