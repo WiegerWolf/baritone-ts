@@ -1,6 +1,33 @@
+import type { Entity } from 'prismarine-entity';
 import { Vec3 } from 'vec3';
 import { Goal, BlockPos, COST_INF } from '../types';
 import { WALK_ONE_BLOCK_COST } from '../core/ActionCosts';
+
+/**
+ * Direction enum for GoalBlockSide
+ */
+export enum Direction {
+  NORTH = 'north',
+  SOUTH = 'south',
+  EAST = 'east',
+  WEST = 'west',
+  UP = 'up',
+  DOWN = 'down',
+}
+
+/**
+ * Get direction vector for a Direction
+ */
+function getDirectionVector(dir: Direction): { x: number; y: number; z: number } {
+  switch (dir) {
+    case Direction.NORTH: return { x: 0, y: 0, z: -1 };
+    case Direction.SOUTH: return { x: 0, y: 0, z: 1 };
+    case Direction.EAST:  return { x: 1, y: 0, z: 0 };
+    case Direction.WEST:  return { x: -1, y: 0, z: 0 };
+    case Direction.UP:    return { x: 0, y: 1, z: 0 };
+    case Direction.DOWN:  return { x: 0, y: -1, z: 0 };
+  }
+}
 
 /**
  * Goal to reach a specific block position
@@ -351,5 +378,481 @@ export class GoalAABB implements Goal {
     const dy = Math.max(0, this.minY - y, y - this.maxY);
     const dz = Math.max(0, this.minZ - z, z - this.maxZ);
     return Math.sqrt(dx * dx + dy * dy + dz * dz) * WALK_ONE_BLOCK_COST;
+  }
+}
+
+/**
+ * GoalAnd - Composite goal that requires ALL sub-goals to be met
+ * Based on BaritonePlus GoalAnd.java
+ *
+ * Unlike GoalComposite (any), this requires all goals to be satisfied.
+ * Useful for complex conditions like "at position X AND at Y level Y"
+ */
+export class GoalAnd implements Goal {
+  public readonly goals: Goal[];
+
+  constructor(...goals: Goal[]) {
+    if (goals.length === 0) {
+      throw new Error('GoalAnd requires at least one goal');
+    }
+    this.goals = goals;
+  }
+
+  isEnd(x: number, y: number, z: number): boolean {
+    for (const goal of this.goals) {
+      if (!goal.isEnd(x, y, z)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  heuristic(x: number, y: number, z: number): number {
+    // Sum heuristics from all goals
+    let sum = 0;
+    for (const goal of this.goals) {
+      sum += goal.heuristic(x, y, z);
+    }
+    return sum;
+  }
+
+  toString(): string {
+    return `GoalAnd[${this.goals.join(', ')}]`;
+  }
+}
+
+/**
+ * GoalBlockSide - Goal to approach a block from a specific side
+ * Based on BaritonePlus GoalBlockSide.java
+ *
+ * Useful for interacting with blocks that require approaching from
+ * a specific direction (e.g., opening a door, using a chest)
+ */
+export class GoalBlockSide implements Goal {
+  private dirVec: { x: number; y: number; z: number };
+
+  constructor(
+    public readonly blockX: number,
+    public readonly blockY: number,
+    public readonly blockZ: number,
+    public readonly direction: Direction,
+    public readonly bufferDistance: number = 1
+  ) {
+    this.dirVec = getDirectionVector(direction);
+  }
+
+  static fromBlockPos(pos: BlockPos, direction: Direction, buffer: number = 1): GoalBlockSide {
+    return new GoalBlockSide(pos.x, pos.y, pos.z, direction, buffer);
+  }
+
+  isEnd(x: number, y: number, z: number): boolean {
+    // We are on the right side if distance in the correct direction > 0
+    return this.getDistanceInRightDirection(x, y, z) > 0;
+  }
+
+  heuristic(x: number, y: number, z: number): number {
+    // How far are we from being on the right side
+    return Math.min(this.getDistanceInRightDirection(x, y, z), 0) * -WALK_ONE_BLOCK_COST;
+  }
+
+  private getDistanceInRightDirection(x: number, y: number, z: number): number {
+    const dx = x - this.blockX;
+    const dy = y - this.blockY;
+    const dz = z - this.blockZ;
+
+    // Dot product with direction vector
+    const dot = dx * this.dirVec.x + dy * this.dirVec.y + dz * this.dirVec.z;
+
+    // Distance along the direction (direction is normalized)
+    return dot - this.bufferDistance;
+  }
+}
+
+/**
+ * GoalChunk - Goal to reach any position within a chunk
+ * Based on BaritonePlus GoalChunk.java
+ *
+ * Useful for chunk loading, exploration, or reaching general areas
+ */
+export class GoalChunk implements Goal {
+  public readonly chunkX: number;
+  public readonly chunkZ: number;
+
+  constructor(chunkX: number, chunkZ: number) {
+    this.chunkX = chunkX;
+    this.chunkZ = chunkZ;
+  }
+
+  /**
+   * Create from world coordinates
+   */
+  static fromWorldCoords(x: number, z: number): GoalChunk {
+    return new GoalChunk(Math.floor(x / 16), Math.floor(z / 16));
+  }
+
+  /**
+   * Get chunk start X coordinate
+   */
+  get startX(): number {
+    return this.chunkX * 16;
+  }
+
+  /**
+   * Get chunk end X coordinate
+   */
+  get endX(): number {
+    return this.chunkX * 16 + 15;
+  }
+
+  /**
+   * Get chunk start Z coordinate
+   */
+  get startZ(): number {
+    return this.chunkZ * 16;
+  }
+
+  /**
+   * Get chunk end Z coordinate
+   */
+  get endZ(): number {
+    return this.chunkZ * 16 + 15;
+  }
+
+  isEnd(x: number, y: number, z: number): boolean {
+    return this.startX <= x && x <= this.endX &&
+           this.startZ <= z && z <= this.endZ;
+  }
+
+  heuristic(x: number, y: number, z: number): number {
+    // Distance to center of chunk
+    const cx = (this.startX + this.endX) / 2;
+    const cz = (this.startZ + this.endZ) / 2;
+    const dx = cx - x;
+    const dz = cz - z;
+    return Math.sqrt(dx * dx + dz * dz) * WALK_ONE_BLOCK_COST;
+  }
+}
+
+/**
+ * GoalDirectionXZ - Goal to move in a direction indefinitely
+ * Based on BaritonePlus GoalDirectionXZ.java
+ *
+ * Never returns true for isEnd - used for exploration in a direction.
+ * Minimizes deviation from the direction while maximizing progress.
+ */
+export class GoalDirectionXZ implements Goal {
+  private originX: number;
+  private originZ: number;
+  private dirX: number;
+  private dirZ: number;
+
+  constructor(
+    origin: Vec3 | { x: number; z: number },
+    direction: Vec3 | { x: number; z: number },
+    public readonly sidePenalty: number = 1.0
+  ) {
+    this.originX = origin.x;
+    this.originZ = 'z' in origin ? origin.z : 0;
+
+    // Normalize direction (XZ only)
+    const len = Math.sqrt(direction.x * direction.x +
+      ('z' in direction ? direction.z * direction.z : 0));
+
+    if (len < 0.001) {
+      throw new Error('Direction vector cannot be zero');
+    }
+
+    this.dirX = direction.x / len;
+    this.dirZ = ('z' in direction ? direction.z : 0) / len;
+  }
+
+  isEnd(_x: number, _y: number, _z: number): boolean {
+    // Direction goals never end - always keep going
+    return false;
+  }
+
+  heuristic(x: number, y: number, z: number): number {
+    const dx = x - this.originX;
+    const dz = z - this.originZ;
+
+    // How far we've traveled in the correct direction
+    const correctDistance = dx * this.dirX + dz * this.dirZ;
+
+    // Project position onto direction line
+    const px = this.dirX * correctDistance;
+    const pz = this.dirZ * correctDistance;
+
+    // Perpendicular distance (deviation from line)
+    const perpDistSq = (dx - px) * (dx - px) + (dz - pz) * (dz - pz);
+
+    // Reward moving in direction, penalize deviation
+    return -correctDistance * WALK_ONE_BLOCK_COST + perpDistSq * this.sidePenalty;
+  }
+}
+
+/**
+ * Entity supplier type for GoalRunAwayFromEntities
+ */
+export type EntitySupplier = () => Entity[];
+
+/**
+ * GoalRunAwayFromEntities - Goal to flee from multiple entities
+ * Based on BaritonePlus GoalRunAwayFromEntities.java
+ *
+ * Calculates heuristic based on inverse distance to entities,
+ * making positions farther from entities more desirable.
+ */
+export class GoalRunAwayFromEntities implements Goal {
+  constructor(
+    public readonly getEntities: EntitySupplier,
+    public readonly minDistance: number = 16,
+    public readonly xzOnly: boolean = false,
+    public readonly penaltyFactor: number = 10
+  ) {}
+
+  isEnd(x: number, y: number, z: number): boolean {
+    const entities = this.getEntities();
+    const minDistSq = this.minDistance * this.minDistance;
+
+    for (const entity of entities) {
+      if (!entity || entity.isValid === false) continue;
+
+      let distSq: number;
+      if (this.xzOnly) {
+        const dx = entity.position.x - x;
+        const dz = entity.position.z - z;
+        distSq = dx * dx + dz * dz;
+      } else {
+        const dx = entity.position.x - x;
+        const dy = entity.position.y - y;
+        const dz = entity.position.z - z;
+        distSq = dx * dx + dy * dy + dz * dz;
+      }
+
+      if (distSq < minDistSq) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  heuristic(x: number, y: number, z: number): number {
+    const entities = this.getEntities();
+    let costSum = 0;
+    let count = 0;
+    const maxEntities = 10; // Limit to prevent calculation explosion
+
+    for (const entity of entities) {
+      if (count >= maxEntities) break;
+      if (!entity || entity.isValid === false) continue;
+
+      const cost = this.getCostOfEntity(entity, x, y, z);
+      if (cost !== 0) {
+        // Closer entities have bigger weight (1/distance)
+        costSum += 1 / cost;
+      } else {
+        // On top of entity - very bad
+        costSum += 1000;
+      }
+
+      count++;
+    }
+
+    if (count > 0) {
+      costSum /= count;
+    }
+
+    return costSum * this.penaltyFactor;
+  }
+
+  private getCostOfEntity(entity: Entity, x: number, y: number, z: number): number {
+    const ex = Math.floor(entity.position.x);
+    const ey = Math.floor(entity.position.y);
+    const ez = Math.floor(entity.position.z);
+
+    let heuristic = 0;
+
+    if (!this.xzOnly) {
+      heuristic += Math.abs(ey - y) * WALK_ONE_BLOCK_COST;
+    }
+
+    const dx = ex - x;
+    const dz = ez - z;
+    heuristic += Math.sqrt(dx * dx + dz * dz) * WALK_ONE_BLOCK_COST;
+
+    return heuristic;
+  }
+}
+
+/**
+ * Projectile data for GoalDodgeProjectiles
+ */
+export interface ProjectileData {
+  position: Vec3;
+  velocity: Vec3;
+  gravity: number;
+}
+
+/**
+ * Projectile supplier type for GoalDodgeProjectiles
+ */
+export type ProjectileSupplier = () => ProjectileData[];
+
+/**
+ * GoalDodgeProjectiles - Goal to avoid incoming projectiles
+ * Based on BaritonePlus GoalDodgeProjectiles.java
+ *
+ * Uses projectile physics to calculate closest approach points
+ * and penalizes positions near predicted impact locations.
+ */
+export class GoalDodgeProjectiles implements Goal {
+  private cachedHits: Map<ProjectileData, Vec3> = new Map();
+  private lastCacheTime: number = 0;
+  private readonly CACHE_TTL = 50; // ms
+
+  constructor(
+    public readonly getProjectiles: ProjectileSupplier,
+    public readonly distanceHorizontal: number = 3,
+    public readonly distanceVertical: number = 3
+  ) {}
+
+  isEnd(x: number, y: number, z: number): boolean {
+    const projectiles = this.getProjectiles();
+    const pos = new Vec3(x, y, z);
+
+    for (const proj of projectiles) {
+      if (!proj) continue;
+
+      const hit = this.getCachedHit(proj, pos);
+      if (this.isHitCloseEnough(hit, pos)) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  heuristic(x: number, y: number, z: number): number {
+    const pos = new Vec3(x, y, z);
+    let costFactor = 0;
+
+    const projectiles = this.getProjectiles();
+    for (const proj of projectiles) {
+      if (!proj) continue;
+
+      const hit = this.getCachedHit(proj, pos);
+
+      // Calculate penalty based on distance to projectile's trajectory
+      const flatDistSq = this.getFlatDistanceSqr(
+        proj.position.x, proj.position.z,
+        proj.velocity.x, proj.velocity.z,
+        pos.x, pos.z
+      );
+
+      if (this.isHitCloseEnough(hit, pos)) {
+        costFactor += flatDistSq;
+      }
+    }
+
+    // Negative because we want to AVOID these positions
+    return -costFactor;
+  }
+
+  /**
+   * Get cached closest approach or calculate new
+   */
+  private getCachedHit(proj: ProjectileData, targetPos: Vec3): Vec3 {
+    const now = Date.now();
+
+    // Clear cache periodically
+    if (now - this.lastCacheTime > this.CACHE_TTL) {
+      this.cachedHits.clear();
+      this.lastCacheTime = now;
+    }
+
+    let hit = this.cachedHits.get(proj);
+    if (!hit) {
+      hit = this.calculateClosestApproach(proj, targetPos);
+      this.cachedHits.set(proj, hit);
+    }
+
+    return hit;
+  }
+
+  /**
+   * Calculate closest approach point of projectile to target
+   */
+  private calculateClosestApproach(proj: ProjectileData, targetPos: Vec3): Vec3 {
+    // Simplified projectile motion:
+    // p(t) = p0 + v*t + 0.5*g*t^2 (for y-component only)
+    // Find t that minimizes distance to target
+
+    const { position: p0, velocity: v, gravity: g } = proj;
+
+    // For XZ plane, projectile moves linearly
+    // For Y, we have parabolic motion
+
+    // Time to closest XZ approach:
+    const dx = targetPos.x - p0.x;
+    const dz = targetPos.z - p0.z;
+    const vxz = Math.sqrt(v.x * v.x + v.z * v.z);
+
+    if (vxz < 0.01) {
+      // Projectile not moving horizontally
+      return p0.clone();
+    }
+
+    // Time to reach same XZ plane as target
+    const dotXZ = (dx * v.x + dz * v.z) / (vxz * vxz);
+    const t = Math.max(0, dotXZ);
+
+    // Position at time t
+    return new Vec3(
+      p0.x + v.x * t,
+      p0.y + v.y * t - 0.5 * g * t * t,
+      p0.z + v.z * t
+    );
+  }
+
+  /**
+   * Check if hit point is close enough to be dangerous
+   */
+  private isHitCloseEnough(hit: Vec3, target: Vec3): boolean {
+    const dx = target.x - hit.x;
+    const dz = target.z - hit.z;
+    const horizontalSq = dx * dx + dz * dz;
+    const vertical = Math.abs(target.y - hit.y);
+
+    return horizontalSq < this.distanceHorizontal * this.distanceHorizontal &&
+           vertical < this.distanceVertical;
+  }
+
+  /**
+   * Calculate squared distance from a point to a line in XZ plane
+   */
+  private getFlatDistanceSqr(
+    px: number, pz: number,  // Projectile position
+    vx: number, vz: number,  // Projectile velocity
+    tx: number, tz: number   // Target position
+  ): number {
+    // Distance from point to line
+    const velLenSq = vx * vx + vz * vz;
+    if (velLenSq < 0.01) {
+      // No velocity - just return distance to projectile
+      const ddx = tx - px;
+      const ddz = tz - pz;
+      return ddx * ddx + ddz * ddz;
+    }
+
+    // Using cross product for point-to-line distance
+    const dx = tx - px;
+    const dz = tz - pz;
+
+    // Cross product magnitude (2D)
+    const cross = Math.abs(dx * vz - dz * vx);
+
+    // Distance = |cross| / |velocity|
+    return (cross * cross) / velLenSq;
   }
 }

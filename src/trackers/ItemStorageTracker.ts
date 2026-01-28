@@ -2,8 +2,12 @@
  * ItemStorageTracker - Inventory and Container Tracking
  * Based on AltoClef's ItemStorageTracker.java
  *
+ * Combines functionality from:
+ * - InventorySubTracker (player inventory slot tracking)
+ * - ContainerSubTracker (world container caching)
+ *
  * Tracks:
- * - Player inventory contents
+ * - Player inventory contents with slot-level detail
  * - Open container contents
  * - Known container locations and cached contents
  * - Conversion slots (crafting grids, furnaces)
@@ -276,6 +280,209 @@ export class ItemStorageTracker extends Tracker {
     return true;
   }
 
+  // ---- Slot-Based Queries (from InventorySubTracker) ----
+
+  /**
+   * Get slots containing specific items in player inventory
+   * @param includeCraftArmorOffhand Include non-normal slots (armor, crafting, offhand)
+   * @param itemNames Item names to search for
+   */
+  getSlotsWithItemPlayerInventory(
+    includeCraftArmorOffhand: boolean,
+    ...itemNames: string[]
+  ): number[] {
+    const slots: number[] = [];
+    const nameSet = new Set(itemNames);
+
+    for (const item of this.bot.inventory.items()) {
+      if (!nameSet.has(item.name)) continue;
+
+      // Filter out armor/crafting/offhand if not included
+      if (!includeCraftArmorOffhand) {
+        // Player inventory normal slots are 9-44
+        if (item.slot < 9 || item.slot > 44) continue;
+      }
+
+      slots.push(item.slot);
+    }
+
+    return slots;
+  }
+
+  /**
+   * Get slots containing specific items in open container
+   * @param itemNames Item names to search for
+   */
+  getSlotsWithItemContainer(...itemNames: string[]): number[] {
+    if (!this.currentContainer.window) return [];
+
+    const slots: number[] = [];
+    const nameSet = new Set(itemNames);
+    const containerSlotCount = this.getContainerSlotCount(this.currentContainer.window);
+
+    for (let i = 0; i < containerSlotCount; i++) {
+      const item = this.currentContainer.window.slots[i];
+      if (item && nameSet.has(item.name)) {
+        slots.push(i);
+      }
+    }
+
+    return slots;
+  }
+
+  /**
+   * Get slots containing items on current screen (player + container if open)
+   * @param itemNames Item names to search for
+   */
+  getSlotsWithItemScreen(...itemNames: string[]): number[] {
+    const playerSlots = this.getSlotsWithItemPlayerInventory(false, ...itemNames);
+    const containerSlots = this.getSlotsWithItemContainer(...itemNames);
+    return [...containerSlots, ...playerSlots];
+  }
+
+  /**
+   * Get empty slots in player inventory
+   * @param includeCraftArmorOffhand Include non-normal slots
+   */
+  getEmptySlotsPlayerInventory(includeCraftArmorOffhand: boolean = false): number[] {
+    const slots: number[] = [];
+    const startSlot = includeCraftArmorOffhand ? 0 : 9;
+    const endSlot = includeCraftArmorOffhand ? 45 : 44;
+
+    for (let i = startSlot; i <= endSlot; i++) {
+      if (!this.bot.inventory.slots[i]) {
+        slots.push(i);
+      }
+    }
+
+    return slots;
+  }
+
+  /**
+   * Get empty slots in open container
+   */
+  getEmptySlotsContainer(): number[] {
+    if (!this.currentContainer.window) return [];
+
+    const slots: number[] = [];
+    const containerSlotCount = this.getContainerSlotCount(this.currentContainer.window);
+
+    for (let i = 0; i < containerSlotCount; i++) {
+      if (!this.currentContainer.window.slots[i]) {
+        slots.push(i);
+      }
+    }
+
+    return slots;
+  }
+
+  /**
+   * Check if player inventory has an empty slot
+   */
+  hasEmptySlot(playerInventoryOnly: boolean = true): boolean {
+    // Check player inventory
+    const emptyPlayerSlot = this.bot.inventory.firstEmptyInventorySlot();
+    if (emptyPlayerSlot !== null) return true;
+
+    // Check container if requested
+    if (!playerInventoryOnly && this.currentContainer.window) {
+      return this.getEmptySlotsContainer().length > 0;
+    }
+
+    return false;
+  }
+
+  /**
+   * Get slots that can fit an item (stackable or empty)
+   * @param itemName Item name to fit
+   * @param count Number of items to fit
+   * @param acceptPartial Accept slots that can fit some but not all items
+   * @param playerInventory Include player inventory slots
+   * @param container Include container slots
+   */
+  getSlotsThatCanFit(
+    itemName: string,
+    count: number,
+    acceptPartial: boolean,
+    playerInventory: boolean = true,
+    container: boolean = false
+  ): number[] {
+    const result: number[] = [];
+
+    // Helper to check if a slot can fit
+    const checkSlot = (slot: number, item: Item | null, isContainer: boolean) => {
+      if (!item) {
+        // Empty slot can fit anything
+        result.push(slot);
+        return;
+      }
+
+      if (item.name === itemName) {
+        // Same item type - check if room to stack
+        const roomLeft = item.stackSize - item.count;
+        if (roomLeft > 0 && (acceptPartial || roomLeft >= count)) {
+          result.push(slot);
+        }
+      }
+    };
+
+    // Check player inventory
+    if (playerInventory) {
+      for (let i = 9; i <= 44; i++) {
+        checkSlot(i, this.bot.inventory.slots[i], false);
+      }
+    }
+
+    // Check container
+    if (container && this.currentContainer.window) {
+      const containerSlotCount = this.getContainerSlotCount(this.currentContainer.window);
+      for (let i = 0; i < containerSlotCount; i++) {
+        checkSlot(i, this.currentContainer.window.slots[i], true);
+      }
+    }
+
+    return result;
+  }
+
+  /**
+   * Get item in specific slot
+   */
+  getItemInSlot(slot: number): Item | null {
+    return this.bot.inventory.slots[slot] ?? null;
+  }
+
+  /**
+   * Get cursor item (item held by mouse in inventory screen)
+   */
+  getCursorItem(): Item | null {
+    return (this.bot.inventory as any).cursor ?? null;
+  }
+
+  /**
+   * Check if item is in offhand
+   */
+  hasItemInOffhand(itemName: string): boolean {
+    const offhandSlot = this.bot.inventory.slots[45]; // Offhand slot
+    return offhandSlot?.name === itemName;
+  }
+
+  /**
+   * Get all inventory item stacks
+   * @param includeCursor Include cursor item
+   */
+  getInventoryStacks(includeCursor: boolean = false): Item[] {
+    const items = [...this.bot.inventory.items()];
+
+    if (includeCursor) {
+      const cursor = this.getCursorItem();
+      if (cursor) {
+        items.push(cursor);
+      }
+    }
+
+    return items;
+  }
+
   /**
    * Get containers with a specific item
    */
@@ -319,6 +526,34 @@ export class ItemStorageTracker extends Tracker {
     const dimension = this.bot.game?.dimension ?? 'overworld';
     return Array.from(this.containerCache.values())
       .filter(c => c.dimension === dimension);
+  }
+
+  /**
+   * Get cached containers by type
+   * @param types Container types to filter by
+   */
+  getCachedContainers(...types: ContainerType[]): ContainerCache[] {
+    const typeSet = new Set(types);
+    const dimension = this.bot.game?.dimension ?? 'overworld';
+
+    return Array.from(this.containerCache.values())
+      .filter(c => c.dimension === dimension && typeSet.has(c.containerType));
+  }
+
+  /**
+   * Get closest container of specific type(s)
+   * @param types Container types to search for
+   */
+  getClosestContainer(...types: ContainerType[]): ContainerCache | null {
+    const containers = this.getCachedContainers(...types);
+    if (containers.length === 0) return null;
+
+    const playerPos = this.bot.entity.position;
+    containers.sort((a, b) =>
+      a.position.distanceTo(playerPos) - b.position.distanceTo(playerPos)
+    );
+
+    return containers[0];
   }
 
   /**

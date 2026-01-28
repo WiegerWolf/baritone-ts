@@ -68,7 +68,12 @@ export {
   ThrowCursorTask,
   ReceiveCraftingOutputTask,
   MoveItemToSlotTask,
+  MoveItemsToSlotTask,
+  MoveItemToSlotFromInventoryTask,
+  MoveItemToSlotFromContainerTask,
+  matchItemNames,
 } from './SlotTask';
+export type { ItemMatcher } from './SlotTask';
 
 // Movement utility tasks
 export {
@@ -483,3 +488,71 @@ export {
   isInBiome,
 } from './BiomeSearchTask';
 export type { BiomeKey, LocateDesertTempleConfig } from './BiomeSearchTask';
+
+// Pickup item tasks
+export {
+  GetToEntityTask,
+  PickupDroppedItemTask,
+  PickupNearbyItemsTask,
+} from './PickupItemTask';
+
+// Flee from entities tasks
+export {
+  RunAwayFromEntitiesTask,
+  RunAwayFromHostilesTask as FleeFromHostilesTask,
+  RunAwayFromPlayersTask as FleeFromPlayersTask,
+  RunAwayFromCreepersTask as FleeFromCreepersTask,
+  DodgeProjectilesTask as FleeFromProjectilesTask,
+} from './FleeFromEntitiesTask';
+export type { EntitySupplier } from './FleeFromEntitiesTask';
+
+// Ender pearl throwing tasks
+export {
+  ThrowEnderPearlSimpleProjectileTask,
+  throwEnderPearl,
+} from './ThrowEnderPearlTask';
+export type { ThrowEnderPearlConfig } from './ThrowEnderPearlTask';
+
+// Outer End islands task
+export {
+  GetToOuterEndIslandsTask,
+  OuterEndIslandsState,
+  getToOuterEndIslands,
+  END_ISLAND_START_RADIUS,
+} from './GetToOuterEndIslandsTask';
+
+// Sheep shearing task
+export {
+  ShearSheepTask,
+  shearSheep,
+  shearSheepOfColor,
+} from './ShearSheepTask';
+export type { ShearSheepConfig } from './ShearSheepTask';
+
+// Tool repair task
+export {
+  RepairToolTask,
+  repairTools,
+  hasItemsNeedingRepair,
+  REPAIRABLE_ITEMS,
+} from './RepairToolTask';
+export type { RepairToolConfig } from './RepairToolTask';
+
+// Elytra navigation task
+export {
+  GetToXZWithElytraTask,
+  flyToXZWithElytra,
+  flyToPositionWithElytra,
+} from './GetToXZWithElytraTask';
+export type { GetToXZWithElytraConfig } from './GetToXZWithElytraTask';
+
+// Craft with matching materials tasks
+export {
+  CraftWithMatchingMaterialsTask,
+  CraftWithMatchingPlanksTask,
+  CraftWithMatchingWoolTask,
+  craftBed,
+  craftFence,
+  craftSlot,
+} from './CraftWithMatchingMaterialsTask';
+export type { CraftingSlot, CraftingRecipe } from './CraftWithMatchingMaterialsTask';
