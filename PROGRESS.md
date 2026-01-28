@@ -5,7 +5,7 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 ## Summary
 
 **Status**: In Progress
-**Last Updated**: Iteration 10
+**Last Updated**: Iteration 11
 
 ### BaritonePlus Java Statistics:
 - Total Tasks: 173 Java files in tasks/
@@ -14,9 +14,9 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 
 ### baritone-ts TypeScript Statistics (Current):
 - Composite Tasks: 46 files
-- Concrete Tasks: 33 modules (GoTo, MineBlock, PlaceBlock, Craft, Smelt, Inventory, Interact, Slot, MovementUtil, Container, Construction, Entity, Escape, Resource, MineAndCollect, KillAndLoot, CollectFuel, BlockSearch, Portal, Armor, Bed, CollectLiquid, Dodge, Trade, MLG, ChunkSearch, InteractWithBlock, StorageContainer, CraftInInventory, GetToChunk, CollectFood, CollectBlazeRods, FastTravel, CollectObsidian, ConstructNetherPortal, LootDesertTemple, StoreInStash, RavageStructures)
+- Concrete Tasks: 35 modules (GoTo, MineBlock, PlaceBlock, Craft, Smelt, Inventory, Interact, Slot, MovementUtil, Container, Construction, Entity, Escape, Resource, MineAndCollect, KillAndLoot, CollectFuel, BlockSearch, Portal, Armor, Bed, CollectLiquid, Dodge, Trade, MLG, ChunkSearch, InteractWithBlock, StorageContainer, CraftInInventory, GetToChunk, CollectFood, CollectBlazeRods, FastTravel, CollectObsidian, ConstructNetherPortal, LootDesertTemple, StoreInStash, RavageStructures, Stronghold, DragonFight)
 - Chains: 6 files (FoodChain, MLGBucketChain, MobDefenseChain, WorldSurvivalChain, DeathMenuChain, PlayerInteractionFixChain)
-- Tests: 30 test files
+- Tests: 31 test files
 - Utilities: BlockRange (3D region definition)
 
 ## Missing Components to Port
@@ -135,10 +135,11 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 
 ### Priority 3: Speedrun/Advanced Tasks
 - [ ] BeatMinecraft2Task
-- [ ] KillEnderDragonTask (DragonFightTask exists but needs enhancement)
+- [x] KillEnderDragonTask (Completed Iteration 11)
 - [ ] MarvionBeatMinecraftTask
-- [ ] LocateStrongholdCoordinatesTask
-- [ ] WaitForDragonAndPearlTask
+- [x] LocateStrongholdCoordinatesTask (Completed Iteration 11)
+- [x] WaitForDragonAndPearlTask (Completed Iteration 11)
+- [x] GoToStrongholdPortalTask (Completed Iteration 11)
 
 ### Priority 4: Utility Tasks
 - [x] CraftInInventoryTask (Completed Iteration 7)
@@ -557,6 +558,42 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [x] Updated exports in index.ts (tasks and utils)
 - [x] All 1160 tests passing
 
+### Iteration 11 (Complete)
+- [x] Implemented stronghold location tasks (StrongholdTask.ts):
+  - calculateIntersection() - triangulation math for two eye directions
+  - EyeDirection class - tracks eye of ender flight path
+  - LocateStrongholdCoordinatesTask - finds stronghold via triangulation
+    - State machine: GOING_TO_OVERWORLD -> THROWING_FIRST_EYE -> WAITING -> MOVING -> THROWING_SECOND -> CALCULATING
+    - Throws two eyes from different positions
+    - Calculates intersection of flight directions
+  - GoToStrongholdPortalTask - navigates to stronghold
+    - Uses LocateStrongholdCoordinatesTask for coordinates
+    - Searches for stone bricks to find actual structure
+  - locateStronghold(), goToStrongholdPortal() helper functions
+- [x] Implemented dragon fight tasks (DragonFightTask.ts):
+  - KillEnderDragonTask - complete dragon fight logic
+    - State machine: EQUIPPING -> DESTROYING_CRYSTALS -> WAITING_FOR_PERCH -> ATTACKING_DRAGON -> ENTERING_PORTAL
+    - Prioritizes End Crystal destruction (they heal dragon)
+    - Waits for dragon to perch for melee attacks
+    - Looks down periodically to avoid angering endermen
+    - Enters end portal when dragon is killed
+  - WaitForDragonAndPearlTask - advanced pearl strategy
+    - State machine: COLLECTING_MATERIALS -> MOVING_TO_POSITION -> PILLARING_UP -> WAITING_FOR_PERCH -> THROWING_PEARL
+    - Implements IDragonWaiter interface
+    - Pillars up to get clear view of portal
+    - Throws pearl onto portal when dragon perches
+  - DIAMOND_ARMOR, FOOD_ITEMS constants
+  - killEnderDragon(), waitForDragonAndPearl() helper functions
+- [x] Added comprehensive tests (SpeedrunTasks.test.ts):
+  - 36 tests covering all new tasks
+  - calculateIntersection triangulation math tests
+  - Stronghold state management tests
+  - Dragon fight state machine tests
+  - IDragonWaiter interface tests
+  - Integration scenario tests
+- [x] Updated exports in index.ts
+- [x] All 1196 tests passing
+
 ## Test Coverage Goals
 
 For each ported task, we need tests that verify:
@@ -607,5 +644,6 @@ For each ported task, we need tests that verify:
 22. ~~Implement structure looting tasks (LootDesertTempleTask)~~ ✅ Done
 23. ~~Implement stash management (StoreInStashTask - needs BlockRange utility)~~ ✅ Done
 24. ~~Implement remaining structure tasks (RavageDesertTemplesTask, RavageRuinedPortalsTask)~~ ✅ Done
-25. Implement speedrun tasks (BeatMinecraft2Task, KillEnderDragonTask)
-26. Implement remaining misc tasks (HeroTask, PlaceSignTask, ClearRegionTask)
+25. ~~Implement speedrun tasks (KillEnderDragonTask, LocateStrongholdCoordinatesTask)~~ ✅ Done
+26. Implement remaining speedrun tasks (BeatMinecraft2Task, MarvionBeatMinecraftTask)
+27. Implement remaining misc tasks (HeroTask, PlaceSignTask, ClearRegionTask)

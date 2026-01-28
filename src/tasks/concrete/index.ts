@@ -364,3 +364,27 @@ export {
   DESERT_TEMPLE_LOOT,
   RUINED_PORTAL_LOOT,
 } from './RavageStructuresTask';
+
+// Stronghold location tasks
+export {
+  LocateStrongholdCoordinatesTask,
+  GoToStrongholdPortalTask,
+  LocateState,
+  GoToStrongholdState,
+  locateStronghold,
+  goToStrongholdPortal,
+  calculateIntersection,
+} from './StrongholdTask';
+
+// Dragon fight tasks
+export {
+  KillEnderDragonTask,
+  WaitForDragonAndPearlTask,
+  DragonFightState,
+  PearlStrategyState,
+  killEnderDragon,
+  waitForDragonAndPearl,
+  DIAMOND_ARMOR,
+  FOOD_ITEMS,
+} from './DragonFightTask';
+export type { IDragonWaiter } from './DragonFightTask';
