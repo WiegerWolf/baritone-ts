@@ -527,7 +527,7 @@ export {
   shearSheep,
   shearSheepOfColor,
 } from './ShearSheepTask';
-export type { ShearSheepConfig } from './ShearSheepTask';
+export type { ShearSheepConfig, WoolColor } from './ShearSheepTask';
 
 // Tool repair task
 export {

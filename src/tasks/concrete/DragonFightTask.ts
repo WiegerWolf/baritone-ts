@@ -55,6 +55,7 @@ enum DragonFightState {
   EQUIPPING,
   DESTROYING_CRYSTALS,
   WAITING_FOR_PERCH,
+  DODGING_BREATH,
   ATTACKING_DRAGON,
   ENTERING_PORTAL,
   FINISHED,
@@ -83,11 +84,13 @@ export class KillEnderDragonTask extends Task {
   private exitPortalTop: BlockPos | null = null;
   private lookDownTimer: TimerGame;
   private attackCooldownTimer: TimerGame;
+  private breathDodgeTimer: TimerGame;
 
   constructor(bot: Bot) {
     super(bot);
     this.lookDownTimer = new TimerGame(bot, 0.5);
     this.attackCooldownTimer = new TimerGame(bot, 0.4);
+    this.breathDodgeTimer = new TimerGame(bot, 0.5);
   }
 
   get displayName(): string {
@@ -154,6 +157,18 @@ export class KillEnderDragonTask extends Task {
         ['end_crystal'],
         () => true // Accept all end crystals
       );
+    }
+
+    // Check if we're in breath cloud and need to dodge
+    if (this.isInBreathCloud()) {
+      this.state = DragonFightState.DODGING_BREATH;
+      this.breathDodgeTimer.reset();
+      return this.handleDodgingBreath();
+    }
+
+    // Handle active breath dodging
+    if (this.state === DragonFightState.DODGING_BREATH) {
+      return this.handleDodgingBreath();
     }
 
     // Fight the dragon
@@ -363,8 +378,64 @@ export class KillEnderDragonTask extends Task {
     return new TimeoutWanderTask(this.bot, 10);
   }
 
+  /**
+   * Check if player is inside dragon breath cloud
+   */
+  private isInBreathCloud(): boolean {
+    for (const entity of Object.values(this.bot.entities)) {
+      if (!entity || entity.name !== 'area_effect_cloud') continue;
+      const dist = this.bot.entity.position.distanceTo(entity.position);
+      if (dist < 4) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * Get direction to escape from center (away from portal)
+   */
+  private getEscapeDirection(): Vec3 {
+    const pos = this.bot.entity.position;
+    // Exit portal center is at 0, 0
+    const dx = pos.x - 0;
+    const dz = pos.z - 0;
+    const len = Math.sqrt(dx * dx + dz * dz);
+    if (len === 0) return new Vec3(1, 0, 0);
+    return new Vec3((dx / len) * 10, 0, (dz / len) * 10);
+  }
+
+  /**
+   * Handle dodging dragon breath by running away from center
+   */
+  private handleDodgingBreath(): Task | null {
+    // Check if still in breath
+    if (!this.isInBreathCloud()) {
+      this.state = DragonFightState.WAITING_FOR_PERCH;
+      this.bot.clearControlStates();
+      return null;
+    }
+
+    // Keep running away
+    if (this.breathDodgeTimer.elapsed()) {
+      const escapeDir = this.getEscapeDirection();
+      try {
+        const escapePos = this.bot.entity.position.plus(escapeDir);
+        this.bot.lookAt(escapePos);
+      } catch {
+        // May fail
+      }
+      this.breathDodgeTimer.reset();
+    }
+
+    this.bot.setControlState('forward', true);
+    this.bot.setControlState('sprint', true);
+
+    return null;
+  }
+
   onStop(interruptTask: ITask | null): void {
-    // Nothing to clean up
+    this.bot.clearControlStates();
   }
 
   isFinished(): boolean {

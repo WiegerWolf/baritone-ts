@@ -120,15 +120,6 @@ export {
   type StorageConfig,
 } from './StorageTask';
 export {
-  ElytraTask,
-  FlightPhase,
-  flyToXZ,
-  flyToPosition,
-  flyHighAltitude,
-  flyLowAltitude,
-  type ElytraConfig,
-} from './ElytraTask';
-export {
   PortalTask,
   PortalType,
   Dimension,
@@ -184,20 +175,6 @@ export {
   type SchematicBlock,
   type SchematicConfig,
 } from './SchematicTask';
-export {
-  DragonFightTask,
-  fightDragon,
-  fightDragonWithBeds,
-  fightDragonSafe,
-  type DragonFightConfig,
-} from './DragonFightTask';
-export {
-  StrongholdTask,
-  findStronghold,
-  findStrongholdQuick,
-  findStrongholdPrecise,
-  type StrongholdConfig,
-} from './StrongholdTask';
 export {
   HuntTask,
   huntAnimals,
@@ -353,16 +330,6 @@ export {
   floodLight,
   type TorchConfig,
 } from './TorchTask';
-export {
-  ShearTask,
-  shearSheep,
-  shearAllNearby,
-  shearColor,
-  shearWhite,
-  collectWool,
-  type ShearConfig,
-  type WoolColor,
-} from './ShearTask';
 export {
   RespawnTask,
   handleRespawn,

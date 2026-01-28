@@ -305,8 +305,14 @@ export class PortalTask extends Task {
 
   // ---- Helper Methods ----
 
+  /**
+   * Find nearest portal using shell expansion search.
+   * Searches in concentric rings for efficiency - first hit is nearest.
+   */
   private findPortal(): Vec3 | null {
     const playerPos = this.bot.entity.position;
+    const searchRadius = Math.min(this.config.searchRadius, 64);
+
     let nearest: Vec3 | null = null;
     let nearestDist = Infinity;
 
@@ -314,21 +320,37 @@ export class PortalTask extends Task {
       ? 'nether_portal'
       : 'end_portal';
 
-    for (let x = -this.config.searchRadius; x <= this.config.searchRadius; x += 4) {
-      for (let z = -this.config.searchRadius; z <= this.config.searchRadius; z += 4) {
-        for (let y = -64; y <= 64; y += 4) {
-          const pos = playerPos.offset(x, y, z);
-          const block = this.bot.blockAt(pos);
+    // Shell expansion: search in growing rings (more efficient)
+    for (let r = 1; r <= searchRadius; r++) {
+      for (let x = -r; x <= r; x++) {
+        for (let y = -Math.min(r, 32); y <= Math.min(r, 32); y++) {
+          for (let z = -r; z <= r; z++) {
+            // Only check outer shell (not interior blocks already checked)
+            if (Math.abs(x) !== r && Math.abs(y) !== Math.min(r, 32) && Math.abs(z) !== r) continue;
 
-          if (!block || block.name !== portalBlockName) continue;
+            const checkPos = new Vec3(
+              Math.floor(playerPos.x) + x,
+              Math.floor(playerPos.y) + y,
+              Math.floor(playerPos.z) + z
+            );
 
-          const dist = playerPos.distanceTo(pos);
-          if (dist < nearestDist) {
-            nearestDist = dist;
-            nearest = pos.clone();
+            const block = this.bot.blockAt(checkPos);
+            if (block && block.name === portalBlockName) {
+              // Check for standable position (solid block below)
+              const below = this.bot.blockAt(checkPos.offset(0, -1, 0));
+              if (below && below.boundingBox === 'block') {
+                const dist = playerPos.distanceTo(checkPos);
+                if (dist < nearestDist) {
+                  nearestDist = dist;
+                  nearest = checkPos;
+                }
+              }
+            }
           }
         }
       }
+      // Early exit - first hit in its ring is nearest
+      if (nearest) break;
     }
 
     return nearest;
