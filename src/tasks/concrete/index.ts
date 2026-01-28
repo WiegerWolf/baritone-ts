@@ -283,3 +283,37 @@ export {
   craftCraftingTable,
 } from './CraftInInventoryTask';
 export type { RecipeSlot, InventoryRecipe, InventoryRecipeTarget } from './CraftInInventoryTask';
+
+// Chunk navigation tasks
+export {
+  GetToChunkTask,
+  getToChunk,
+  getToChunkContaining,
+} from './GetToChunkTask';
+
+// Food collection tasks
+export {
+  CollectFoodTask,
+  FoodCollectionState,
+  collectFood,
+  collectFoodUntilFull,
+} from './CollectFoodTask';
+export type { CollectFoodConfig } from './CollectFoodTask';
+
+// Blaze rod collection tasks
+export {
+  CollectBlazeRodsTask,
+  BlazeCollectionState,
+  collectBlazeRods,
+  collectBlazeRodsForSpeedrun,
+} from './CollectBlazeRodsTask';
+export type { CollectBlazeRodsConfig } from './CollectBlazeRodsTask';
+
+// Fast travel tasks
+export {
+  FastTravelTask,
+  FastTravelState,
+  fastTravelTo,
+  fastTravelToPos,
+} from './FastTravelTask';
+export type { FastTravelConfig } from './FastTravelTask';

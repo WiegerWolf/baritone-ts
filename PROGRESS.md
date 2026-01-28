@@ -5,7 +5,7 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 ## Summary
 
 **Status**: In Progress
-**Last Updated**: Iteration 7
+**Last Updated**: Iteration 8
 
 ### BaritonePlus Java Statistics:
 - Total Tasks: 173 Java files in tasks/
@@ -14,9 +14,9 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 
 ### baritone-ts TypeScript Statistics (Current):
 - Composite Tasks: 46 files
-- Concrete Tasks: 24 modules (GoTo, MineBlock, PlaceBlock, Craft, Smelt, Inventory, Interact, Slot, MovementUtil, Container, Construction, Entity, Escape, Resource, MineAndCollect, KillAndLoot, CollectFuel, BlockSearch, Portal, Armor, Bed, CollectLiquid, Dodge, Trade, MLG, ChunkSearch, InteractWithBlock, StorageContainer, CraftInInventory)
+- Concrete Tasks: 28 modules (GoTo, MineBlock, PlaceBlock, Craft, Smelt, Inventory, Interact, Slot, MovementUtil, Container, Construction, Entity, Escape, Resource, MineAndCollect, KillAndLoot, CollectFuel, BlockSearch, Portal, Armor, Bed, CollectLiquid, Dodge, Trade, MLG, ChunkSearch, InteractWithBlock, StorageContainer, CraftInInventory, GetToChunk, CollectFood, CollectBlazeRods, FastTravel)
 - Chains: 6 files (FoodChain, MLGBucketChain, MobDefenseChain, WorldSurvivalChain, DeathMenuChain, PlayerInteractionFixChain)
-- Tests: 27 test files
+- Tests: 28 test files
 
 ## Missing Components to Port
 
@@ -52,7 +52,7 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [ ] StoreInStashTask (needs BlockRange utility)
 - [ ] ContainerStoredTracker
 
-#### Resource Collection Tasks (Completed Iteration 5)
+#### Resource Collection Tasks (Completed Iteration 5 & 8)
 - [x] CollectWoodTask (exists)
 - [x] GatherResourcesTask (exists)
 - [x] MineOresTask (exists)
@@ -60,21 +60,21 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [x] MineAndCollectTask (Completed Iteration 5)
 - [x] KillAndLootTask (Completed Iteration 5)
 - [x] CollectFuelTask (Completed Iteration 5)
-- [ ] CollectBlazeRodsTask
-- [ ] CollectFoodTask (partial - HuntTask exists)
-- [ ] CollectBucketLiquidTask
+- [x] CollectBlazeRodsTask (Completed Iteration 8)
+- [x] CollectFoodTask (Completed Iteration 8)
+- [x] CollectBucketLiquidTask (exists)
 - [ ] CollectObsidianTask
 - [ ] CarveThenCollectTask
 - [x] TradeWithPiglinsTask (Completed Iteration 6)
 
-#### Movement Tasks (Partially Exists)
+#### Movement Tasks (Completed Iteration 8)
 - [x] FleeTask/RunAwayFromEntitiesTask (exists)
 - [x] ExploreTask (exists)
 - [x] FollowPlayerTask (exists)
 - [x] TimeoutWanderTask (Completed Iteration 2)
 - [x] SearchChunkForBlockTask (Completed Iteration 6)
 - [x] SearchChunksExploreTask (Completed Iteration 6)
-- [ ] GetToChunkTask
+- [x] GetToChunkTask (Completed Iteration 8)
 - [x] GetToYTask (Completed Iteration 2)
 - [x] GetWithinRangeOfBlockTask (Completed Iteration 5)
 - [x] PickupDroppedItemTask (Exists as PickupItemTask)
@@ -87,7 +87,7 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [x] GoInDirectionXZTask (Completed Iteration 5)
 - [x] SafeRandomShimmyTask (Completed Iteration 2)
 - [x] IdleTask (Completed Iteration 2)
-- [ ] FastTravelTask
+- [x] FastTravelTask (Completed Iteration 8)
 - [x] WaitTask (Completed Iteration 2)
 - [x] LookAtBlockTask (Completed Iteration 2)
 
@@ -126,8 +126,8 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 #### Misc Tasks
 - [x] SleepTask (exists)
 - [x] RepairTask (exists)
-- [ ] EquipArmorTask
-- [ ] PlaceBedAndSetSpawnTask
+- [x] EquipArmorTask (exists)
+- [x] PlaceBedAndSetSpawnTask (exists)
 - [ ] LootDesertTempleTask
 - [ ] RavageDesertTemplesTask
 - [ ] RavageRuinedPortalsTask
@@ -422,6 +422,61 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [x] Updated concrete task exports in index.ts
 - [x] All 1017 tests passing
 
+### Iteration 8 (Complete)
+- [x] Implemented chunk navigation task (GetToChunkTask.ts):
+  - GetToChunkTask - navigate to a specific chunk (more lenient than block position)
+  - Uses ChunkPos from ChunkSearchTask for chunk coordinates
+  - fromBlockPos() and fromVec3() factory methods for convenience
+  - isInTargetChunk() completion check
+  - getToChunk(), getToChunkContaining() helper functions
+- [x] Implemented food collection task (CollectFoodTask.ts):
+  - CollectFoodTask - autonomous food collection through multiple means
+  - COOKABLE_FOODS array mapping raw food to cooked variants with mob types
+  - CROPS array for harvestable crops with food values
+  - calculateFoodPotential() - accounts for raw food cooking potential
+    - Only counts cooked value for raw food (not raw + cooked)
+    - Counts wheat -> bread potential (3 wheat = 1 bread = 5 hunger)
+    - Counts hay blocks -> wheat -> bread potential
+  - State machine: SEARCHING -> HUNTING -> HARVESTING -> PICKING_UP -> COOKING -> etc.
+  - findNearestMob() for hunting targets
+  - findNearestCropBlock() for harvest targets
+  - collectFood(), collectFoodUntilFull() helper functions
+- [x] Implemented blaze rod collection task (CollectBlazeRodsTask.ts):
+  - CollectBlazeRodsTask - multi-step resource collection for Nether progression
+  - State machine: GOING_TO_NETHER -> SEARCHING_FORTRESS -> GOING_TO_SPAWNER -> WAITING_FOR_BLAZES -> KILLING_BLAZES -> FLEEING
+  - Searches for nether bricks to find fortress
+  - findBlazeSpawner() for locating spawners
+  - Safety checks: flee if low health or too many blazes
+  - isHoveringAboveLavaOrTooHigh() to avoid unreachable blazes
+  - collectBlazeRods(), collectBlazeRodsForSpeedrun() helper functions
+- [x] Implemented fast travel task (FastTravelTask.ts):
+  - FastTravelTask - Nether portal-based fast travel (8:1 coordinate scaling)
+  - State machine: CHECKING_THRESHOLD -> COLLECTING_MATERIALS -> ENTERING_NETHER -> TRAVELING_NETHER -> BUILDING_EXIT_PORTAL -> EXITING_NETHER -> WALKING_OVERWORLD
+  - getNetherTarget() - calculates Nether coordinates (Overworld / 8)
+  - getOverworldThreshold() - determines when Nether travel is worth it (default 500 blocks)
+  - canBuildPortal() and canLightPortal() checks
+  - NETHER_CLOSE_ENOUGH_THRESHOLD for accepting "close enough" positions
+  - fastTravelTo(), fastTravelToPos() helper functions
+- [x] Added comprehensive tests (MovementAndResourceTasks.test.ts):
+  - 49 tests covering all new tasks
+  - WHY/intent tests explaining purpose of each task
+  - Chunk coordinate utility tests (blockToChunk, chunkToBlock)
+  - GetToChunkTask creation, completion, equality
+  - CollectFoodTask food potential calculation (cooked food, raw food, wheat, hay)
+  - CollectBlazeRodsTask creation, spawner finding, safety states
+  - FastTravelTask creation, threshold calculation, Nether coordinate scaling
+  - Convenience function tests
+- [x] Fixed API compatibility issues:
+  - chunkToBlock() takes ChunkPos, not separate x,z
+  - GoToDimensionTask takes Dimension, not config object
+  - KillAndLootTask signature: (bot, itemTargets, entityTypes, config?)
+  - DoToClosestBlockTask signature: (bot, taskFactory, blockTypes, config?)
+  - DestroyBlockTask signature: (bot, x, y, z, config?)
+  - RunAwayFromHostilesTask uses fleeDistance not distance
+  - SearchChunkForBlockTask signature: (bot, blocks, maxResults?, config?)
+- [x] Updated concrete task exports in index.ts
+- [x] All 1066 tests passing
+
 ## Test Coverage Goals
 
 For each ported task, we need tests that verify:
@@ -465,8 +520,9 @@ For each ported task, we need tests that verify:
 15. ~~Implement container storage tasks (PickupFromContainerTask, StoreInContainerTask)~~ ✅ Done
 16. ~~Implement enhanced interaction task (InteractWithBlockTask)~~ ✅ Done
 17. ~~Implement inventory crafting tasks (CraftInInventoryTask)~~ ✅ Done
-18. Implement remaining movement tasks (GetToChunkTask, FastTravelTask)
-19. Implement resource collection tasks (CollectBlazeRodsTask, CollectFoodTask, CollectObsidianTask)
-20. Implement construction compound tasks (ConstructNetherPortalBucketTask, ConstructNetherPortalObsidianTask)
-21. Implement stash management (StoreInStashTask - needs BlockRange utility)
-22. Implement structure looting tasks (LootDesertTempleTask, RavageDesertTemplesTask)
+18. ~~Implement movement tasks (GetToChunkTask, FastTravelTask)~~ ✅ Done
+19. ~~Implement resource collection tasks (CollectBlazeRodsTask, CollectFoodTask)~~ ✅ Done
+20. Implement remaining resource tasks (CollectObsidianTask)
+21. Implement construction compound tasks (ConstructNetherPortalBucketTask, ConstructNetherPortalObsidianTask)
+22. Implement stash management (StoreInStashTask - needs BlockRange utility)
+23. Implement structure looting tasks (LootDesertTempleTask, RavageDesertTemplesTask)
