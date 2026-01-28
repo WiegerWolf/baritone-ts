@@ -166,3 +166,53 @@ export {
   goInDirection,
 } from './BlockSearchTask';
 export type { BlockFilter, BlockTaskFactory, DoToClosestBlockConfig } from './BlockSearchTask';
+
+// Portal/dimension tasks
+export {
+  EnterNetherPortalTask,
+  GoToDimensionTask,
+  enterNether,
+  returnToOverworld,
+  goToDimension,
+} from './PortalTask';
+export type { PortalConfig } from './PortalTask';
+
+// Armor tasks
+export {
+  ArmorSlot,
+  ArmorMaterial,
+  EquipArmorTask,
+  EquipSpecificArmorTask,
+  equipBestArmor,
+  equipArmor,
+} from './ArmorTask';
+export type { ArmorPiece, EquipArmorConfig } from './ArmorTask';
+
+// Bed/sleep tasks
+export {
+  PlaceBedAndSetSpawnTask,
+  SleepInBedTask,
+  placeBedAndSetSpawn,
+  sleepInBed,
+} from './BedTask';
+export type { BedTaskConfig } from './BedTask';
+
+// Liquid collection tasks
+export {
+  LiquidType,
+  CollectBucketLiquidTask,
+  CollectWaterBucketTask,
+  CollectLavaBucketTask,
+  collectWater,
+  collectLava,
+} from './CollectLiquidTask';
+export type { CollectLiquidConfig } from './CollectLiquidTask';
+
+// Dodge/evasion tasks
+export {
+  DodgeProjectilesTask,
+  StrafeAndDodgeTask,
+  dodgeProjectiles,
+  strafeAndDodge,
+} from './DodgeTask';
+export type { DodgeProjectilesConfig } from './DodgeTask';
