@@ -127,7 +127,14 @@ export {
   enterEnd,
   buildAndEnterNether,
   findNearestPortal,
+  // Legacy classes from concrete/PortalTask
+  EnterNetherPortalTask,
+  GoToDimensionTask,
+  enterNetherLegacy,
+  returnToOverworld,
+  goToDimension,
   type PortalConfig,
+  type NetherPortalConfig,
 } from './PortalTask';
 export {
   FishingTask,

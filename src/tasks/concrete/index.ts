@@ -178,15 +178,15 @@ export {
 } from './BlockSearchTask';
 export type { BlockFilter, BlockTaskFactory, DoToClosestBlockConfig } from './BlockSearchTask';
 
-// Portal/dimension tasks
+// Portal/dimension tasks - re-exported from composite for backwards compatibility
 export {
   EnterNetherPortalTask,
   GoToDimensionTask,
-  enterNether,
+  enterNetherLegacy as enterNether,
   returnToOverworld,
   goToDimension,
-} from './PortalTask';
-export type { PortalConfig } from './PortalTask';
+  type NetherPortalConfig as PortalConfig,
+} from '../composite/PortalTask';
 
 // Armor tasks
 export {

@@ -34,9 +34,9 @@ This resulted in duplicate implementations of the same functionality.
 **Merge** - Take metadata/color handling from concrete, timeout handling from composite.
 
 #### Status
-- [ ] Create merged implementation
-- [ ] Update imports/exports
-- [ ] Delete redundant file
+- [x] Create merged implementation
+- [x] Update imports/exports
+- [x] Delete redundant file
 - [ ] Update tests
 
 ---
@@ -63,10 +63,10 @@ This resulted in duplicate implementations of the same functionality.
 **Keep concrete** - More complete and battle-tested. Delete composite.
 
 #### Status
-- [ ] Verify concrete has all needed exports
-- [ ] Update any imports pointing to composite
-- [ ] Delete `composite/ElytraTask.ts`
-- [ ] Update `composite/index.ts`
+- [x] Verify concrete has all needed exports
+- [x] Update any imports pointing to composite
+- [x] Delete `composite/ElytraTask.ts`
+- [x] Update `composite/index.ts`
 
 ---
 
@@ -92,10 +92,10 @@ This resulted in duplicate implementations of the same functionality.
 **Keep concrete** - More strategies and complete implementations. Merge breath dodging from composite, then delete composite.
 
 #### Status
-- [ ] Add breath dodging logic to concrete
-- [ ] Update any imports pointing to composite
-- [ ] Delete `composite/DragonFightTask.ts`
-- [ ] Update `composite/index.ts`
+- [x] Add breath dodging logic to concrete
+- [x] Update any imports pointing to composite
+- [x] Delete `composite/DragonFightTask.ts`
+- [x] Update `composite/index.ts`
 
 ---
 
@@ -119,11 +119,11 @@ This resulted in duplicate implementations of the same functionality.
 **Keep composite** - More features (building, End portal, coordinate utils). Merge better portal search algorithm from concrete, then delete concrete.
 
 #### Status
-- [ ] Port shell-expansion portal search from concrete to composite
-- [ ] Port standable-position check from concrete
-- [ ] Update any imports pointing to concrete
-- [ ] Delete `concrete/PortalTask.ts`
-- [ ] Update `concrete/index.ts`
+- [x] Port shell-expansion portal search from concrete to composite
+- [x] Port standable-position check from concrete
+- [x] Update any imports pointing to concrete
+- [x] Delete `concrete/PortalTask.ts`
+- [x] Update `concrete/index.ts`
 
 ---
 
@@ -147,10 +147,10 @@ This resulted in duplicate implementations of the same functionality.
 **Keep concrete** - Proper eye entity tracking is critical for triangulation accuracy. Delete composite.
 
 #### Status
-- [ ] Verify concrete has all needed exports
-- [ ] Update any imports pointing to composite
-- [ ] Delete `composite/StrongholdTask.ts`
-- [ ] Update `composite/index.ts`
+- [x] Verify concrete has all needed exports
+- [x] Update any imports pointing to composite
+- [x] Delete `composite/StrongholdTask.ts`
+- [x] Update `composite/index.ts`
 
 ---
 
@@ -170,11 +170,11 @@ This resulted in duplicate implementations of the same functionality.
 
 Suggested order (least to most complex):
 
-1. **Elytra** - Simple deletion of composite
-2. **Stronghold** - Simple deletion of composite
-3. **Dragon** - Delete composite after porting breath dodge
-4. **Portal** - Delete concrete after porting search algorithm
-5. **Shearing** - Full merge required
+1. **Elytra** - Simple deletion of composite ✅
+2. **Stronghold** - Simple deletion of composite ✅
+3. **Dragon** - Delete composite after porting breath dodge ✅
+4. **Portal** - Delete concrete after porting search algorithm ✅
+5. **Shearing** - Full merge required ✅
 
 ---
 
@@ -183,3 +183,22 @@ Suggested order (least to most complex):
 - After each deletion, run tests to verify nothing breaks
 - Update `index.ts` files in both `concrete/` and `composite/` folders
 - Check for any other files that import the deleted tasks
+
+## Implementation Complete
+
+All tasks have been implemented as of 2026-01-28:
+
+### Files Deleted
+- `src/tasks/composite/ElytraTask.ts`
+- `src/tasks/composite/StrongholdTask.ts`
+- `src/tasks/composite/DragonFightTask.ts`
+- `src/tasks/composite/ShearTask.ts`
+- `src/tasks/concrete/PortalTask.ts`
+
+### Files Modified
+- `src/tasks/concrete/DragonFightTask.ts` - Added breath dodging logic
+- `src/tasks/concrete/ShearSheepTask.ts` - Added timeout handling
+- `src/tasks/composite/PortalTask.ts` - Added shell expansion search, EnterNetherPortalTask, GoToDimensionTask
+- `src/tasks/composite/index.ts` - Removed deleted exports, added portal classes
+- `src/tasks/concrete/index.ts` - Re-exports portal classes from composite
+- Various concrete tasks updated to import from composite/PortalTask

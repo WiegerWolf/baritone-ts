@@ -14,6 +14,7 @@ import type { ITask } from '../interfaces';
 import { GetToBlockTask, GoToNearTask } from '../concrete/GoToTask';
 import { PlaceBlockTask } from '../concrete/PlaceBlockTask';
 import { InteractBlockTask } from '../concrete/InteractTask';
+import { TimeoutWanderTask } from '../concrete/MovementUtilTask';
 import { TimerGame } from '../../utils/timers/TimerGame';
 
 /**
@@ -25,12 +26,12 @@ export enum PortalType {
 }
 
 /**
- * Dimension names
+ * Dimension names (matching concrete/ResourceTask for compatibility)
  */
 export enum Dimension {
-  OVERWORLD = 'overworld',
-  NETHER = 'the_nether',
-  END = 'the_end',
+  OVERWORLD = 'minecraft:overworld',
+  NETHER = 'minecraft:the_nether',
+  END = 'minecraft:the_end',
 }
 
 /**
@@ -442,4 +443,352 @@ export function findNearestPortal(bot: Bot, type: PortalType = PortalType.NETHER
     portalType: type,
     buildIfNeeded: false,
   });
+}
+
+// ============================================================================
+// Legacy compatibility classes from concrete/PortalTask (BaritonePlus style)
+// ============================================================================
+
+/**
+ * State for EnterNetherPortalTask
+ */
+enum NetherPortalState {
+  FINDING_PORTAL,
+  APPROACHING,
+  ENTERING,
+  WAITING,
+  WANDERING,
+  FINISHED,
+}
+
+/**
+ * Configuration for EnterNetherPortalTask
+ */
+export interface NetherPortalConfig {
+  /** Timeout before trying to exit and re-enter portal */
+  portalTimeout: number;
+  /** Whether to build a portal if none found */
+  buildIfMissing: boolean;
+  /** Custom portal filter */
+  portalFilter?: (pos: Vec3) => boolean;
+}
+
+const DEFAULT_NETHER_CONFIG: NetherPortalConfig = {
+  portalTimeout: 10,
+  buildIfMissing: false,
+};
+
+/**
+ * Task to enter a nether portal and travel to another dimension.
+ * Based on BaritonePlus EnterNetherPortalTask.java
+ */
+export class EnterNetherPortalTask extends Task {
+  private targetDimension: Dimension;
+  private config: NetherPortalConfig;
+  private state: NetherPortalState = NetherPortalState.FINDING_PORTAL;
+  private portalTimeout: TimerGame;
+  private leftPortal: boolean = false;
+  private currentPortalPos: Vec3 | null = null;
+
+  constructor(
+    bot: Bot,
+    targetDimension: Dimension,
+    config: Partial<NetherPortalConfig> = {}
+  ) {
+    super(bot);
+
+    if (targetDimension === Dimension.END) {
+      throw new Error("Can't use a nether portal to reach the End. Use an End portal.");
+    }
+
+    this.targetDimension = targetDimension;
+    this.config = { ...DEFAULT_NETHER_CONFIG, ...config };
+    this.portalTimeout = new TimerGame(bot, this.config.portalTimeout);
+  }
+
+  get displayName(): string {
+    const dimName = this.targetDimension === Dimension.NETHER ? 'Nether' : 'Overworld';
+    return `EnterPortal(${dimName})`;
+  }
+
+  onStart(): void {
+    this.state = NetherPortalState.FINDING_PORTAL;
+    this.leftPortal = false;
+    this.currentPortalPos = null;
+    this.portalTimeout.reset();
+  }
+
+  onTick(): Task | null {
+    if (this.getCurrentDimension() === this.targetDimension) {
+      this.state = NetherPortalState.FINISHED;
+      return null;
+    }
+
+    switch (this.state) {
+      case NetherPortalState.FINDING_PORTAL:
+        return this.handleFindingPortal();
+      case NetherPortalState.APPROACHING:
+        return this.handleApproaching();
+      case NetherPortalState.ENTERING:
+        return this.handleEntering();
+      case NetherPortalState.WAITING:
+        return this.handleWaiting();
+      case NetherPortalState.WANDERING:
+        return this.handleWandering();
+      default:
+        return null;
+    }
+  }
+
+  private handleFindingPortal(): Task | null {
+    const portal = this.findNearestNetherPortal();
+    if (portal) {
+      this.currentPortalPos = portal;
+      this.state = NetherPortalState.APPROACHING;
+      return null;
+    }
+
+    if (this.config.buildIfMissing) {
+      // Building portal is complex - for now, just wander
+    }
+
+    this.state = NetherPortalState.WANDERING;
+    return null;
+  }
+
+  private handleApproaching(): Task | null {
+    if (!this.currentPortalPos) {
+      this.state = NetherPortalState.FINDING_PORTAL;
+      return null;
+    }
+
+    const block = this.bot.blockAt(this.currentPortalPos);
+    if (!block || block.name !== 'nether_portal') {
+      this.currentPortalPos = null;
+      this.state = NetherPortalState.FINDING_PORTAL;
+      return null;
+    }
+
+    if (this.isInPortal()) {
+      this.state = NetherPortalState.WAITING;
+      this.portalTimeout.reset();
+      return null;
+    }
+
+    const dist = this.bot.entity.position.distanceTo(this.currentPortalPos);
+    if (dist <= 1.5) {
+      this.state = NetherPortalState.ENTERING;
+      return null;
+    }
+
+    return new GoToNearTask(
+      this.bot,
+      Math.floor(this.currentPortalPos.x),
+      Math.floor(this.currentPortalPos.y),
+      Math.floor(this.currentPortalPos.z),
+      1
+    );
+  }
+
+  private handleEntering(): Task | null {
+    if (!this.currentPortalPos) {
+      this.state = NetherPortalState.FINDING_PORTAL;
+      return null;
+    }
+
+    if (this.isInPortal()) {
+      this.state = NetherPortalState.WAITING;
+      this.portalTimeout.reset();
+      return null;
+    }
+
+    this.bot.setControlState('forward', true);
+    return null;
+  }
+
+  private handleWaiting(): Task | null {
+    if (!this.isInPortal()) {
+      this.portalTimeout.reset();
+      this.state = NetherPortalState.APPROACHING;
+      return null;
+    }
+
+    this.bot.clearControlStates();
+
+    if (this.portalTimeout.elapsed() && !this.leftPortal) {
+      this.state = NetherPortalState.WANDERING;
+      this.leftPortal = true;
+      return null;
+    }
+
+    return null;
+  }
+
+  private handleWandering(): Task | null {
+    const portal = this.findNearestNetherPortal();
+    if (portal) {
+      this.currentPortalPos = portal;
+      this.state = NetherPortalState.APPROACHING;
+      return null;
+    }
+
+    return new TimeoutWanderTask(this.bot, 5);
+  }
+
+  onStop(interruptTask: ITask | null): void {
+    this.bot.clearControlStates();
+    this.currentPortalPos = null;
+  }
+
+  isFinished(): boolean {
+    return this.state === NetherPortalState.FINISHED ||
+           this.getCurrentDimension() === this.targetDimension;
+  }
+
+  private findNearestNetherPortal(): Vec3 | null {
+    const playerPos = this.bot.entity.position;
+    const searchRadius = 64;
+
+    let nearest: Vec3 | null = null;
+    let nearestDist = Infinity;
+
+    for (let r = 1; r <= searchRadius; r++) {
+      for (let x = -r; x <= r; x++) {
+        for (let y = -Math.min(r, 32); y <= Math.min(r, 32); y++) {
+          for (let z = -r; z <= r; z++) {
+            if (Math.abs(x) !== r && Math.abs(y) !== r && Math.abs(z) !== r) continue;
+
+            const checkPos = new Vec3(
+              Math.floor(playerPos.x) + x,
+              Math.floor(playerPos.y) + y,
+              Math.floor(playerPos.z) + z
+            );
+
+            const block = this.bot.blockAt(checkPos);
+            if (block && block.name === 'nether_portal') {
+              if (this.config.portalFilter && !this.config.portalFilter(checkPos)) {
+                continue;
+              }
+
+              const below = this.bot.blockAt(checkPos.offset(0, -1, 0));
+              if (below && below.boundingBox === 'block') {
+                const dist = playerPos.distanceTo(checkPos);
+                if (dist < nearestDist) {
+                  nearestDist = dist;
+                  nearest = checkPos;
+                }
+              }
+            }
+          }
+        }
+      }
+      if (nearest) break;
+    }
+
+    return nearest;
+  }
+
+  private isInPortal(): boolean {
+    const playerBlockPos = this.bot.entity.position.floored();
+    const block = this.bot.blockAt(playerBlockPos);
+    return block !== null && block.name === 'nether_portal';
+  }
+
+  private getCurrentDimension(): Dimension {
+    const dimensionName = (this.bot as any).game?.dimension ?? 'minecraft:overworld';
+    if (dimensionName.includes('nether')) return Dimension.NETHER;
+    if (dimensionName.includes('end')) return Dimension.END;
+    return Dimension.OVERWORLD;
+  }
+
+  isEqual(other: ITask | null): boolean {
+    if (!other) return false;
+    if (!(other instanceof EnterNetherPortalTask)) return false;
+    return this.targetDimension === other.targetDimension;
+  }
+}
+
+/**
+ * Task to go to a specific dimension.
+ * Based on BaritonePlus GoToDimensionTask.java
+ */
+export class GoToDimensionTask extends Task {
+  private targetDimension: Dimension;
+  private finished: boolean = false;
+
+  constructor(bot: Bot, targetDimension: Dimension) {
+    super(bot);
+    this.targetDimension = targetDimension;
+  }
+
+  get displayName(): string {
+    const dimName = this.targetDimension === Dimension.NETHER ? 'Nether'
+      : this.targetDimension === Dimension.END ? 'End'
+      : 'Overworld';
+    return `GoToDimension(${dimName})`;
+  }
+
+  onStart(): void {
+    this.finished = false;
+  }
+
+  onTick(): Task | null {
+    const current = this.getCurrentDimension();
+
+    if (current === this.targetDimension) {
+      this.finished = true;
+      return null;
+    }
+
+    if (this.targetDimension === Dimension.END) {
+      // End portal logic would require finding stronghold
+      // For now, fail gracefully
+      this.finished = true;
+      return null;
+    }
+
+    return new EnterNetherPortalTask(this.bot, this.targetDimension);
+  }
+
+  onStop(interruptTask: ITask | null): void {
+    // Nothing to clean up
+  }
+
+  isFinished(): boolean {
+    return this.finished || this.getCurrentDimension() === this.targetDimension;
+  }
+
+  private getCurrentDimension(): Dimension {
+    const dimensionName = (this.bot as any).game?.dimension ?? 'minecraft:overworld';
+    if (dimensionName.includes('nether')) return Dimension.NETHER;
+    if (dimensionName.includes('end')) return Dimension.END;
+    return Dimension.OVERWORLD;
+  }
+
+  isEqual(other: ITask | null): boolean {
+    if (!other) return false;
+    if (!(other instanceof GoToDimensionTask)) return false;
+    return this.targetDimension === other.targetDimension;
+  }
+}
+
+/**
+ * Helper to enter the nether (legacy API)
+ */
+export function enterNetherLegacy(bot: Bot): EnterNetherPortalTask {
+  return new EnterNetherPortalTask(bot, Dimension.NETHER);
+}
+
+/**
+ * Helper to return to overworld (legacy API)
+ */
+export function returnToOverworld(bot: Bot): EnterNetherPortalTask {
+  return new EnterNetherPortalTask(bot, Dimension.OVERWORLD);
+}
+
+/**
+ * Helper to go to a dimension
+ */
+export function goToDimension(bot: Bot, dimension: Dimension): GoToDimensionTask {
+  return new GoToDimensionTask(bot, dimension);
 }

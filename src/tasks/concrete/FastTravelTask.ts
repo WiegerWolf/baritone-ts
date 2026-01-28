@@ -19,7 +19,7 @@ import { Vec3 } from 'vec3';
 import { Task } from '../Task';
 import type { ITask } from '../interfaces';
 import { Dimension } from './ResourceTask';
-import { GoToDimensionTask, EnterNetherPortalTask } from './PortalTask';
+import { GoToDimensionTask, EnterNetherPortalTask } from '../composite/PortalTask';
 import { GetToBlockTask } from './GoToTask';
 import { GoToXZTask } from './GoToTask';
 import { BlockPos } from '../../types';

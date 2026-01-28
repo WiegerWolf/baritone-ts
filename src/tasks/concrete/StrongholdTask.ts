@@ -18,7 +18,7 @@ import type { Bot } from 'mineflayer';
 import { Vec3 } from 'vec3';
 import { Task } from '../Task';
 import type { ITask } from '../interfaces';
-import { GoToDimensionTask } from './PortalTask';
+import { GoToDimensionTask } from '../composite/PortalTask';
 import { GoInDirectionXZTask } from './BlockSearchTask';
 import { SearchChunkForBlockTask } from './ChunkSearchTask';
 import { FastTravelTask } from './FastTravelTask';

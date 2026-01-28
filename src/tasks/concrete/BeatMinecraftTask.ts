@@ -20,7 +20,7 @@ import { BlockPos } from '../../types';
 import { TimerGame } from '../../utils/timers/TimerGame';
 
 // Import subtasks
-import { GoToDimensionTask } from './PortalTask';
+import { GoToDimensionTask } from '../composite/PortalTask';
 import { GoToStrongholdPortalTask, LocateStrongholdCoordinatesTask } from './StrongholdTask';
 import { KillEnderDragonTask, WaitForDragonAndPearlTask } from './DragonFightTask';
 import { CollectBlazeRodsTask } from './CollectBlazeRodsTask';

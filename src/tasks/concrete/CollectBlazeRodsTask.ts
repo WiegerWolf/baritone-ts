@@ -21,7 +21,7 @@ import { Vec3 } from 'vec3';
 import { Task } from '../Task';
 import type { ITask } from '../interfaces';
 import { ResourceTask, Dimension, itemTarget } from './ResourceTask';
-import { GoToDimensionTask } from './PortalTask';
+import { GoToDimensionTask } from '../composite/PortalTask';
 import { SearchChunkForBlockTask } from './ChunkSearchTask';
 import { GetToBlockTask, GoToNearTask } from './GoToTask';
 import { RunAwayFromHostilesTask } from './EscapeTask';
