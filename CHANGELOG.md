@@ -1,3 +1,10 @@
+## [1.0.1](https://github.com/WiegerWolf/baritone-ts/compare/v1.0.0...v1.0.1) (2026-01-28)
+
+
+### Bug Fixes
+
+* **pathing:** guard against movement index mismatch and undefined access ([c8dfe1c](https://github.com/WiegerWolf/baritone-ts/commit/c8dfe1c291a11ba6fb2327af3aa1726fbdc35858))
+
 # 1.0.0 (2026-01-28)
 
 
