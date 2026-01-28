@@ -499,9 +499,9 @@ export class PathExecutor {
     );
 
     // Skip upcoming movements if we've already reached their destination
-    for (let i = this.pathPosition; i < Math.min(this.path.length - 1, this.pathPosition + 3); i++) {
+    for (let i = this.pathPosition; i < Math.min(this.movements.length, this.pathPosition + 3); i++) {
       const movement = this.movements[i];
-      if (movement.dest.equals(currentPos)) {
+      if (movement && movement.dest.equals(currentPos)) {
         this.pathPosition = i + 1;
         this.ticksOnCurrent = 0;
       }
