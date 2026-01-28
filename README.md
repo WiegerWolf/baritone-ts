@@ -346,5 +346,7 @@ GNU AFFERO GENERAL PUBLIC LICENSE
 ## Credits
 
 - [Baritone](https://github.com/cabaletta/baritone) - Original Java implementation
+- [BaritonePlus](https://github.com/Gentleman2292/BaritonePlus) - Extended task system
+- [altoclef](https://github.com/MiranCZ/altoclef) - High-level automation tasks
 - [mineflayer-pathfinder](https://github.com/PrismarineJS/mineflayer-pathfinder) - Inspiration
 - [Mineflayer](https://github.com/PrismarineJS/mineflayer) - Bot framework
