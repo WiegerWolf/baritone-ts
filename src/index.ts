@@ -1,6 +1,7 @@
 import type { Bot } from 'mineflayer';
 import { Vec3 } from 'vec3';
-import { BlockPos, PathNode, PathResult, Goal } from './types';
+import { BlockPos, PathNode } from './types';
+import type { PathResult, Goal } from './types';
 import { CalculationContextImpl, ContextOptions } from './core/CalculationContext';
 import { AStar } from './pathing/AStar';
 import { PathExecutor } from './pathing/PathExecutor';
