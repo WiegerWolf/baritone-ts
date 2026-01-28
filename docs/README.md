@@ -47,10 +47,12 @@ Baritone-TS is a TypeScript port of [Baritone](https://github.com/cabaletta/bari
 
 ### Key Features
 
-- **Tick-accurate pathfinding** with realistic movement costs
-- **20+ movement types** covering all Minecraft locomotion
-- **7-coefficient A\*** for graceful degradation under timeout
-- **High-level processes** for mining, following, farming, combat, building
-- **100+ hierarchical tasks** for complex automation workflows
-- **Elytra and boat support** for long-distance travel
-- **2-bit chunk caching** for memory-efficient block storage
+- **Tick-accurate pathfinding** with realistic movement costs based on Minecraft physics
+- **22+ movement types** covering all Minecraft locomotion (walking, swimming, climbing, doors, parkour)
+- **Multi-coefficient A\*** for graceful degradation under time pressure
+- **Priority-based task chains** with automatic survival behaviors (food, MLG bucket, combat)
+- **17 goal types** for precise navigation targets
+- **Elytra and boat controllers** for long-distance travel
+- **Lazy-update tracker system** for efficient block/entity/storage tracking
+- **Type-safe event bus** for decoupled component communication
+- **Comprehensive settings** organized by category (pathfinding, combat, food, safety, mining)

@@ -145,7 +145,7 @@ bot.on('path_update', (result) => {
     if (goal) {
       const start = bot.entity.position;
       console.log(`  Start: ${start}`);
-      console.log(`  Goal satisfied at start: ${goal.isInGoal(start.x, start.y, start.z)}`);
+      console.log(`  Goal satisfied at start: ${goal.isEnd(start.x, start.y, start.z)}`);
       console.log(`  Heuristic: ${goal.heuristic(start.x, start.y, start.z)}`);
     }
   }

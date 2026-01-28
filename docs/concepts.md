@@ -40,8 +40,8 @@ A **Goal** defines where the bot should go. Goals are the fundamental target for
 
 ```typescript
 interface Goal {
-  // Check if a position satisfies the goal
-  isInGoal(x: number, y: number, z: number): boolean;
+  // Check if a position satisfies the goal (is an end state)
+  isEnd(x: number, y: number, z: number): boolean;
 
   // Estimate cost to reach goal (heuristic for A*)
   heuristic(x: number, y: number, z: number): number;
@@ -117,7 +117,7 @@ Only one process can be active at a time. They handle the "what to do" while the
 
 See [Processes](./processes.md) for details.
 
-## Tasks
+## Tasks and Task Chains
 
 **Tasks** are hierarchical units of work for complex automation:
 
@@ -134,6 +134,25 @@ Tasks differ from processes:
 - Tasks form a **tree** of subtasks
 - Tasks have **completion criteria**
 - Tasks handle **resource acquisition**
+
+**Task Chains** compete for execution based on priority:
+
+```typescript
+const ChainPriority = {
+  INACTIVE: 0,      // Not running
+  USER_TASK: 50,    // User-initiated tasks
+  FOOD: 55,         // Automatic eating
+  DANGER: 100,      // Combat/survival
+  DEATH: 1000,      // Respawn handling
+};
+```
+
+Built-in chains:
+- **UserTaskChain** - User-initiated tasks (priority 50)
+- **FoodChain** - Automatic eating when hungry (priority 55)
+- **MobDefenseChain** - Combat when threatened (priority 100)
+- **MLGBucketChain** - Fall protection (priority 100)
+- **WorldSurvivalChain** - Escape lava/fire (priority 100)
 
 Example tasks:
 - `MineOresTask` - Mine ores with tool management
@@ -206,6 +225,8 @@ This tick-accurate model ensures optimal paths based on real travel time.
 4. **Path Executor** runs the path
 5. **Processes** automate high-level behaviors
 6. **Tasks** handle complex workflows
-7. **Trackers** cache world state
+7. **Task Chains** manage priority-based execution
+8. **Trackers** cache world state
+9. **EventBus** enables component communication
 
-Start with goals for basic navigation, use processes for automation, and tasks for complex bot behaviors.
+Start with goals for basic navigation, use processes for automation, and tasks for complex bot behaviors. Task chains handle automatic survival behaviors like eating and combat.

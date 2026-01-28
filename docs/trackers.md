@@ -1,53 +1,83 @@
 # Trackers
 
-Trackers maintain cached information about the game world, enabling efficient queries without repeated scanning.
+Trackers maintain cached information about the game world, enabling efficient queries without repeated scanning. They use a lazy-update pattern to minimize expensive computations.
 
 ## Overview
 
-Baritone-TS includes 4 tracker types:
+Baritone-TS includes these tracker types:
 
 | Tracker | Purpose |
 |---------|---------|
+| **Tracker** | Base class with dirty-flag pattern |
+| **AsyncTracker** | For multi-tick update operations |
 | **BlockTracker** | Find and track specific block types |
 | **EntityTracker** | Track entities, projectiles, threats |
-| **ItemStorageTracker** | Track container contents |
-| **TrackerManager** | Coordinate all trackers |
+| **ItemStorageTracker** | Track container and inventory contents |
+| **MiscBlockTracker** | Track special blocks (doors, water, portals) |
+| **SimpleChunkTracker** | Track chunk load state |
+| **TrackerManager** | Coordinate all trackers, handle dimension changes |
 
 ## Tracker Manager
 
-The TrackerManager coordinates updates across all trackers:
+The TrackerManager coordinates updates across all trackers and handles dimension changes:
 
 ```typescript
-import { TrackerManager } from 'baritone-ts';
+import { TrackerManager, createTrackerManager } from 'baritone-ts';
 
-// Get the tracker manager
-const trackers = bot.pathfinder.trackers;
+// Create tracker manager
+const trackers = createTrackerManager(bot);
 
-// Or create a new one
-const trackers = new TrackerManager(bot, bot.pathfinder.ctx);
+// Or using constructor
+const trackers = new TrackerManager(bot);
 
-// Tick all trackers (call each game tick)
+// Register custom trackers
+trackers.register(myCustomTracker);
+
+// Tick all trackers (marks them dirty, ticks async trackers)
 trackers.tick();
 
-// Access individual trackers
-const blocks = trackers.blocks;
-const entities = trackers.entities;
-const storage = trackers.storage;
+// Reset all trackers (on dimension change)
+trackers.resetAll();
+
+// Start/stop dimension change detection
+trackers.start();
+trackers.stop();
+
+// Get all registered trackers
+const allTrackers = trackers.getTrackers();
+
+// Debug info
+console.log(trackers.getDebugInfo());
 ```
 
 ### Lazy Updates
 
-Trackers use **lazy updates** - they only recalculate when accessed:
+Trackers use **lazy updates** with dirty flags - they only recalculate when accessed:
 
 ```typescript
-// First access triggers scan
-const ores = trackers.blocks.findBlocks('diamond_ore');
+// Each tick, all trackers are marked dirty
+trackers.tick();  // Marks all dirty
+
+// First access triggers update
+const ores = tracker.findBlocks('diamond_ore');
 
 // Subsequent accesses in same tick use cached data
-const moreOres = trackers.blocks.findBlocks('diamond_ore'); // Uses cache
+const moreOres = tracker.findBlocks('diamond_ore'); // Uses cache
 
-// Next tick, cache is invalidated
-// First access triggers new scan
+// Next tick, all trackers marked dirty again
+// First access triggers new update
+```
+
+### Async Trackers
+
+Some trackers spread work across multiple ticks:
+
+```typescript
+// AsyncTracker updates incrementally
+if (asyncTracker.isUpdateInProgress()) {
+  const progress = asyncTracker.getUpdateProgress(); // 0.0 - 1.0
+  console.log(`Update ${Math.floor(progress * 100)}% complete`);
+}
 ```
 
 ## BlockTracker

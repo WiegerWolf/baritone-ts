@@ -39,53 +39,62 @@ mlgChain.enable();
 
 ## FoodChain
 
-Automatically eats food when hunger is low.
+Automatically eats food when hunger is low. Uses a scoring algorithm to select the best food, optimizing for saturation and minimizing waste.
+
+**Priority:** 55 (higher than user tasks, lower than danger)
 
 ```typescript
 import { FoodChain } from 'baritone-ts';
 
 const foodChain = new FoodChain(bot, {
   // When to eat
-  minHunger: 6,           // Eat when hunger drops below this (0-20)
-  minSaturation: 1,       // Or when saturation is low
+  eatWhenHunger: 14,           // Eat when hunger drops below this (0-20)
 
-  // What to eat
-  preferredFoods: [
-    'golden_apple',
-    'cooked_beef',
-    'cooked_porkchop',
-    'bread'
-  ],
-  avoidFoods: [
-    'rotten_flesh',
-    'spider_eye',
-    'poisonous_potato'
-  ],
+  // Food selection
+  eatRottenFlesh: false,       // Allow eating rotten flesh
+  rottenFleshPenalty: 5,       // Scoring penalty for rotten flesh
 
-  // Behavior
-  interruptTasks: true,   // Pause tasks while eating
-  craftFood: false,       // Don't craft food automatically
+  // Scoring algorithm
+  saturationMultiplier: 1.0,   // Weight for saturation in scoring
+  wastePenalty: 0.5,           // Penalty for wasting food points
+
+  // Timing
+  eatCooldown: 1,              // Minimum seconds between eat attempts
 });
 
-foodChain.enable();
+// Check state
+if (foodChain.needsToEat()) {
+  console.log('Need to eat');
+}
 
-// Events
-foodChain.on('eating', (food) => {
-  console.log(`Eating ${food.name}`);
-});
+if (foodChain.urgentlyNeedsFood()) {
+  console.log('Urgently need food!');
+}
 
-foodChain.on('low_food', () => {
-  console.log('Running low on food!');
-});
+// Get food info
+const availableFoods = foodChain.getAvailableFoods();
+const bestFood = foodChain.selectBestFood();
+const totalValue = foodChain.getTotalFoodValue();
+
+// Debug info
+console.log(foodChain.getDebugInfo());
 ```
 
-### Food Priority
+### Food Scoring
 
-By default, foods are prioritized:
-1. Golden apples (emergency healing)
-2. Cooked meats (high saturation)
-3. Bread, carrots, potatoes
-4. Raw foods (last resort)
+The scoring algorithm considers:
+1. Saturation value (weighted by saturationMultiplier)
+2. Wasted hunger/saturation points (penalized)
+3. Risky foods (rotten flesh, spider eye penalized)
+4. Efficient eating bonus (when nearly full)
+5. Low health bonus for high saturation
+
+### Known Foods
+
+Foods tracked with hunger and saturation values:
+- **Best:** Golden carrot (14.4 sat), cooked beef (12.8), cooked porkchop (12.8)
+- **Good:** Bread (6.0), baked potato (6.0), cooked salmon (9.6)
+- **Emergency:** Rotten flesh (0.8 sat, hunger effect risk)
 
 ## MLGBucketChain
 

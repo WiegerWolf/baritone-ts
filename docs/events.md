@@ -408,27 +408,125 @@ survival.on('low_health', (health: number) => {
 
 ## EventBus
 
-Baritone-TS includes a central EventBus for cross-module communication.
+Baritone-TS includes a central EventBus for cross-module communication with priority-based handler ordering.
 
 ```typescript
-import { EventBus } from 'baritone-ts';
+import { EventBus, HandlerPriority, createEventBus } from 'baritone-ts';
 
-const bus = bot.pathfinder.eventBus;
+// Create a new event bus
+const bus = createEventBus();
 
-// Subscribe to events
-const unsubscribe = bus.on('custom_event', (data) => {
-  console.log('Custom event:', data);
+// Subscribe to events with priority
+const handlerId = bus.subscribe('block_place', (data) => {
+  console.log(`Block placed at ${data.pos}`);
+}, HandlerPriority.NORMAL);
+
+// Subscribe with high priority (runs first)
+bus.subscribe('block_place', (data) => {
+  console.log('High priority handler');
+}, HandlerPriority.HIGH);
+
+// One-time handler
+bus.once('player_death', (data) => {
+  console.log('Player died - this only fires once');
 });
 
-// Emit events
-bus.emit('custom_event', { foo: 'bar' });
+// Publish events
+bus.publish('custom', { type: 'my_event', data: { foo: 'bar' } });
 
-// Unsubscribe
-unsubscribe();
+// Unsubscribe by handler ID
+bus.unsubscribe(handlerId);
 
-// One-time listener
-bus.once('one_time_event', (data) => {
-  console.log('This only fires once');
+// Unsubscribe all handlers for an event
+bus.unsubscribeAll('block_place');
+
+// Check if event has handlers
+if (bus.hasHandlers('entity_spawn')) {
+  console.log('Entity spawn is being tracked');
+}
+
+// Get handler count
+const count = bus.getHandlerCount('block_update');
+
+// Clear all handlers
+bus.clear();
+
+// Debug info
+console.log(bus.getDebugInfo());
+```
+
+### Handler Priorities
+
+```typescript
+const HandlerPriority = {
+  LOWEST: 0,     // Runs last
+  LOW: 25,
+  NORMAL: 50,    // Default
+  HIGH: 75,
+  HIGHEST: 100,  // Runs first
+  MONITOR: 150,  // For logging/debugging, runs after all others
+};
+```
+
+### Event Types
+
+All built-in event types:
+
+```typescript
+interface EventTypes {
+  // World events
+  'block_place': { pos: Vec3; block: Block };
+  'block_break': { pos: Vec3; oldBlock: Block };
+  'block_update': { pos: Vec3; oldBlock: Block | null; newBlock: Block | null };
+
+  // Chunk events
+  'chunk_load': { x: number; z: number };
+  'chunk_unload': { x: number; z: number };
+
+  // Entity events
+  'entity_spawn': { entity: Entity };
+  'entity_despawn': { entity: Entity };
+  'entity_move': { entity: Entity; oldPos: Vec3; newPos: Vec3 };
+  'entity_damage': { entity: Entity; damage: number };
+
+  // Player events
+  'player_move': { pos: Vec3 };
+  'player_health': { health: number; oldHealth: number };
+  'player_food': { food: number; oldFood: number };
+  'player_death': {};
+
+  // Container events
+  'container_open': { pos: Vec3 | null; windowId: number };
+  'container_close': { windowId: number };
+  'container_update': { windowId: number; slot: number; item: Item | null };
+
+  // Task events
+  'task_start': { taskName: string };
+  'task_finish': { taskName: string; success: boolean };
+  'chain_change': { oldChain: string | null; newChain: string };
+
+  // Combat events
+  'attack': { target: Entity };
+  'hurt': { damage: number; attacker: Entity | null };
+
+  // Custom events
+  'custom': { type: string; data: any };
+}
+```
+
+### Bot Event Bridge
+
+Connect mineflayer events to the EventBus:
+
+```typescript
+import { createBotEventBridge, createEventBus } from 'baritone-ts';
+
+const eventBus = createEventBus();
+createBotEventBridge(bot, eventBus);
+
+// Now mineflayer events are forwarded to the EventBus
+eventBus.subscribe('entity_spawn', ({ entity }) => {
+  console.log(`Entity spawned: ${entity.name}`);
 });
 ```
 

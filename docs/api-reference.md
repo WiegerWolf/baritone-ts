@@ -665,15 +665,17 @@ interface BlockPos {
 }
 
 interface Goal {
-  isInGoal(x: number, y: number, z: number): boolean;
+  isEnd(x: number, y: number, z: number): boolean;
   heuristic(x: number, y: number, z: number): number;
 }
 
-enum MovementStatus {
+enum MovementState {
+  NOT_STARTED = 'NOT_STARTED',
   PREPPING = 'PREPPING',
   WAITING = 'WAITING',
   RUNNING = 'RUNNING',
   SUCCESS = 'SUCCESS',
+  UNREACHABLE = 'UNREACHABLE',
   FAILED = 'FAILED'
 }
 

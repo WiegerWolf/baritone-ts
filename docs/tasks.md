@@ -4,527 +4,687 @@ Tasks are hierarchical units of work for complex automation. They form a tree st
 
 ## Overview
 
-Baritone-TS includes 100+ tasks organized into:
+Baritone-TS includes a comprehensive task system organized into:
 
-- **Composite Tasks** (46): High-level workflows that orchestrate subtasks
-- **Concrete Tasks** (57): Specific implementations that do actual work
+- **Base Classes**: `Task`, `WrapperTask`, `GroundedTask`
+- **Task Chains**: Priority-based execution system (`TaskChain`, `SingleTaskChain`, `UserTaskChain`)
+- **Task Runner**: Central orchestrator (`TaskRunner`)
+- **Concrete Tasks**: Low-level task implementations
+- **Composite Tasks**: High-level workflows combining multiple tasks
 
-## Task vs Process
+## Task System Architecture
 
-| Aspect | Task | Process |
-|--------|------|---------|
-| Structure | Tree of subtasks | Single unit |
-| Completion | Has end condition | May run forever |
-| Resources | Manages prerequisites | Uses what's available |
-| Complexity | Complex workflows | Single behaviors |
+### Task Base Class
 
-**Use Tasks** for: Complex multi-step operations, resource gathering chains, building projects
-
-**Use Processes** for: Continuous behaviors, simple automation, real-time responses
-
-## Task Runner
-
-Tasks are executed through the TaskRunner:
+All tasks extend the abstract `Task` class:
 
 ```typescript
-import { TaskRunner, MineOresTask } from 'baritone-ts';
+import { Task } from 'baritone-ts';
 
-// Create task runner
-const runner = new TaskRunner(bot, bot.pathfinder);
+abstract class Task {
+  readonly displayName: string;
+  protected bot: Bot;
 
-// Set the active task
-runner.setTask(new MineOresTask(bot, {
-  targetOres: ['diamond_ore', 'iron_ore'],
-  quantity: 10
-}));
+  // Lifecycle methods
+  onStart(): void;              // Called when task begins
+  onTick(): Task | null;        // Called each tick, returns subtask or null
+  onStop(): void;               // Called when task ends
 
-// Tick the runner (call every game tick)
-bot.on('physicsTick', () => {
-  runner.tick();
-});
-
-// Check if task is complete
-if (runner.isComplete()) {
-  console.log('Task finished!');
+  // State methods
+  isFinished(): boolean;        // Check if task is complete
+  isEqual(other: Task | null): boolean;  // Equality for task switching
 }
 ```
 
-## Core Task Types
+### Task Lifecycle
 
-### Resource Tasks
+1. `onStart()` - Initialize task state
+2. `onTick()` - Execute each tick, can return subtask for delegation
+3. `onStop()` - Cleanup when task ends or is interrupted
 
-#### CollectItemTask
+### Specialized Task Types
 
-Collect a specific item, handling all prerequisites.
+#### WrapperTask
+
+Decorates an existing task with additional behavior:
 
 ```typescript
-import { CollectItemTask } from 'baritone-ts';
+import { WrapperTask, Task } from 'baritone-ts';
 
-const task = new CollectItemTask(bot, {
-  itemName: 'diamond',
-  quantity: 5,
-  // Will mine diamond ore, smelt if needed, etc.
+class MyWrapper extends WrapperTask {
+  constructor(bot: Bot, inner: Task) {
+    super(bot, inner);
+  }
+
+  onTick(): Task | null {
+    // Add behavior before/after inner task
+    return this.inner;
+  }
+}
+```
+
+#### GroundedTask
+
+Tasks that require the player to be on the ground for safety:
+
+```typescript
+import { GroundedTask } from 'baritone-ts';
+
+class SafeTask extends GroundedTask {
+  // Won't execute mid-air
+  // Prevents interruption by other tasks while mid-air
+}
+```
+
+## Task Chain System
+
+Task chains compete for execution based on priority. Only the highest priority active chain runs each tick.
+
+### Chain Priorities
+
+```typescript
+const ChainPriority = {
+  INACTIVE: 0,      // Not running
+  USER_TASK: 50,    // User-initiated tasks
+  FOOD: 55,         // Automatic eating (higher than user)
+  DANGER: 100,      // Combat/survival (highest normal)
+  DEATH: 1000,      // Respawn handling
+};
+```
+
+### Built-in Chains
+
+| Chain | Priority | Purpose |
+|-------|----------|---------|
+| `UserTaskChain` | 50 | User-initiated tasks |
+| `FoodChain` | 55 | Automatic eating when hungry |
+| `MobDefenseChain` | 100 | Combat when hostiles nearby |
+| `WorldSurvivalChain` | 100 | Escape lava/fire |
+| `MLGBucketChain` | 100 | Fall protection |
+| `DeathMenuChain` | 1000 | Respawn handling |
+
+### UserTaskChain
+
+For user-initiated tasks:
+
+```typescript
+import { UserTaskChain, GoToTask } from 'baritone-ts';
+
+const userChain = new UserTaskChain(bot);
+userChain.setUserTask(new GoToTask(bot, targetPos));
+```
+
+### SingleTaskChain
+
+Base for survival chains that produce tasks dynamically:
+
+```typescript
+import { SingleTaskChain, Task, ChainPriority } from 'baritone-ts';
+
+class MyChain extends SingleTaskChain {
+  readonly displayName = 'MyChain';
+
+  getPriority(): number {
+    return this.shouldActivate() ? ChainPriority.DANGER : ChainPriority.INACTIVE;
+  }
+
+  isActive(): boolean {
+    return this.shouldActivate();
+  }
+
+  protected getTaskForTick(): Task | null {
+    // Return the task to run this tick
+    return this.shouldActivate() ? new MyTask(this.bot) : null;
+  }
+}
+```
+
+## Task Runner
+
+The `TaskRunner` orchestrates multiple task chains:
+
+```typescript
+import { TaskRunner, createTaskRunner } from 'baritone-ts';
+
+// Create task runner
+const runner = createTaskRunner(bot);
+
+// Or manually
+const runner = new TaskRunner(bot);
+
+// Register chains (built-in chains auto-registered)
+runner.registerChain(new FoodChain(bot));
+runner.registerChain(new UserTaskChain(bot));
+
+// Attach to physics tick
+runner.attachToBot();
+
+// Or manually tick
+bot.on('physicsTick', () => runner.tick());
+```
+
+### TaskRunner Events
+
+```typescript
+runner.on('chain_changed', (oldChain, newChain) => {
+  console.log(`Chain changed: ${oldChain} -> ${newChain}`);
+});
+
+runner.on('task_started', (task) => {
+  console.log(`Started: ${task.displayName}`);
+});
+
+runner.on('task_finished', (task) => {
+  console.log(`Finished: ${task.displayName}`);
+});
+
+runner.on('tick', () => {
+  // Called every tick
 });
 ```
 
-#### MineOresTask
+## Concrete Tasks
 
-Mine ore blocks and collect drops.
+Low-level tasks in `src/tasks/concrete/`:
+
+### Navigation Tasks
 
 ```typescript
-import { MineOresTask } from 'baritone-ts';
+import {
+  GoToTask,
+  GoToBlockTask,
+  GetToBlockTask,
+  GoToNearTask,
+  GoToXZTask,
+  FollowEntityTask
+} from 'baritone-ts';
 
-const task = new MineOresTask(bot, {
-  targetOres: ['diamond_ore', 'deepslate_diamond_ore'],
-  quantity: 10,
-  returnToStart: true
-});
+// Go to exact position
+new GoToTask(bot, { x: 100, y: 64, z: 100 });
+
+// Go to specific block
+new GoToBlockTask(bot, 100, 64, 100);
+
+// Get adjacent to block (for interaction)
+new GetToBlockTask(bot, 100, 64, 100);
+
+// Get within range
+new GoToNearTask(bot, { x: 100, y: 64, z: 100 }, 5);
+
+// Go to X,Z coordinates
+new GoToXZTask(bot, 100, 100);
+
+// Follow an entity
+new FollowEntityTask(bot, entity, 3);
 ```
 
-#### GatherWoodTask
-
-Collect wood from trees.
+### Mining Tasks
 
 ```typescript
-import { GatherWoodTask } from 'baritone-ts';
+import { MineBlockTask, MineBlockTypeTask } from 'baritone-ts';
 
-const task = new GatherWoodTask(bot, {
-  woodType: 'oak',    // 'oak', 'spruce', 'birch', etc. or 'any'
-  quantity: 64
-});
+// Mine specific block at position
+new MineBlockTask(bot, { x: 100, y: 64, z: 100 });
+
+// Mine all blocks of a type
+new MineBlockTypeTask(bot, 'diamond_ore');
+```
+
+### Placement Tasks
+
+```typescript
+import { PlaceBlockTask, PlaceAgainstTask } from 'baritone-ts';
+
+// Place block at position
+new PlaceBlockTask(bot, { x: 100, y: 64, z: 100 }, 'cobblestone');
+
+// Place against another block
+new PlaceAgainstTask(bot, targetPos, againstPos, 'cobblestone');
 ```
 
 ### Crafting Tasks
 
-#### CraftItemTask
-
-Craft an item, gathering materials if needed.
-
 ```typescript
-import { CraftItemTask } from 'baritone-ts';
+import { CraftTask, EnsureItemTask } from 'baritone-ts';
 
-const task = new CraftItemTask(bot, {
-  itemName: 'diamond_pickaxe',
-  quantity: 1,
-  gatherMaterials: true  // Will mine diamonds and sticks if needed
-});
+// Craft item
+new CraftTask(bot, 'diamond_pickaxe', 1);
+
+// Ensure item exists (craft if missing)
+new EnsureItemTask(bot, 'crafting_table', 1);
 ```
 
-#### SmeltItemTask
-
-Smelt items in a furnace.
+### Smelting Tasks
 
 ```typescript
-import { SmeltItemTask } from 'baritone-ts';
+import { SmeltTask, isFuel, getFuelBurnTime } from 'baritone-ts';
 
-const task = new SmeltItemTask(bot, {
-  inputItem: 'iron_ore',
-  outputItem: 'iron_ingot',
-  quantity: 32,
-  fuel: 'coal'  // Will gather fuel if needed
-});
-```
+// Smelt items
+new SmeltTask(bot, 'iron_ore', 'iron_ingot', 16);
 
-### Movement Tasks
-
-#### GoToPositionTask
-
-Navigate to a position.
-
-```typescript
-import { GoToPositionTask } from 'baritone-ts';
-
-const task = new GoToPositionTask(bot, {
-  position: { x: 100, y: 64, z: 100 },
-  tolerance: 2  // Get within 2 blocks
-});
-```
-
-#### FollowEntityTask
-
-Follow an entity until a condition is met.
-
-```typescript
-import { FollowEntityTask } from 'baritone-ts';
-
-const task = new FollowEntityTask(bot, {
-  entity: targetPlayer,
-  distance: 3,
-  duration: 60000  // Follow for 1 minute
-});
-```
-
-#### FleeFromTask
-
-Run away from danger.
-
-```typescript
-import { FleeFromTask } from 'baritone-ts';
-
-const task = new FleeFromTask(bot, {
-  position: dangerPosition,
-  distance: 30
-});
-```
-
-### Combat Tasks
-
-#### KillEntityTask
-
-Kill a specific entity.
-
-```typescript
-import { KillEntityTask } from 'baritone-ts';
-
-const task = new KillEntityTask(bot, {
-  entity: targetMob,
-  useRanged: true,
-  useShield: true
-});
-```
-
-#### KillMobsTask
-
-Hunt and kill mobs of specific types.
-
-```typescript
-import { KillMobsTask } from 'baritone-ts';
-
-const task = new KillMobsTask(bot, {
-  mobTypes: ['zombie', 'skeleton'],
-  quantity: 10,
-  searchRadius: 32
-});
-```
-
-### Building Tasks
-
-#### PlaceBlockTask
-
-Place a block at a position.
-
-```typescript
-import { PlaceBlockTask } from 'baritone-ts';
-
-const task = new PlaceBlockTask(bot, {
-  position: { x: 100, y: 64, z: 100 },
-  blockName: 'stone',
-  face: 'top'  // Which face to place against
-});
-```
-
-#### BuildStructureTask
-
-Build a structure from instructions.
-
-```typescript
-import { BuildStructureTask } from 'baritone-ts';
-
-const task = new BuildStructureTask(bot, {
-  instructions: [
-    { position: { x: 0, y: 64, z: 0 }, blockName: 'stone' },
-    { position: { x: 1, y: 64, z: 0 }, blockName: 'stone' },
-    // ...
-  ],
-  gatherMaterials: true
-});
-```
-
-### Container Tasks
-
-#### DepositItemsTask
-
-Deposit items into a container.
-
-```typescript
-import { DepositItemsTask } from 'baritone-ts';
-
-const task = new DepositItemsTask(bot, {
-  containerPosition: { x: 100, y: 64, z: 100 },
-  items: ['diamond', 'iron_ingot', 'gold_ingot']
-});
-```
-
-#### WithdrawItemsTask
-
-Withdraw items from a container.
-
-```typescript
-import { WithdrawItemsTask } from 'baritone-ts';
-
-const task = new WithdrawItemsTask(bot, {
-  containerPosition: { x: 100, y: 64, z: 100 },
-  itemName: 'diamond',
-  quantity: 5
-});
-```
-
-### Utility Tasks
-
-#### EquipItemTask
-
-Equip an item in a slot.
-
-```typescript
-import { EquipItemTask } from 'baritone-ts';
-
-const task = new EquipItemTask(bot, {
-  itemName: 'diamond_sword',
-  destination: 'hand'  // 'hand', 'off-hand', 'head', 'torso', 'legs', 'feet'
-});
-```
-
-#### EatFoodTask
-
-Eat food to restore hunger.
-
-```typescript
-import { EatFoodTask } from 'baritone-ts';
-
-const task = new EatFoodTask(bot, {
-  minHunger: 6,  // Eat when hunger below this
-  preferredFoods: ['cooked_beef', 'golden_apple']
-});
-```
-
-#### SleepTask
-
-Sleep in a bed.
-
-```typescript
-import { SleepTask } from 'baritone-ts';
-
-const task = new SleepTask(bot, {
-  bedPosition: { x: 100, y: 64, z: 100 },
-  // OR find nearest bed
-  findBed: true,
-  searchRadius: 32
-});
-```
-
-## Task Composition
-
-Tasks can delegate to subtasks:
-
-```typescript
-import { Task, TaskStatus } from 'baritone-ts';
-
-class MyCompositeTask extends Task {
-  private subtask: Task | null = null;
-
-  tick(): TaskStatus {
-    // Delegate to subtask if set
-    if (this.subtask) {
-      const status = this.subtask.tick();
-      if (status === TaskStatus.SUCCESS) {
-        this.subtask = null;
-        // Continue with next step
-      } else {
-        return status;  // Still working on subtask
-      }
-    }
-
-    // Check if we need to collect items first
-    if (!this.hasRequiredItems()) {
-      this.subtask = new CollectItemTask(this.bot, {
-        itemName: 'diamond_pickaxe',
-        quantity: 1
-      });
-      return TaskStatus.IN_PROGRESS;
-    }
-
-    // Do main work...
-    return TaskStatus.IN_PROGRESS;
-  }
+// Check if item is fuel
+if (isFuel('coal')) {
+  const burnTime = getFuelBurnTime('coal');
 }
 ```
 
-## Task Status
-
-Tasks return a status each tick:
+### Inventory Tasks
 
 ```typescript
-enum TaskStatus {
-  SUCCESS,      // Task completed successfully
-  IN_PROGRESS,  // Task is still working
-  FAILED,       // Task failed
-  CANCELLED     // Task was cancelled
-}
+import {
+  EquipTask,
+  PickupItemTask,
+  DropItemTask,
+  MoveItemTask,
+  EquipmentSlot
+} from 'baritone-ts';
+
+// Equip item
+new EquipTask(bot, 'diamond_sword', EquipmentSlot.HAND);
+
+// Pickup dropped item
+new PickupItemTask(bot, itemEntity);
+
+// Drop items
+new DropItemTask(bot, 'cobblestone', 64);
+
+// Move item between slots
+new MoveItemTask(bot, sourceSlot, destSlot);
 ```
 
-## Task Events
+### Interaction Tasks
 
 ```typescript
-runner.on('task_started', (task) => {
-  console.log(`Started: ${task.name}`);
+import {
+  InteractBlockTask,
+  InteractEntityTask,
+  AttackEntityTask,
+  UseItemTask
+} from 'baritone-ts';
+
+// Interact with block (open chest, press button)
+new InteractBlockTask(bot, { x: 100, y: 64, z: 100 });
+
+// Interact with entity
+new InteractEntityTask(bot, entity);
+
+// Attack entity
+new AttackEntityTask(bot, entity);
+
+// Use held item
+new UseItemTask(bot);
+```
+
+## Composite Tasks
+
+High-level tasks in `src/tasks/composite/`:
+
+### Resource Gathering
+
+```typescript
+import {
+  CollectWoodTask,
+  GatherResourcesTask,
+  gatherResources,
+  MineOresTask,
+  mineDiamonds,
+  mineIron,
+  mineCoal
+} from 'baritone-ts';
+
+// Collect wood
+new CollectWoodTask(bot, { woodType: 'oak', quantity: 32 });
+
+// Gather generic resources
+new GatherResourcesTask(bot, config);
+gatherResources(bot, 'iron_ore', 16);
+
+// Mine specific ores
+new MineOresTask(bot, { targetOres: ['diamond_ore'], quantity: 10 });
+mineDiamonds(bot, 10);
+mineIron(bot, 32);
+mineCoal(bot, 64);
+```
+
+### Tools
+
+```typescript
+import { GetToolTask, ensureTool, ToolType } from 'baritone-ts';
+
+// Get or craft a tool
+new GetToolTask(bot, 'pickaxe', 'iron');
+ensureTool(bot, ToolType.PICKAXE, 'diamond');
+```
+
+### Farming
+
+```typescript
+import {
+  FarmTask,
+  FarmMode,
+  harvestCrops,
+  harvestAndReplant,
+  maintainFarm,
+  harvestWheat
+} from 'baritone-ts';
+
+// Farm with specific mode
+new FarmTask(bot, {
+  mode: FarmMode.HARVEST_AND_REPLANT,
+  crops: ['wheat', 'carrots', 'potatoes']
 });
 
-runner.on('task_completed', (task) => {
-  console.log(`Completed: ${task.name}`);
+// Helper functions
+harvestCrops(bot);
+harvestAndReplant(bot);
+maintainFarm(bot);
+harvestWheat(bot);
+```
+
+### Exploration
+
+```typescript
+import {
+  ExploreTask,
+  ExplorePattern,
+  exploreSpiral,
+  exploreTowards,
+  exploreRandom,
+  exploreArea
+} from 'baritone-ts';
+
+// Explore with pattern
+new ExploreTask(bot, { pattern: ExplorePattern.SPIRAL });
+
+// Helper functions
+exploreSpiral(bot, origin, radius);
+exploreTowards(bot, direction);
+exploreRandom(bot);
+exploreArea(bot, minPos, maxPos);
+```
+
+### Building
+
+```typescript
+import {
+  BuildShelterTask,
+  ShelterType,
+  buildDirtHut,
+  buildWoodCabin,
+  digUnderground,
+  buildEmergencyShelter
+} from 'baritone-ts';
+
+// Build shelter
+new BuildShelterTask(bot, { type: ShelterType.WOOD_CABIN });
+
+// Helper functions
+buildDirtHut(bot);
+buildWoodCabin(bot);
+digUnderground(bot);
+buildEmergencyShelter(bot);
+```
+
+### Combat
+
+```typescript
+import {
+  CombatTask,
+  CombatStyle,
+  fightMobs,
+  fightEntity,
+  hitAndRun,
+  defensiveCombat
+} from 'baritone-ts';
+
+// Combat with style
+new CombatTask(bot, {
+  style: CombatStyle.AGGRESSIVE,
+  target: entity
 });
 
-runner.on('task_failed', (task, error) => {
-  console.log(`Failed: ${task.name} - ${error.message}`);
-});
+// Helper functions
+fightMobs(bot, ['zombie', 'skeleton']);
+fightEntity(bot, entity);
+hitAndRun(bot, entity);
+defensiveCombat(bot);
+```
 
-runner.on('subtask_started', (task, subtask) => {
-  console.log(`${task.name} started subtask: ${subtask.name}`);
-});
+### Survival
+
+```typescript
+import {
+  SurviveTask,
+  SurvivalPriority,
+  survive,
+  survivePassive,
+  surviveAndProgress
+} from 'baritone-ts';
+
+// Survival mode
+new SurviveTask(bot, { priority: SurvivalPriority.FOOD_FIRST });
+
+// Helper functions
+survive(bot);
+survivePassive(bot);
+surviveAndProgress(bot);
+```
+
+## Resource Task System
+
+Generic resource collection system:
+
+```typescript
+import {
+  ResourceTask,
+  CollectItemTask,
+  GatherItemTask,
+  MineAndCollectTask,
+  ITEM_SOURCE_BLOCKS,
+  createSourceBlockMap
+} from 'baritone-ts';
+
+// Collect item from any source
+new CollectItemTask(bot, 'diamond', 10);
+
+// Gather from world
+new GatherItemTask(bot, 'apple', 5);
+
+// Mine and collect
+new MineAndCollectTask(bot, 'iron_ore', 16);
+
+// Get source blocks for item
+const sources = ITEM_SOURCE_BLOCKS.get('diamond');
+```
+
+## Task Catalogue
+
+Registry for task creation:
+
+```typescript
+import {
+  TaskCatalogue,
+  createTaskCatalogue,
+  getAcquisitionChain,
+  SMELTING_RECIPES,
+  getSmeltingRecipe
+} from 'baritone-ts';
+
+// Create catalogue
+const catalogue = createTaskCatalogue(bot);
+
+// Get acquisition chain for item
+const chain = getAcquisitionChain(bot, 'diamond_pickaxe');
+
+// Get smelting recipe
+const recipe = getSmeltingRecipe('iron_ingot');
+// { input: 'iron_ore', output: 'iron_ingot', fuel: 'any' }
 ```
 
 ## Creating Custom Tasks
 
-Extend the Task base class:
+### Simple Task
 
 ```typescript
-import { Task, TaskStatus } from 'baritone-ts';
-
-interface MyTaskOptions {
-  targetItem: string;
-  quantity: number;
-}
+import { Task } from 'baritone-ts';
 
 class MyTask extends Task {
-  private options: MyTaskOptions;
-  private collected: number = 0;
+  readonly displayName = 'MyTask';
+  private done = false;
 
-  constructor(bot: Bot, options: MyTaskOptions) {
-    super(bot);
-    this.options = options;
+  onStart(): void {
+    this.done = false;
   }
 
-  get name(): string {
-    return 'MyTask';
-  }
-
-  tick(): TaskStatus {
-    // Check completion
-    if (this.collected >= this.options.quantity) {
-      return TaskStatus.SUCCESS;
-    }
-
+  onTick(): Task | null {
     // Do work
-    // ...
-
-    return TaskStatus.IN_PROGRESS;
+    if (/* condition */) {
+      this.done = true;
+    }
+    return null;
   }
 
-  reset(): void {
-    this.collected = 0;
-  }
-
-  cancel(): void {
+  onStop(): void {
     // Cleanup
+  }
+
+  isFinished(): boolean {
+    return this.done;
+  }
+
+  isEqual(other: Task | null): boolean {
+    return other instanceof MyTask;
   }
 }
 ```
 
-## Task Chains
-
-Chain tasks to run in sequence:
+### Task with Subtasks
 
 ```typescript
-import { TaskChain } from 'baritone-ts';
+import { Task } from 'baritone-ts';
 
-const chain = new TaskChain(bot, [
-  new GatherWoodTask(bot, { woodType: 'oak', quantity: 16 }),
-  new CraftItemTask(bot, { itemName: 'crafting_table', quantity: 1 }),
-  new CraftItemTask(bot, { itemName: 'wooden_pickaxe', quantity: 1 }),
-  new MineOresTask(bot, { targetOres: ['stone'], quantity: 8 }),
-  new CraftItemTask(bot, { itemName: 'stone_pickaxe', quantity: 1 })
-]);
+class CompositeTask extends Task {
+  readonly displayName = 'CompositeTask';
+  private phase = 0;
 
-runner.setTask(chain);
+  onTick(): Task | null {
+    switch (this.phase) {
+      case 0:
+        // Phase 0: Gather materials
+        this.phase = 1;
+        return new GatherResourcesTask(this.bot, config);
+
+      case 1:
+        // Phase 1: Build structure
+        this.phase = 2;
+        return new BuildTask(this.bot, config);
+
+      case 2:
+        // Done
+        return null;
+    }
+    return null;
+  }
+
+  isFinished(): boolean {
+    return this.phase === 2;
+  }
+}
 ```
 
-## Task Priorities
-
-Tasks can have priorities for interruption:
+### Grounded Task
 
 ```typescript
-// High priority tasks can interrupt lower ones
-runner.setTask(miningTask, { priority: 50 });
+import { GroundedTask } from 'baritone-ts';
 
-// Later, urgent task interrupts
-runner.setTask(fleeTask, { priority: 100 });
+class SafeOperationTask extends GroundedTask {
+  readonly displayName = 'SafeOperation';
 
-// When flee completes, mining resumes
+  // This task won't be interrupted while player is mid-air
+  // Prevents dangerous interruptions during jumps/falls
+}
+```
+
+## Task Interfaces
+
+### ITaskCanForce
+
+Tasks implementing this can prevent interruption:
+
+```typescript
+interface ITaskCanForce {
+  shouldForce(): boolean;
+}
+```
+
+### ITaskRequiresGrounded
+
+Tasks that need the player grounded:
+
+```typescript
+interface ITaskRequiresGrounded {
+  requiresGrounded(): boolean;
+}
+```
+
+### ITaskOverridesGrounded
+
+Tasks that can interrupt grounded tasks (e.g., MLG bucket):
+
+```typescript
+interface ITaskOverridesGrounded {
+  overridesGrounded(): boolean;
+}
 ```
 
 ## Examples
 
-### Full Diamond Gear Automation
+### Complete Automation Chain
 
 ```typescript
-const runner = new TaskRunner(bot, bot.pathfinder);
+const runner = createTaskRunner(bot);
 
-const gearTask = new TaskChain(bot, [
-  // Get wood for tools
-  new GatherWoodTask(bot, { woodType: 'any', quantity: 16 }),
+// Set user task
+runner.getUserChain().setUserTask(
+  new MineOresTask(bot, {
+    targetOres: ['diamond_ore'],
+    quantity: 10
+  })
+);
 
-  // Craft basic tools
-  new CraftItemTask(bot, { itemName: 'crafting_table', quantity: 1 }),
-  new CraftItemTask(bot, { itemName: 'wooden_pickaxe', quantity: 1 }),
+// Survival chains run automatically:
+// - FoodChain eats when hungry
+// - MobDefenseChain fights when attacked
+// - MLGBucketChain protects from falls
 
-  // Upgrade to stone
-  new MineOresTask(bot, { targetOres: ['stone'], quantity: 11 }),
-  new CraftItemTask(bot, { itemName: 'stone_pickaxe', quantity: 1 }),
-  new CraftItemTask(bot, { itemName: 'furnace', quantity: 1 }),
-
-  // Get iron
-  new MineOresTask(bot, { targetOres: ['iron_ore'], quantity: 31 }),
-  new SmeltItemTask(bot, { inputItem: 'iron_ore', quantity: 31 }),
-  new CraftItemTask(bot, { itemName: 'iron_pickaxe', quantity: 1 }),
-
-  // Get diamonds
-  new MineOresTask(bot, { targetOres: ['diamond_ore'], quantity: 24 }),
-
-  // Craft diamond gear
-  new CraftItemTask(bot, { itemName: 'diamond_pickaxe', quantity: 1 }),
-  new CraftItemTask(bot, { itemName: 'diamond_sword', quantity: 1 }),
-  new CraftItemTask(bot, { itemName: 'diamond_helmet', quantity: 1 }),
-  new CraftItemTask(bot, { itemName: 'diamond_chestplate', quantity: 1 }),
-  new CraftItemTask(bot, { itemName: 'diamond_leggings', quantity: 1 }),
-  new CraftItemTask(bot, { itemName: 'diamond_boots', quantity: 1 })
-]);
-
-runner.setTask(gearTask);
+runner.attachToBot();
 ```
 
-### Base Builder Bot
+### Custom Task Chain
 
 ```typescript
-const baseTask = new TaskChain(bot, [
-  // Clear area
-  new ClearAreaTask(bot, {
-    min: { x: 0, y: 64, z: 0 },
-    max: { x: 10, y: 68, z: 10 }
-  }),
+const runner = createTaskRunner(bot);
 
-  // Build floor
-  new BuildStructureTask(bot, {
-    instructions: BuildHelper.createFloor(0, 64, 0, 10, 10, 'stone_bricks'),
-    gatherMaterials: true
-  }),
+// Add custom high-priority chain
+class EmergencyChain extends SingleTaskChain {
+  readonly displayName = 'Emergency';
 
-  // Build walls
-  new BuildStructureTask(bot, {
-    instructions: BuildHelper.createWalls(0, 65, 0, 10, 4, 10, 'stone_bricks'),
-    gatherMaterials: true
-  }),
+  getPriority(): number {
+    return this.isEmergency() ? ChainPriority.DANGER : ChainPriority.INACTIVE;
+  }
 
-  // Add roof
-  new BuildStructureTask(bot, {
-    instructions: BuildHelper.createFloor(0, 69, 0, 10, 10, 'oak_planks'),
-    gatherMaterials: true
-  }),
+  isActive(): boolean {
+    return this.isEmergency();
+  }
 
-  // Place door
-  new PlaceBlockTask(bot, {
-    position: { x: 5, y: 65, z: 0 },
-    blockName: 'oak_door'
-  })
-]);
+  protected getTaskForTick(): Task | null {
+    return this.isEmergency() ? new FleeTask(this.bot) : null;
+  }
 
-runner.setTask(baseTask);
+  private isEmergency(): boolean {
+    return this.bot.health < 5;
+  }
+}
+
+runner.registerChain(new EmergencyChain(bot));
 ```

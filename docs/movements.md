@@ -152,12 +152,14 @@ const cost = movement.calculateCost(ctx);
 Each movement runs as a state machine:
 
 ```typescript
-enum MovementStatus {
-  PREPPING,   // Setting up (equipping tools)
-  WAITING,    // Waiting (chunk loading, block break)
-  RUNNING,    // Actively moving
-  SUCCESS,    // Completed successfully
-  FAILED      // Could not complete
+enum MovementState {
+  NOT_STARTED,  // Initial state
+  PREPPING,     // Setting up (equipping tools)
+  WAITING,      // Waiting (chunk loading, block break)
+  RUNNING,      // Actively moving
+  SUCCESS,      // Completed successfully
+  UNREACHABLE,  // Path became blocked
+  FAILED        // Could not complete
 }
 ```
 
