@@ -364,20 +364,22 @@ Many composite tasks exist as stubs:
 
 ## Priority Tasks for Next Iterations
 
-### Iteration 3 - Core Movement Tasks
-1. Full port of `TimeoutWanderTask`
-2. Full port of `PickupDroppedItemTask`
-3. Port `RunAwayFromEntitiesTask` and variants
+### Iteration 5 - Goal Types & Advanced Movement
+1. Port `GoalAnd.java` - Composite goals
+2. Port `GoalBlockSide.java` - Approach block from side
+3. Port `GoalRunAwayFromEntities.java` - Flee goal
+4. Port `GetToOuterEndIslandsTask.java` - End dimension travel
 
-### Iteration 4 - Container Tasks
-1. Port `DoStuffInContainerTask.java`
-2. Port `CraftInTableTask.java`
-3. Port `SmeltInFurnaceTask.java`
+### Iteration 6 - Slot/Inventory Tasks
+1. Port `ClickSlotTask.java`
+2. Port `EnsureFree*Task.java` (multiple)
+3. Port `MoveItem*Task.java` (multiple)
+4. Port `ThrowCursorTask.java`
 
-### Iteration 5+ - Resource Collection
+### Iteration 7+ - Resource Collection & Speedrun
 1. Full implementation of resource collection tasks
-2. Container interaction tasks
-3. Crafting integration
+2. Speedrun tasks (BeatMinecraft2Task)
+3. Dragon fight tasks
 
 ---
 
@@ -403,11 +405,11 @@ Many composite tasks exist as stubs:
 
 ## Statistics
 - **Java Files**: 371
-- **TypeScript Files**: 190 (was 188)
-- **Estimated Completion**: ~55%
-- **Core Systems**: ~85% complete
-- **Task Implementations**: ~35% complete (up from ~20%)
-- **Utility/Helper**: ~70% complete
+- **TypeScript Files**: 195 (was 190)
+- **Estimated Completion**: ~58%
+- **Core Systems**: ~88% complete
+- **Task Implementations**: ~38% complete (up from ~35%)
+- **Utility/Helper**: ~75% complete
 
 ## Files Added in Iteration 1
 1. `src/control/InputControls.ts`
@@ -444,4 +446,17 @@ Many composite tasks exist as stubs:
 - Added RunAwayFromEntitiesTask family for fleeing from threats
 - Added DodgeProjectilesTask for avoiding arrows/fireballs
 - All type errors fixed, project compiles successfully
-- Ready for next iteration focusing on container tasks
+
+## Files Added in Iteration 4
+1. `src/trackers/blacklisting/AbstractObjectBlacklist.ts`
+2. `src/trackers/blacklisting/WorldLocateBlacklist.ts`
+3. `src/trackers/blacklisting/EntityLocateBlacklist.ts`
+4. `src/trackers/blacklisting/index.ts`
+5. `src/tasks/concrete/ThrowEnderPearlTask.ts`
+
+### Iteration 4 Summary
+- Added intelligent blacklisting system with distance/tool-based reset
+- Added ThrowEnderPearlTask for ender pearl travel
+- Verified container tasks are already well-implemented
+- All type errors fixed, project compiles successfully
+- Ready for next iteration focusing on goal types and advanced movement
