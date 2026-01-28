@@ -701,7 +701,7 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [x] Updated exports in index.ts
 - [x] All 1320 tests passing
 
-### Iteration 15 (Complete - Final)
+### Iteration 15
 - [x] Implemented PlaceStructureBlockTask (AdvancedConstructionTask.ts):
   - Places any throwaway block at a position
   - State machine: GETTING_BLOCK -> PLACING -> FINISHED/FAILED
@@ -723,16 +723,53 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
   - 22 new tests added
 - [x] Updated exports in index.ts
 - [x] All 1342 tests passing
-- [x] Port complete - all major BaritonePlus tasks ported!
+
+### Iteration 16 (Current)
+- [x] Conducted thorough audit of missing BaritonePlus tasks
+- [x] Implemented RunAwayFromPositionTask (EscapeTask.ts):
+  - Flee from multiple danger positions
+  - Weighted flee direction calculation
+  - Optional Y-level maintenance
+  - runFromPositions(), runFromPositionsAtY() helpers
+- [x] Implemented GetCloseToBlockTask (BlockSearchTask.ts):
+  - Iteratively approach unreachable positions (lava pools, etc.)
+  - Strictly decreasing range algorithm
+  - getAchievedDistance() to report how close we got
+  - getCloseTo(), getCloseToVec() helpers
+- [x] Implemented SatisfyMiningRequirementTask (MiningRequirementTask.ts):
+  - MiningRequirement enum (HAND, WOOD, STONE, IRON, DIAMOND)
+  - Tool tier validation and checking
+  - miningRequirementMet(), getBlockMiningRequirement() helpers
+  - satisfyMiningRequirement(), ensure*Pickaxe() factories
+- [x] Implemented GetBuildingMaterialsTask (MiningRequirementTask.ts):
+  - Collects throwaway blocks (cobblestone, dirt, netherrack)
+  - BUILDING_MATERIALS constant
+  - getBuildingMaterials() helper
+- [x] Implemented SearchWithinBiomeTask (BiomeSearchTask.ts):
+  - Biome-based chunk exploration
+  - Biomes constant with all Minecraft biomes
+  - searchWithinBiome() helper
+- [x] Implemented LocateDesertTempleTask (BiomeSearchTask.ts):
+  - Auto-locates desert temples by pressure plate detection
+  - Temple structure verification (sandstone check)
+  - locateDesertTemple() helper
+- [x] Implemented KillEnderDragonWithBedsTask (DragonFightTask.ts):
+  - Bed explosion speedrun strategy
+  - State machine: FINDING_PORTAL -> POSITIONING -> PLACING_BED -> WAITING_FOR_HEAD -> EXPLODING_BED
+  - BED_ITEMS constant for all bed colors
+  - killDragonWithBeds() helper
+- [x] Added 46 comprehensive tests for all new tasks (MissingTasks.test.ts)
+- [x] Updated exports in index.ts
+- [x] All 1388 tests passing
 
 ## Port Completion Summary
 
-The BaritonePlus → baritone-ts port is now **complete** with 15 iterations:
+The BaritonePlus → baritone-ts port is now **complete** with 16 iterations:
 
 **Total Statistics:**
-- 39 concrete task modules ported
+- 41 concrete task modules ported
 - 6 chain implementations
-- 1342 tests passing
+- 1388 tests passing
 - Full coverage of BaritonePlus functionality
 
 **Notable Omissions (by design):**
@@ -810,4 +847,4 @@ For each ported task, we need tests that verify:
 ## 🎉 PORT COMPLETE! 🎉
 
 All major BaritonePlus tasks have been successfully ported to baritone-ts TypeScript implementation.
-Total: 15 iterations, 39 task modules, 1342 tests passing.
+Total: 16 iterations, 41 task modules, 1388 tests passing.

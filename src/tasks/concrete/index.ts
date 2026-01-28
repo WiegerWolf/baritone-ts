@@ -117,13 +117,16 @@ export {
   EscapeFromLavaTask,
   RunAwayFromCreepersTask,
   RunAwayFromHostilesTask,
+  RunAwayFromPositionTask,
   escapeFromLava,
   escapeFromLavaUrgent,
   runFromCreepers,
   runFromHostiles,
   runFromAllHostiles,
+  runFromPositions,
+  runFromPositionsAtY,
 } from './EscapeTask';
-export type { LavaEscapeConfig, CreeperFleeConfig, HostileFleeConfig } from './EscapeTask';
+export type { LavaEscapeConfig, CreeperFleeConfig, HostileFleeConfig, PositionFleeConfig } from './EscapeTask';
 
 // Resource collection tasks
 export {
@@ -161,9 +164,12 @@ export {
   DoToClosestBlockTask,
   GetWithinRangeOfBlockTask,
   GoInDirectionXZTask,
+  GetCloseToBlockTask,
   doToClosestBlock,
   getWithinRangeOf,
   goInDirection,
+  getCloseTo,
+  getCloseToVec,
 } from './BlockSearchTask';
 export type { BlockFilter, BlockTaskFactory, DoToClosestBlockConfig } from './BlockSearchTask';
 
@@ -380,12 +386,16 @@ export {
 export {
   KillEnderDragonTask,
   WaitForDragonAndPearlTask,
+  KillEnderDragonWithBedsTask,
   DragonFightState,
   PearlStrategyState,
+  BedDragonState,
   killEnderDragon,
   waitForDragonAndPearl,
+  killDragonWithBeds,
   DIAMOND_ARMOR,
   FOOD_ITEMS,
+  BED_ITEMS,
 } from './DragonFightTask';
 export type { IDragonWaiter } from './DragonFightTask';
 
@@ -446,3 +456,30 @@ export {
   doToClosestObject,
 } from './AbstractDoToClosestObjectTask';
 export type { DoToClosestObjectConfig } from './AbstractDoToClosestObjectTask';
+
+// Mining requirement tasks
+export {
+  MiningRequirement,
+  SatisfyMiningRequirementTask,
+  GetBuildingMaterialsTask,
+  satisfyMiningRequirement,
+  ensureStonePickaxe,
+  ensureIronPickaxe,
+  ensureDiamondPickaxe,
+  getBuildingMaterials,
+  miningRequirementMet,
+  getBlockMiningRequirement,
+  BUILDING_MATERIALS,
+} from './MiningRequirementTask';
+
+// Biome search tasks
+export {
+  Biomes,
+  SearchWithinBiomeTask,
+  LocateDesertTempleTask,
+  searchWithinBiome,
+  locateDesertTemple,
+  getCurrentBiome,
+  isInBiome,
+} from './BiomeSearchTask';
+export type { BiomeKey, LocateDesertTempleConfig } from './BiomeSearchTask';
