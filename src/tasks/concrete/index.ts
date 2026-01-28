@@ -216,3 +216,35 @@ export {
   strafeAndDodge,
 } from './DodgeTask';
 export type { DodgeProjectilesConfig } from './DodgeTask';
+
+// Trading tasks
+export {
+  TradeWithPiglinsTask,
+  tradeWithPiglins,
+  tradeForEnderPearls,
+  tradeForFireResistance,
+} from './TradeTask';
+export type { PiglinTradeConfig } from './TradeTask';
+
+// MLG/fall damage prevention tasks
+export {
+  MLGBucketTask,
+  MLGBucketMonitorTask,
+  mlgBucket,
+  monitorForMLG,
+  shouldMLG,
+} from './MLGTask';
+export type { MLGConfig } from './MLGTask';
+
+// Chunk search/exploration tasks
+export {
+  blockToChunk,
+  chunkToBlock,
+  SearchChunksExploreTask,
+  SearchChunkForBlockTask,
+  SearchChunkByConditionTask,
+  searchForBlocks,
+  searchForStronghold,
+  searchForNetherFortress,
+} from './ChunkSearchTask';
+export type { ChunkPos, ChunkSearchConfig } from './ChunkSearchTask';

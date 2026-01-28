@@ -5,7 +5,7 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 ## Summary
 
 **Status**: In Progress
-**Last Updated**: Iteration 5
+**Last Updated**: Iteration 6
 
 ### BaritonePlus Java Statistics:
 - Total Tasks: 173 Java files in tasks/
@@ -14,9 +14,9 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 
 ### baritone-ts TypeScript Statistics (Current):
 - Composite Tasks: 46 files
-- Concrete Tasks: 17 modules (GoTo, MineBlock, PlaceBlock, Craft, Smelt, Inventory, Interact, Slot, MovementUtil, Container, Construction, Entity, Escape, Resource, MineAndCollect, KillAndLoot, CollectFuel, BlockSearch)
+- Concrete Tasks: 21 modules (GoTo, MineBlock, PlaceBlock, Craft, Smelt, Inventory, Interact, Slot, MovementUtil, Container, Construction, Entity, Escape, Resource, MineAndCollect, KillAndLoot, CollectFuel, BlockSearch, Portal, Armor, Bed, CollectLiquid, Dodge, Trade, MLG, ChunkSearch)
 - Chains: 6 files (FoodChain, MLGBucketChain, MobDefenseChain, WorldSurvivalChain, DeathMenuChain, PlayerInteractionFixChain)
-- Tests: 24 test files
+- Tests: 26 test files
 
 ## Missing Components to Port
 
@@ -63,22 +63,22 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [ ] CollectBucketLiquidTask
 - [ ] CollectObsidianTask
 - [ ] CarveThenCollectTask
-- [ ] TradeWithPiglinsTask
+- [x] TradeWithPiglinsTask (Completed Iteration 6)
 
 #### Movement Tasks (Partially Exists)
 - [x] FleeTask/RunAwayFromEntitiesTask (exists)
 - [x] ExploreTask (exists)
 - [x] FollowPlayerTask (exists)
 - [x] TimeoutWanderTask (Completed Iteration 2)
-- [ ] SearchChunkForBlockTask
-- [ ] SearchChunksExploreTask
+- [x] SearchChunkForBlockTask (Completed Iteration 6)
+- [x] SearchChunksExploreTask (Completed Iteration 6)
 - [ ] GetToChunkTask
 - [x] GetToYTask (Completed Iteration 2)
 - [x] GetWithinRangeOfBlockTask (Completed Iteration 5)
 - [x] PickupDroppedItemTask (Exists as PickupItemTask)
-- [ ] DodgeProjectilesTask
-- [ ] MLGBucketTask (task version)
-- [ ] EnterNetherPortalTask
+- [x] DodgeProjectilesTask (Completed Iteration 6)
+- [x] MLGBucketTask (Completed Iteration 6)
+- [x] EnterNetherPortalTask (Completed Iteration 6)
 - [x] EscapeFromLavaTask (Completed Iteration 4)
 - [x] RunAwayFromCreepersTask (Completed Iteration 4)
 - [x] RunAwayFromHostilesTask (Completed Iteration 4)
@@ -341,6 +341,40 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [x] Updated concrete task exports in index.ts
 - [x] All 863 tests passing
 
+### Iteration 6 (Complete)
+- [x] Fixed TypeScript errors in CollectLiquidTask (private/protected method conflict)
+- [x] Verified existing implementations:
+  - PortalTask.ts (EnterNetherPortalTask, GoToDimensionTask)
+  - ArmorTask.ts (EquipArmorTask, EquipSpecificArmorTask)
+  - BedTask.ts (PlaceBedAndSetSpawnTask, SleepInBedTask)
+  - DodgeTask.ts (DodgeProjectilesTask, StrafeAndDodgeTask)
+  - CollectLiquidTask.ts (CollectBucketLiquidTask)
+- [x] Implemented trading tasks (TradeTask.ts):
+  - TradeWithPiglinsTask - bartering with piglins
+  - Piglin blacklisting for unresponsive piglins
+  - Hoglin avoidance during trading
+  - tradeWithPiglins(), tradeForEnderPearls() helpers
+- [x] Implemented MLG/fall damage prevention tasks (MLGTask.ts):
+  - MLGBucketTask - emergency water bucket placement
+  - MLGBucketMonitorTask - continuous fall monitoring
+  - Dimension awareness (water evaporates in nether)
+  - Water pickup after landing
+  - mlgBucket(), monitorForMLG(), shouldMLG() helpers
+- [x] Implemented chunk search/exploration tasks (ChunkSearchTask.ts):
+  - ChunkPos type and blockToChunk/chunkToBlock utilities
+  - SearchChunksExploreTask - abstract base for chunk exploration
+  - SearchChunkForBlockTask - find specific blocks across chunks
+  - SearchChunkByConditionTask - find chunks matching conditions
+  - searchForBlocks(), searchForStronghold(), searchForNetherFortress() helpers
+- [x] Added comprehensive tests for new tasks (TradeAndMLGTasks.test.ts):
+  - 48 tests covering trading, MLG, and chunk search
+  - WHY/intent tests explaining purpose of each task
+  - Dimension handling tests
+  - Chunk coordinate utility tests
+  - Equality and convenience function tests
+- [x] Updated concrete task exports in index.ts
+- [x] All 959 tests passing
+
 ## Test Coverage Goals
 
 For each ported task, we need tests that verify:
@@ -377,7 +411,11 @@ For each ported task, we need tests that verify:
 8. ~~Implement escape/safety tasks (EscapeFromLavaTask, RunAwayFromCreepersTask)~~ ✅ Done
 9. ~~Implement resource collection tasks (MineAndCollectTask, KillAndLootTask, CollectFuelTask)~~ ✅ Done
 10. ~~Implement block search tasks (DoToClosestBlockTask, GetWithinRangeOfBlockTask, GoInDirectionXZTask)~~ ✅ Done
-11. Implement nether tasks (EnterNetherPortalTask, TradeWithPiglinsTask)
-12. Implement search/exploration tasks (SearchChunkForBlockTask)
-13. Implement remaining misc tasks (EquipArmorTask, PlaceBedAndSetSpawnTask)
-14. Add comprehensive tests for new tasks
+11. ~~Implement nether tasks (EnterNetherPortalTask, TradeWithPiglinsTask)~~ ✅ Done
+12. ~~Implement search/exploration tasks (SearchChunkForBlockTask)~~ ✅ Done
+13. ~~Implement misc tasks (EquipArmorTask, PlaceBedAndSetSpawnTask, DodgeProjectilesTask)~~ ✅ Done
+14. ~~Implement MLG/fall prevention tasks~~ ✅ Done
+15. Implement remaining container tasks (StoreInStashTask, PickupFromContainerTask)
+16. Implement remaining movement tasks (GetToChunkTask, FastTravelTask)
+17. Implement crafting tasks (CraftInInventoryTask, CraftGenericManuallyTask)
+18. Implement construction compound tasks (ConstructNetherPortalBucketTask)
