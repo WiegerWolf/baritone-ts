@@ -5,7 +5,7 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 ## Summary
 
 **Status**: In Progress
-**Last Updated**: Iteration 3
+**Last Updated**: Iteration 4
 
 ### BaritonePlus Java Statistics:
 - Total Tasks: 173 Java files in tasks/
@@ -14,9 +14,9 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 
 ### baritone-ts TypeScript Statistics (Current):
 - Composite Tasks: 46 files
-- Concrete Tasks: 11 modules (GoTo, MineBlock, PlaceBlock, Craft, Smelt, Inventory, Interact, Slot, MovementUtil, Container, Construction)
+- Concrete Tasks: 13 modules (GoTo, MineBlock, PlaceBlock, Craft, Smelt, Inventory, Interact, Slot, MovementUtil, Container, Construction, Entity, Escape)
 - Chains: 6 files (FoodChain, MLGBucketChain, MobDefenseChain, WorldSurvivalChain, DeathMenuChain, PlayerInteractionFixChain)
-- Tests: 20 test files
+- Tests: 22 test files
 
 ## Missing Components to Port
 
@@ -78,9 +78,9 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [ ] DodgeProjectilesTask
 - [ ] MLGBucketTask (task version)
 - [ ] EnterNetherPortalTask
-- [ ] EscapeFromLavaTask
-- [ ] RunAwayFromCreepersTask
-- [ ] RunAwayFromHostilesTask
+- [x] EscapeFromLavaTask (Completed Iteration 4)
+- [x] RunAwayFromCreepersTask (Completed Iteration 4)
+- [x] RunAwayFromHostilesTask (Completed Iteration 4)
 - [ ] GoInDirectionXZTask
 - [x] SafeRandomShimmyTask (Completed Iteration 2)
 - [x] IdleTask (Completed Iteration 2)
@@ -88,14 +88,15 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [x] WaitTask (Completed Iteration 2)
 - [x] LookAtBlockTask (Completed Iteration 2)
 
-#### Entity Tasks
+#### Entity Tasks (Completed Iteration 4)
 - [x] CombatTask/KillEntityTask (exists)
 - [x] HuntTask (exists)
 - [x] ShearTask (exists)
-- [ ] AbstractDoToEntityTask (base class)
-- [ ] DoToClosestEntityTask
-- [ ] GiveItemToPlayerTask
-- [ ] KillPlayerTask
+- [x] AbstractDoToEntityTask (Completed Iteration 4)
+- [x] DoToClosestEntityTask (Completed Iteration 4)
+- [x] GiveItemToPlayerTask (Completed Iteration 4)
+- [x] KillPlayerTask (Completed Iteration 4)
+- [x] InteractWithEntityTask (Completed Iteration 4)
 - [ ] HeroTask
 
 #### Construction Tasks (Completed Iteration 3)
@@ -214,6 +215,67 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [x] Updated concrete task exports in index.ts
 - [x] All 750 tests passing
 
+### Iteration 4 (Complete)
+- [x] Implemented entity interaction tasks (EntityTask.ts):
+  - AbstractDoToEntityTask - base class for entity interactions
+    - State machine: FINDING -> APPROACHING -> MAINTAINING_DISTANCE -> INTERACTING
+    - Progress checking to detect unreachable entities
+    - Look helper for proper entity orientation
+    - Configurable maintain distance and reach range
+  - DoToClosestEntityTask - find and interact with closest entity of types
+    - Entity type filtering
+    - Custom entity filter predicates
+    - Origin position supplier for distance calculations
+  - GiveItemToPlayerTask - give items to another player
+    - Finds player by username
+    - Approaches and drops items toward them
+  - KillPlayerTask - PvP targeting task
+    - Tracks specific player
+    - Finishes when player dead or disconnected
+  - InteractWithEntityTask - right-click entity interaction
+    - Approaches entity within range
+    - Performs useOn/activateEntity
+  - killEntities() helper - convenience function to create kill task
+  - KillEntitySubTask - internal subtask for killing single entity
+- [x] Implemented escape/safety tasks (EscapeTask.ts):
+  - EscapeFromLavaTask - escape from lava urgently
+    - Sprint and jump through lava for faster escape
+    - Finds safe ground (solid, not adjacent to lava)
+    - Prefers positions near water to cool off
+    - Progress checking with direction change on stuck
+    - Timeout safety (30 seconds max)
+  - RunAwayFromCreepersTask - flee from creepers
+    - Weighted flee direction based on creeper proximity
+    - Extra distance for charged creepers
+    - Detects fusing creepers (need more distance)
+    - Sprint while fleeing
+  - RunAwayFromHostilesTask - flee from all hostile mobs
+    - Configurable hostile types list
+    - Option to include/exclude skeletons
+    - Calculates average hostile position and flees opposite
+    - Sprint while fleeing
+  - Convenience functions: escapeFromLava, escapeFromLavaUrgent, runFromCreepers, runFromHostiles, runFromAllHostiles
+- [x] Added comprehensive tests for entity tasks (EntityTasks.test.ts):
+  - 19 tests covering AbstractDoToEntityTask state machine
+  - DoToClosestEntityTask finding and filtering
+  - GiveItemToPlayerTask inventory checks
+  - KillPlayerTask targeting
+  - InteractWithEntityTask interaction
+  - killEntities helper function
+  - Equality checks for task deduplication
+- [x] Added comprehensive tests for escape tasks (EscapeTasks.test.ts):
+  - 36 tests covering EscapeFromLavaTask lava detection
+  - Sprint/jump behavior through lava
+  - Safe ground finding algorithm
+  - RunAwayFromCreepersTask detection and flee direction
+  - Charged creeper handling
+  - RunAwayFromHostilesTask filtering
+  - Multiple hostile handling
+  - Convenience function tests
+- [x] Updated concrete task exports in index.ts
+- [x] Fixed MovementProgressChecker API usage (setProgress + failed, not check)
+- [x] All 805 tests passing
+
 ## Test Coverage Goals
 
 For each ported task, we need tests that verify:
@@ -246,7 +308,9 @@ For each ported task, we need tests that verify:
 4. ~~Implement movement utility tasks~~ ✅ Done
 5. ~~Add container interaction base classes (DoStuffInContainerTask)~~ ✅ Done
 6. ~~Implement construction tasks (DestroyBlockTask, PlaceBlockNearbyTask)~~ ✅ Done
-7. Implement entity interaction base classes (AbstractDoToEntityTask, DoToClosestEntityTask)
-8. Implement resource collection tasks (CollectBlazeRodsTask, CollectFuelTask)
-9. Implement escape/safety tasks (EscapeFromLavaTask, RunAwayFromCreepersTask)
-10. Add comprehensive tests for new tasks
+7. ~~Implement entity interaction base classes (AbstractDoToEntityTask, DoToClosestEntityTask)~~ ✅ Done
+8. ~~Implement escape/safety tasks (EscapeFromLavaTask, RunAwayFromCreepersTask)~~ ✅ Done
+9. Implement resource collection tasks (CollectBlazeRodsTask, CollectFuelTask)
+10. Implement search/exploration tasks (SearchChunkForBlockTask)
+11. Implement nether tasks (EnterNetherPortalTask, TradeWithPiglinsTask)
+12. Add comprehensive tests for new tasks

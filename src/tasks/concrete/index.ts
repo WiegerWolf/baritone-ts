@@ -100,3 +100,27 @@ export {
   ClearLiquidTask,
   PutOutFireTask,
 } from './ConstructionTask';
+
+// Entity interaction tasks
+export {
+  AbstractDoToEntityTask,
+  DoToClosestEntityTask,
+  GiveItemToPlayerTask,
+  KillPlayerTask,
+  InteractWithEntityTask,
+  killEntities,
+} from './EntityTask';
+export type { EntityTaskConfig, EntityFilter, EntityTaskFactory } from './EntityTask';
+
+// Escape/safety tasks
+export {
+  EscapeFromLavaTask,
+  RunAwayFromCreepersTask,
+  RunAwayFromHostilesTask,
+  escapeFromLava,
+  escapeFromLavaUrgent,
+  runFromCreepers,
+  runFromHostiles,
+  runFromAllHostiles,
+} from './EscapeTask';
+export type { LavaEscapeConfig, CreeperFleeConfig, HostileFleeConfig } from './EscapeTask';
