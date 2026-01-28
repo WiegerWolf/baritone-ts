@@ -29,3 +29,20 @@ export {
   WorldLocateBlacklist,
   EntityLocateBlacklist,
 } from './blacklisting';
+
+// Misc block tracker
+export {
+  MiscBlockTracker,
+  Dimension,
+} from './MiscBlockTracker';
+
+// Simple chunk tracker
+export {
+  SimpleChunkTracker,
+  blockToChunk,
+  chunkStartX,
+  chunkEndX,
+  chunkStartZ,
+  chunkEndZ,
+  type ChunkPos,
+} from './SimpleChunkTracker';

@@ -5,11 +5,42 @@ This document tracks the porting progress from the Java BaritonePlus project to 
 
 **Source**: BaritonePlus (371 Java files)
 **Target**: baritone-ts (195 TypeScript files currently)
-**Last Updated**: 2026-01-28, Iteration 5
+**Last Updated**: 2026-01-28, Iteration 6
 
 ---
 
-## Iteration 5 Progress (Current)
+## Iteration 6 Progress (Current)
+
+### Completed in This Iteration:
+1. **GoalDodgeProjectiles** - NEW (in `goals/index.ts`)
+   - Uses projectile physics to predict impact points
+   - Penalizes positions near predicted trajectories
+   - Caches calculations for performance
+   - Supports custom horizontal/vertical dodge distances
+
+2. **ShearSheepTask** - NEW
+   - `tasks/concrete/ShearSheepTask.ts` - Find and shear sheep
+   - Finds shearable sheep (not already sheared)
+   - Handles shears equipping
+   - Supports color preferences and count limits
+   - Reads sheep metadata for sheared state
+
+3. **Updated Exports**
+   - `tasks/concrete/index.ts` updated with ShearSheepTask
+   - `goals/index.ts` updated with GoalDodgeProjectiles
+
+## Files Added in Iteration 6
+1. `src/tasks/concrete/ShearSheepTask.ts`
+
+### Iteration 6 Summary
+- Added GoalDodgeProjectiles for projectile avoidance pathfinding
+- Added ShearSheepTask for automated wool collection
+- All type errors fixed, project compiles successfully
+- Remaining gaps: Elytra navigation, RepairToolTask, enhanced slot tasks
+
+---
+
+## Iteration 5 Progress (Completed)
 
 ### Completed in This Iteration:
 1. **Verification Pass** - Confirmed existing implementations
@@ -261,7 +292,7 @@ Many composite tasks exist as stubs:
 - [x] `GoalBlockSide.java` → `goals/index.ts` (Iteration 4)
 - [x] `GoalChunk.java` → `goals/index.ts` (Iteration 4)
 - [x] `GoalDirectionXZ.java` → `goals/index.ts` (Iteration 4)
-- [ ] `GoalDodgeProjectiles.java` - Avoid projectiles
+- [x] `GoalDodgeProjectiles.java` → `goals/index.ts` (Iteration 6)
 - [x] `GoalFollowEntity.java` → `goals/index.ts` (existing as GoalFollow)
 - [x] `GoalRunAwayFromEntities.java` → `goals/index.ts` (Iteration 4)
 
@@ -354,7 +385,7 @@ Many composite tasks exist as stubs:
 - [x] `KillEntitiesTask.java` → EntityTask.ts (killEntities function exists)
 - [x] `KillEntityTask.java` → EntityTask.ts (part of AbstractDoToEntityTask)
 - [x] `KillPlayerTask.java` → EntityTask.ts (verified Iteration 5)
-- [ ] `ShearSheepTask.java` - Specialized task, not ported
+- [x] `ShearSheepTask.java` → `ShearSheepTask.ts` (Iteration 6)
 
 #### Slot/Inventory Tasks (~10 files)
 - [x] `ClickSlotTask.java` → SlotTask.ts (verified Iteration 5)
@@ -412,19 +443,16 @@ Many composite tasks exist as stubs:
 
 ## Priority Tasks for Next Iterations
 
-### Iteration 6 - Remaining Gaps
-1. Port `GetToOuterEndIslandsTask.java` - End dimension travel
-2. Port `GetToXZWithElytraTask.java` - Elytra flight navigation
-3. Port `ShearSheepTask.java` - Specialized entity interaction
-4. Port `RepairToolTask.java` - Anvil-based repair
-5. Enhanced `MoveItemToSlotFromContainerTask` and `MoveItemToSlotFromInventoryTask`
-6. Port `CraftWithMatchingPlanTask` variants
+### Iteration 7 - Remaining Gaps
+1. Port `GetToXZWithElytraTask.java` - Elytra flight navigation
+2. Port `RepairToolTask.java` - Anvil-based repair
+3. Enhanced `MoveItemToSlotFromContainerTask` and `MoveItemToSlotFromInventoryTask`
+4. Port `CraftWithMatchingPlanTask` variants
 
-### Iteration 7+ - Polish & Edge Cases
-1. Port `GoalDodgeProjectiles.java` goal
-2. Butler/command system (if needed)
-3. Additional MiscBlockTracker, SimpleChunkTracker if needed
-4. Storage sub-trackers (ContainerSubTracker, InventorySubTracker)
+### Iteration 8+ - Polish & Edge Cases
+1. Butler/command system (if needed)
+2. Additional MiscBlockTracker, SimpleChunkTracker if needed
+3. Storage sub-trackers (ContainerSubTracker, InventorySubTracker)
 
 ---
 
@@ -450,11 +478,12 @@ Many composite tasks exist as stubs:
 
 ## Statistics
 - **Java Files**: 371
-- **TypeScript Files**: 196
-- **Estimated Completion**: ~78%
-- **Core Systems**: ~90% complete
-- **Task Implementations**: ~85% complete (many existed, verified in Iteration 5)
-- **Utility/Helper**: ~80% complete
+- **TypeScript Files**: 197
+- **Estimated Completion**: ~80%
+- **Core Systems**: ~92% complete
+- **Task Implementations**: ~88% complete
+- **Utility/Helper**: ~82% complete
+- **Goals**: ~95% complete (all core goals ported)
 
 ## Files Added in Iteration 1
 1. `src/control/InputControls.ts`

@@ -515,3 +515,20 @@ export {
   getToOuterEndIslands,
   END_ISLAND_START_RADIUS,
 } from './GetToOuterEndIslandsTask';
+
+// Sheep shearing task
+export {
+  ShearSheepTask,
+  shearSheep,
+  shearSheepOfColor,
+} from './ShearSheepTask';
+export type { ShearSheepConfig } from './ShearSheepTask';
+
+// Tool repair task
+export {
+  RepairToolTask,
+  repairTools,
+  hasItemsNeedingRepair,
+  REPAIRABLE_ITEMS,
+} from './RepairToolTask';
+export type { RepairToolConfig } from './RepairToolTask';
