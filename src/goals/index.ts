@@ -1,6 +1,33 @@
+import type { Entity } from 'prismarine-entity';
 import { Vec3 } from 'vec3';
 import { Goal, BlockPos, COST_INF } from '../types';
 import { WALK_ONE_BLOCK_COST } from '../core/ActionCosts';
+
+/**
+ * Direction enum for GoalBlockSide
+ */
+export enum Direction {
+  NORTH = 'north',
+  SOUTH = 'south',
+  EAST = 'east',
+  WEST = 'west',
+  UP = 'up',
+  DOWN = 'down',
+}
+
+/**
+ * Get direction vector for a Direction
+ */
+function getDirectionVector(dir: Direction): { x: number; y: number; z: number } {
+  switch (dir) {
+    case Direction.NORTH: return { x: 0, y: 0, z: -1 };
+    case Direction.SOUTH: return { x: 0, y: 0, z: 1 };
+    case Direction.EAST:  return { x: 1, y: 0, z: 0 };
+    case Direction.WEST:  return { x: -1, y: 0, z: 0 };
+    case Direction.UP:    return { x: 0, y: 1, z: 0 };
+    case Direction.DOWN:  return { x: 0, y: -1, z: 0 };
+  }
+}
 
 /**
  * Goal to reach a specific block position
@@ -351,5 +378,309 @@ export class GoalAABB implements Goal {
     const dy = Math.max(0, this.minY - y, y - this.maxY);
     const dz = Math.max(0, this.minZ - z, z - this.maxZ);
     return Math.sqrt(dx * dx + dy * dy + dz * dz) * WALK_ONE_BLOCK_COST;
+  }
+}
+
+/**
+ * GoalAnd - Composite goal that requires ALL sub-goals to be met
+ * Based on BaritonePlus GoalAnd.java
+ *
+ * Unlike GoalComposite (any), this requires all goals to be satisfied.
+ * Useful for complex conditions like "at position X AND at Y level Y"
+ */
+export class GoalAnd implements Goal {
+  public readonly goals: Goal[];
+
+  constructor(...goals: Goal[]) {
+    if (goals.length === 0) {
+      throw new Error('GoalAnd requires at least one goal');
+    }
+    this.goals = goals;
+  }
+
+  isEnd(x: number, y: number, z: number): boolean {
+    for (const goal of this.goals) {
+      if (!goal.isEnd(x, y, z)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  heuristic(x: number, y: number, z: number): number {
+    // Sum heuristics from all goals
+    let sum = 0;
+    for (const goal of this.goals) {
+      sum += goal.heuristic(x, y, z);
+    }
+    return sum;
+  }
+
+  toString(): string {
+    return `GoalAnd[${this.goals.join(', ')}]`;
+  }
+}
+
+/**
+ * GoalBlockSide - Goal to approach a block from a specific side
+ * Based on BaritonePlus GoalBlockSide.java
+ *
+ * Useful for interacting with blocks that require approaching from
+ * a specific direction (e.g., opening a door, using a chest)
+ */
+export class GoalBlockSide implements Goal {
+  private dirVec: { x: number; y: number; z: number };
+
+  constructor(
+    public readonly blockX: number,
+    public readonly blockY: number,
+    public readonly blockZ: number,
+    public readonly direction: Direction,
+    public readonly bufferDistance: number = 1
+  ) {
+    this.dirVec = getDirectionVector(direction);
+  }
+
+  static fromBlockPos(pos: BlockPos, direction: Direction, buffer: number = 1): GoalBlockSide {
+    return new GoalBlockSide(pos.x, pos.y, pos.z, direction, buffer);
+  }
+
+  isEnd(x: number, y: number, z: number): boolean {
+    // We are on the right side if distance in the correct direction > 0
+    return this.getDistanceInRightDirection(x, y, z) > 0;
+  }
+
+  heuristic(x: number, y: number, z: number): number {
+    // How far are we from being on the right side
+    return Math.min(this.getDistanceInRightDirection(x, y, z), 0) * -WALK_ONE_BLOCK_COST;
+  }
+
+  private getDistanceInRightDirection(x: number, y: number, z: number): number {
+    const dx = x - this.blockX;
+    const dy = y - this.blockY;
+    const dz = z - this.blockZ;
+
+    // Dot product with direction vector
+    const dot = dx * this.dirVec.x + dy * this.dirVec.y + dz * this.dirVec.z;
+
+    // Distance along the direction (direction is normalized)
+    return dot - this.bufferDistance;
+  }
+}
+
+/**
+ * GoalChunk - Goal to reach any position within a chunk
+ * Based on BaritonePlus GoalChunk.java
+ *
+ * Useful for chunk loading, exploration, or reaching general areas
+ */
+export class GoalChunk implements Goal {
+  public readonly chunkX: number;
+  public readonly chunkZ: number;
+
+  constructor(chunkX: number, chunkZ: number) {
+    this.chunkX = chunkX;
+    this.chunkZ = chunkZ;
+  }
+
+  /**
+   * Create from world coordinates
+   */
+  static fromWorldCoords(x: number, z: number): GoalChunk {
+    return new GoalChunk(Math.floor(x / 16), Math.floor(z / 16));
+  }
+
+  /**
+   * Get chunk start X coordinate
+   */
+  get startX(): number {
+    return this.chunkX * 16;
+  }
+
+  /**
+   * Get chunk end X coordinate
+   */
+  get endX(): number {
+    return this.chunkX * 16 + 15;
+  }
+
+  /**
+   * Get chunk start Z coordinate
+   */
+  get startZ(): number {
+    return this.chunkZ * 16;
+  }
+
+  /**
+   * Get chunk end Z coordinate
+   */
+  get endZ(): number {
+    return this.chunkZ * 16 + 15;
+  }
+
+  isEnd(x: number, y: number, z: number): boolean {
+    return this.startX <= x && x <= this.endX &&
+           this.startZ <= z && z <= this.endZ;
+  }
+
+  heuristic(x: number, y: number, z: number): number {
+    // Distance to center of chunk
+    const cx = (this.startX + this.endX) / 2;
+    const cz = (this.startZ + this.endZ) / 2;
+    const dx = cx - x;
+    const dz = cz - z;
+    return Math.sqrt(dx * dx + dz * dz) * WALK_ONE_BLOCK_COST;
+  }
+}
+
+/**
+ * GoalDirectionXZ - Goal to move in a direction indefinitely
+ * Based on BaritonePlus GoalDirectionXZ.java
+ *
+ * Never returns true for isEnd - used for exploration in a direction.
+ * Minimizes deviation from the direction while maximizing progress.
+ */
+export class GoalDirectionXZ implements Goal {
+  private originX: number;
+  private originZ: number;
+  private dirX: number;
+  private dirZ: number;
+
+  constructor(
+    origin: Vec3 | { x: number; z: number },
+    direction: Vec3 | { x: number; z: number },
+    public readonly sidePenalty: number = 1.0
+  ) {
+    this.originX = origin.x;
+    this.originZ = 'z' in origin ? origin.z : 0;
+
+    // Normalize direction (XZ only)
+    const len = Math.sqrt(direction.x * direction.x +
+      ('z' in direction ? direction.z * direction.z : 0));
+
+    if (len < 0.001) {
+      throw new Error('Direction vector cannot be zero');
+    }
+
+    this.dirX = direction.x / len;
+    this.dirZ = ('z' in direction ? direction.z : 0) / len;
+  }
+
+  isEnd(_x: number, _y: number, _z: number): boolean {
+    // Direction goals never end - always keep going
+    return false;
+  }
+
+  heuristic(x: number, y: number, z: number): number {
+    const dx = x - this.originX;
+    const dz = z - this.originZ;
+
+    // How far we've traveled in the correct direction
+    const correctDistance = dx * this.dirX + dz * this.dirZ;
+
+    // Project position onto direction line
+    const px = this.dirX * correctDistance;
+    const pz = this.dirZ * correctDistance;
+
+    // Perpendicular distance (deviation from line)
+    const perpDistSq = (dx - px) * (dx - px) + (dz - pz) * (dz - pz);
+
+    // Reward moving in direction, penalize deviation
+    return -correctDistance * WALK_ONE_BLOCK_COST + perpDistSq * this.sidePenalty;
+  }
+}
+
+/**
+ * Entity supplier type for GoalRunAwayFromEntities
+ */
+export type EntitySupplier = () => Entity[];
+
+/**
+ * GoalRunAwayFromEntities - Goal to flee from multiple entities
+ * Based on BaritonePlus GoalRunAwayFromEntities.java
+ *
+ * Calculates heuristic based on inverse distance to entities,
+ * making positions farther from entities more desirable.
+ */
+export class GoalRunAwayFromEntities implements Goal {
+  constructor(
+    public readonly getEntities: EntitySupplier,
+    public readonly minDistance: number = 16,
+    public readonly xzOnly: boolean = false,
+    public readonly penaltyFactor: number = 10
+  ) {}
+
+  isEnd(x: number, y: number, z: number): boolean {
+    const entities = this.getEntities();
+    const minDistSq = this.minDistance * this.minDistance;
+
+    for (const entity of entities) {
+      if (!entity || entity.isValid === false) continue;
+
+      let distSq: number;
+      if (this.xzOnly) {
+        const dx = entity.position.x - x;
+        const dz = entity.position.z - z;
+        distSq = dx * dx + dz * dz;
+      } else {
+        const dx = entity.position.x - x;
+        const dy = entity.position.y - y;
+        const dz = entity.position.z - z;
+        distSq = dx * dx + dy * dy + dz * dz;
+      }
+
+      if (distSq < minDistSq) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  heuristic(x: number, y: number, z: number): number {
+    const entities = this.getEntities();
+    let costSum = 0;
+    let count = 0;
+    const maxEntities = 10; // Limit to prevent calculation explosion
+
+    for (const entity of entities) {
+      if (count >= maxEntities) break;
+      if (!entity || entity.isValid === false) continue;
+
+      const cost = this.getCostOfEntity(entity, x, y, z);
+      if (cost !== 0) {
+        // Closer entities have bigger weight (1/distance)
+        costSum += 1 / cost;
+      } else {
+        // On top of entity - very bad
+        costSum += 1000;
+      }
+
+      count++;
+    }
+
+    if (count > 0) {
+      costSum /= count;
+    }
+
+    return costSum * this.penaltyFactor;
+  }
+
+  private getCostOfEntity(entity: Entity, x: number, y: number, z: number): number {
+    const ex = Math.floor(entity.position.x);
+    const ey = Math.floor(entity.position.y);
+    const ez = Math.floor(entity.position.z);
+
+    let heuristic = 0;
+
+    if (!this.xzOnly) {
+      heuristic += Math.abs(ey - y) * WALK_ONE_BLOCK_COST;
+    }
+
+    const dx = ex - x;
+    const dz = ez - z;
+    heuristic += Math.sqrt(dx * dx + dz * dz) * WALK_ONE_BLOCK_COST;
+
+    return heuristic;
   }
 }

@@ -5,7 +5,7 @@ This document tracks the porting progress from the Java BaritonePlus project to 
 
 **Source**: BaritonePlus (371 Java files)
 **Target**: baritone-ts (195 TypeScript files currently)
-**Last Updated**: 2026-01-28, Iteration 4
+**Last Updated**: 2026-01-28, Iteration 5
 
 ---
 
@@ -25,11 +25,19 @@ This document tracks the porting progress from the Java BaritonePlus project to 
    - Checks line of sight before throwing
    - Uses ProjectileHelper utilities
 
-3. **Updated Exports**
+3. **Goal Types** - NEW (in `goals/index.ts`)
+   - `GoalAnd` - Composite goal requiring ALL sub-goals to be met
+   - `GoalBlockSide` - Approach block from specific direction
+   - `GoalChunk` - Reach any position within a chunk
+   - `GoalDirectionXZ` - Move in a direction indefinitely
+   - `GoalRunAwayFromEntities` - Flee from multiple entities
+   - `Direction` enum for directional goals
+
+4. **Updated Exports**
    - `trackers/index.ts` updated with blacklisting exports
    - `tasks/concrete/index.ts` updated with ThrowEnderPearlTask exports
 
-4. **Verified Existing (Container Tasks)**
+5. **Verified Existing (Container Tasks)**
    - `ContainerTask.ts` already well-implemented with:
      - DoStuffInContainerTask - Abstract base for container interactions
      - CraftInTableTask - Crafting table operations
@@ -213,14 +221,14 @@ Many composite tasks exist as stubs:
 - [x] `WorldHelper.java` → `WorldHelper.ts` - World/dimension utilities (Iteration 1)
 
 ### Baritone Goal Types ⚠️
-**Missing from `api/util/baritone/`:**
-- [ ] `GoalAnd.java` - Composite goals
-- [ ] `GoalBlockSide.java` - Approach block from side
-- [ ] `GoalChunk.java` - Go to chunk
-- [ ] `GoalDirectionXZ.java` - Move in direction
+**From `api/util/baritone/`:**
+- [x] `GoalAnd.java` → `goals/index.ts` (Iteration 4)
+- [x] `GoalBlockSide.java` → `goals/index.ts` (Iteration 4)
+- [x] `GoalChunk.java` → `goals/index.ts` (Iteration 4)
+- [x] `GoalDirectionXZ.java` → `goals/index.ts` (Iteration 4)
 - [ ] `GoalDodgeProjectiles.java` - Avoid projectiles
-- [ ] `GoalFollowEntity.java` - Follow moving entity
-- [ ] `GoalRunAwayFromEntities.java` - Flee from entities
+- [x] `GoalFollowEntity.java` → `goals/index.ts` (existing as GoalFollow)
+- [x] `GoalRunAwayFromEntities.java` → `goals/index.ts` (Iteration 4)
 
 ### Data Types ⚠️
 - [ ] `ArmorRequirement.java`
@@ -364,17 +372,16 @@ Many composite tasks exist as stubs:
 
 ## Priority Tasks for Next Iterations
 
-### Iteration 5 - Goal Types & Advanced Movement
-1. Port `GoalAnd.java` - Composite goals
-2. Port `GoalBlockSide.java` - Approach block from side
-3. Port `GoalRunAwayFromEntities.java` - Flee goal
-4. Port `GetToOuterEndIslandsTask.java` - End dimension travel
+### Iteration 5 - Advanced Movement Tasks
+1. Port `GetToOuterEndIslandsTask.java` - End dimension travel
+2. Port `GetToXZWithElytraTask.java` - Elytra flight navigation
+3. Port remaining movement utility tasks
 
 ### Iteration 6 - Slot/Inventory Tasks
-1. Port `ClickSlotTask.java`
-2. Port `EnsureFree*Task.java` (multiple)
-3. Port `MoveItem*Task.java` (multiple)
-4. Port `ThrowCursorTask.java`
+1. Port `ClickSlotTask.java` - Verify existing implementation
+2. Port `EnsureFree*Task.java` (multiple) - Verify existing
+3. Port `MoveItem*Task.java` (multiple) - Verify existing
+4. Port `ThrowCursorTask.java` - Verify existing
 
 ### Iteration 7+ - Resource Collection & Speedrun
 1. Full implementation of resource collection tasks
@@ -457,6 +464,7 @@ Many composite tasks exist as stubs:
 ### Iteration 4 Summary
 - Added intelligent blacklisting system with distance/tool-based reset
 - Added ThrowEnderPearlTask for ender pearl travel
+- Added 5 new goal types (GoalAnd, GoalBlockSide, GoalChunk, GoalDirectionXZ, GoalRunAwayFromEntities)
 - Verified container tasks are already well-implemented
 - All type errors fixed, project compiles successfully
-- Ready for next iteration focusing on goal types and advanced movement
+- Ready for next iteration focusing on slot/inventory tasks
