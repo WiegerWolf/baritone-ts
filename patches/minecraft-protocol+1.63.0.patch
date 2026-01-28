@@ -1,0 +1,18 @@
+diff --git a/node_modules/minecraft-protocol/src/datatypes/checksums.js b/node_modules/minecraft-protocol/src/datatypes/checksums.js
+index 1d516c7..834ac43 100644
+--- a/node_modules/minecraft-protocol/src/datatypes/checksums.js
++++ b/node_modules/minecraft-protocol/src/datatypes/checksums.js
+@@ -12,9 +12,10 @@ function computeChatChecksum (lastSeenMessages) {
+       checksum = (31 * checksum + sigHash) & 0xffffffff
+     }
+   }
+-  // Convert to byte
+-  const result = checksum & 0xff
+-  return result === 0 ? 1 : result
++  // Convert to signed byte (i8 range: -128 to 127)
++  const unsigned = checksum & 0xff
++  const signed = unsigned > 127 ? unsigned - 256 : unsigned
++  return signed === 0 ? 1 : signed
+ }
+ 
+ module.exports = { computeChatChecksum }
