@@ -4,17 +4,16 @@ Survival chains are emergency behaviors that automatically activate when the bot
 
 ## Overview
 
-Baritone-TS includes 7 survival chains:
+Baritone-TS includes 6 survival chains:
 
-| Chain | Purpose |
-|-------|---------|
-| **FoodChain** | Eat when hungry |
-| **MLGBucketChain** | Water bucket for fall protection |
-| **MobDefenseChain** | Flee or fight when threatened |
-| **ArmorEquipChain** | Keep armor equipped |
-| **HealthChain** | Use healing items when low health |
-| **FireChain** | Escape from fire/lava |
-| **WorldSurvivalChain** | Combined survival handling |
+| Chain | Priority | Purpose |
+|-------|----------|---------|
+| **FoodChain** | 55 | Eat when hungry |
+| **MLGBucketChain** | 100 | Water bucket for fall protection |
+| **MobDefenseChain** | 100 | Flee or fight when threatened |
+| **WorldSurvivalChain** | 100 | Escape lava/fire/suffocation |
+| **DeathMenuChain** | 1000 | Handle respawn after death |
+| **PlayerInteractionFixChain** | 50 | Fix stuck player interactions |
 
 ## Enabling Survival Chains
 
@@ -207,144 +206,102 @@ defenseChain.setMode('smart');
 // Will flee from creepers, fight single zombies, etc.
 ```
 
-## ArmorEquipChain
-
-Keeps best armor equipped.
-
-```typescript
-import { ArmorEquipChain } from 'baritone-ts';
-
-const armorChain = new ArmorEquipChain(bot, {
-  // Priority (higher = better)
-  armorPriority: [
-    'netherite',
-    'diamond',
-    'iron',
-    'chainmail',
-    'gold',
-    'leather'
-  ],
-
-  // When to equip
-  autoEquip: true,        // Equip when inventory changes
-  checkInterval: 1000,    // Check every N ms
-
-  // What to prioritize
-  preferEnchanted: true,  // Prefer enchanted armor
-  preferUnbreaking: true, // Prefer durability
-  preferProtection: true, // Prefer protection enchants
-});
-
-armorChain.enable();
-```
-
-## HealthChain
-
-Uses healing items when health is low.
-
-```typescript
-import { HealthChain } from 'baritone-ts';
-
-const healthChain = new HealthChain(bot, {
-  // When to heal
-  criticalHealth: 6,      // Use any healing below this
-  lowHealth: 10,          // Use non-critical healing
-
-  // Healing items (in priority order)
-  healingItems: [
-    'enchanted_golden_apple',  // Critical only
-    'golden_apple',
-    'potion',                   // Any healing potion
-    'cooked_beef'               // Food as last resort
-  ],
-
-  // Behavior
-  useTotems: true,        // Equip totem in off-hand
-  drinkMilk: true,        // Use milk to clear bad effects
-});
-
-healthChain.enable();
-
-// Events
-healthChain.on('low_health', (health) => {
-  console.log(`Health low: ${health}`);
-});
-
-healthChain.on('healing', (item) => {
-  console.log(`Using ${item.name}`);
-});
-```
-
-## FireChain
-
-Escapes from fire and lava.
-
-```typescript
-import { FireChain } from 'baritone-ts';
-
-const fireChain = new FireChain(bot, {
-  // Detection
-  detectFire: true,
-  detectLava: true,
-  detectMagma: true,
-
-  // Response
-  fleeDistance: 10,       // How far to run
-  useWater: true,         // Place water to extinguish
-
-  // Priority
-  priority: 200,          // Very high priority
-});
-
-fireChain.enable();
-```
-
 ## WorldSurvivalChain
 
-Combined chain that includes all survival behaviors.
+Escapes from environmental hazards like lava, fire, and suffocation.
+
+**Priority:** 100 (danger level)
 
 ```typescript
-import { WorldSurvivalChain } from 'baritone-ts';
+import { WorldSurvivalChain, HazardType } from 'baritone-ts';
 
-const survival = new WorldSurvivalChain(bot, bot.pathfinder, {
-  // Enable/disable individual features
-  food: true,
-  mlg: true,
-  mobDefense: true,
-  armor: true,
-  health: true,
-  fire: true,
+const survival = new WorldSurvivalChain(bot, {
+  // Hazards to detect
+  detectLava: true,
+  detectFire: true,
+  detectSuffocation: true,
+  detectDrowning: true,
 
-  // Food settings
-  foodOptions: {
-    minHunger: 6,
-    preferredFoods: ['cooked_beef', 'bread']
-  },
+  // Response options
+  useWaterBucket: true,    // Place water to escape lava
+  breakBlocksToEscape: true, // Break blocks if suffocating
 
-  // Defense settings
-  defenseOptions: {
-    mode: 'smart',
-    threatRadius: 16
-  },
-
-  // MLG settings
-  mlgOptions: {
-    minFallHeight: 4
-  },
-
-  // Health settings
-  healthOptions: {
-    criticalHealth: 6
-  }
+  // Escape settings
+  escapeRadius: 10,        // How far to search for escape
+  checkInterval: 100,      // Check frequency (ms)
 });
 
-survival.enable();
+// Hazard types
+enum HazardType {
+  LAVA,
+  FIRE,
+  SUFFOCATION,
+  DROWNING,
+  VOID
+}
 
-// Disable specific feature
-survival.disableFeature('mobDefense');
+// Check current hazards
+const hazards = survival.getActiveHazards();
+for (const hazard of hazards) {
+  console.log(`Hazard: ${HazardType[hazard]}`);
+}
+```
 
-// Re-enable
-survival.enableFeature('mobDefense');
+## DeathMenuChain
+
+Handles respawning after player death.
+
+**Priority:** 1000 (highest, always respawns)
+
+```typescript
+import { DeathMenuChain, DeathState } from 'baritone-ts';
+
+const deathChain = new DeathMenuChain(bot, {
+  // Auto-respawn behavior
+  autoRespawn: true,           // Automatically respawn
+  respawnDelay: 1000,          // Delay before respawn (ms)
+  useSpawnPoint: true,         // Use bed spawn if available
+});
+
+// Death states
+enum DeathState {
+  ALIVE,
+  DYING,
+  DEAD,
+  RESPAWNING,
+  RESPAWNED
+}
+
+// Events
+deathChain.on('death', () => {
+  console.log('Player died');
+});
+
+deathChain.on('respawn', () => {
+  console.log('Player respawned');
+});
+```
+
+## PlayerInteractionFixChain
+
+Fixes stuck player interactions (e.g., stuck in GUI, holding item).
+
+**Priority:** 50 (low, only when stuck)
+
+```typescript
+import { PlayerInteractionFixChain } from 'baritone-ts';
+
+const fixChain = new PlayerInteractionFixChain(bot, {
+  // Detection settings
+  stuckThreshold: 5000,       // Consider stuck after N ms
+  checkInventory: true,       // Check for stuck inventory
+  checkMovement: true,        // Check for stuck movement
+
+  // Fix actions
+  closeWindows: true,         // Close open windows
+  releaseItems: true,         // Release held items
+  cancelDigging: true,        // Cancel stuck digging
+});
 ```
 
 ## Chain Priority

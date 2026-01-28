@@ -201,25 +201,46 @@ const exposedOres = blockTracker.findExposed([
 
 ## EntityTracker
 
-Tracks entities, projectiles, and threats.
+Tracks entities, projectiles, and threats with automatic categorization.
+
+### Entity Categories
+
+```typescript
+import { EntityCategory } from 'baritone-ts';
+
+enum EntityCategory {
+  Hostile,     // Zombies, skeletons, creepers, etc.
+  Neutral,     // Wolves, endermen, piglins, etc.
+  Passive,     // Cows, pigs, sheep, villagers, etc.
+  Projectile,  // Arrows, fireballs, ender pearls, etc.
+  Player,      // Other players
+  Other        // Misc entities
+}
+```
 
 ### Basic Usage
 
 ```typescript
-import { EntityTracker } from 'baritone-ts';
+import { EntityTracker, EntityCategory } from 'baritone-ts';
 
 const entityTracker = bot.pathfinder.trackers.entities;
 
 // Get all entities
 const all = entityTracker.getAll();
 
-// Get entities by type
-const players = entityTracker.getByType('player');
+// Get entities by category
+const hostiles = entityTracker.getByCategory(EntityCategory.Hostile);
+const players = entityTracker.getByCategory(EntityCategory.Player);
+
+// Get entities by type name
 const zombies = entityTracker.getByType('zombie');
 
 // Get nearest
 const nearestPlayer = entityTracker.getNearest('player');
 const nearestHostile = entityTracker.getNearestHostile();
+
+// Get entities within reach
+const closeEntities = entityTracker.getEntitiesWithinReach();
 ```
 
 ### Threat Detection
@@ -471,6 +492,46 @@ trackers.register('crops', new CropTracker(bot, ctx));
 // Use it
 const readyCrops = trackers.get('crops').getReadyCrops();
 ```
+
+## Blacklisting System
+
+Prevent repeatedly attempting failed actions with blacklisting:
+
+```typescript
+import { WorldLocateBlacklist, EntityLocateBlacklist } from 'baritone-ts';
+
+// Block position blacklisting
+const blockBlacklist = new WorldLocateBlacklist();
+
+// Blacklist a position for 60 seconds
+blockBlacklist.blacklist(blockPos, 60000);
+
+// Check if blacklisted
+if (blockBlacklist.isBlacklisted(blockPos)) {
+  console.log('Position is blacklisted');
+}
+
+// Clear blacklist
+blockBlacklist.clear();
+
+// Entity blacklisting
+const entityBlacklist = new EntityLocateBlacklist();
+
+// Blacklist an entity
+entityBlacklist.blacklist(entity, 30000);
+
+// Check if entity is blacklisted
+if (entityBlacklist.isBlacklisted(entity)) {
+  console.log('Entity is blacklisted');
+}
+```
+
+### Use Cases
+
+- Prevent mining blocks that can't be reached
+- Skip entities that escaped
+- Avoid containers that are locked
+- Skip failed crafting recipes
 
 ## Performance Tips
 

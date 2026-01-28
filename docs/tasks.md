@@ -688,3 +688,102 @@ class EmergencyChain extends SingleTaskChain {
 
 runner.registerChain(new EmergencyChain(bot));
 ```
+
+## Complete Task Catalogue
+
+Baritone-TS includes 300+ task implementations organized into categories:
+
+### Concrete Tasks (Low-Level)
+
+| Category | Tasks |
+|----------|-------|
+| **Navigation** | `GoToTask`, `GoToBlockTask`, `GetToBlockTask`, `GoToNearTask`, `GoToXZTask`, `FollowEntityTask`, `GetToChunkTask`, `GetToYTask` |
+| **Mining** | `MineBlockTask`, `MineBlockTypeTask`, `DestroyBlockTask`, `MineAndCollectTask` |
+| **Placement** | `PlaceBlockTask`, `PlaceAgainstTask`, `PlaceBlockNearbyTask`, `ClearLiquidTask` |
+| **Crafting** | `CraftTask`, `CraftInInventoryTask`, `CraftWithRecipeBookTask`, `CraftInTableTask`, `CraftWithMatchingMaterialsTask` |
+| **Smelting** | `SmeltTask`, `SmeltInFurnaceBaseTask` |
+| **Inventory** | `EquipTask`, `PickupItemTask`, `DropItemTask`, `MoveItemTask`, `MoveItemToSlotTask` |
+| **Slots** | `ClickSlotTask`, `EnsureFreeCursorSlotTask`, `EnsureFreeInventorySlotTask`, `ThrowCursorTask`, `ReceiveCraftingOutputTask` |
+| **Interaction** | `InteractBlockTask`, `InteractEntityTask`, `AttackEntityTask`, `UseItemTask`, `InteractWithBlockTask` |
+| **Container** | `DoStuffInContainerTask`, `PickupFromContainerTask`, `StoreInContainerTask`, `LootContainerTask` |
+| **Entity** | `AbstractDoToEntityTask`, `DoToClosestEntityTask`, `KillPlayerTask`, `GiveItemToPlayerTask` |
+| **Escape** | `EscapeFromLavaTask`, `RunAwayFromCreepersTask`, `RunAwayFromHostilesTask`, `RunAwayFromPositionTask` |
+| **Resource** | `ResourceTask`, `CollectItemTask`, `GatherItemTask`, `CollectFuelTask`, `CollectFoodTask` |
+| **Armor** | `EquipArmorTask`, `EquipSpecificArmorTask` |
+| **Portal** | `EnterNetherPortalTask`, `GoToDimensionTask`, `ConstructNetherPortalTask` |
+| **Bed/Sleep** | `PlaceBedAndSetSpawnTask`, `SleepInBedTask` |
+| **Liquid** | `CollectBucketLiquidTask`, `CollectWaterBucketTask`, `CollectLavaBucketTask` |
+| **Dodge** | `DodgeProjectilesTask`, `StrafeAndDodgeTask` |
+| **Trading** | `TradeWithPiglinsTask` |
+| **MLG** | `MLGBucketTask`, `MLGBucketMonitorTask` |
+| **Search** | `SearchChunksExploreTask`, `SearchChunkForBlockTask`, `SearchChunkByConditionTask` |
+| **Dragon** | `KillEnderDragonTask`, `WaitForDragonAndPearlTask`, `KillEnderDragonWithBedsTask` |
+| **Construction** | `PlaceSignTask`, `ClearRegionTask`, `CoverWithBlocksTask`, `ConstructIronGolemTask` |
+| **Speedrun** | `BeatMinecraftTask`, `LocateStrongholdCoordinatesTask`, `GoToStrongholdPortalTask` |
+
+### Composite Tasks (High-Level)
+
+| Category | Tasks | Helper Functions |
+|----------|-------|------------------|
+| **Wood** | `CollectWoodTask` | - |
+| **Tools** | `GetToolTask` | `ensureTool()` |
+| **Resources** | `GatherResourcesTask` | `gatherResources()` |
+| **Mining** | `MineOresTask` | `mineDiamonds()`, `mineIron()`, `mineCoal()`, `mineGold()` |
+| **Farming** | `FarmTask` | `harvestCrops()`, `harvestAndReplant()`, `maintainFarm()` |
+| **Exploration** | `ExploreTask` | `exploreSpiral()`, `exploreTowards()`, `exploreRandom()` |
+| **Shelter** | `BuildShelterTask` | `buildDirtHut()`, `buildWoodCabin()`, `digUnderground()` |
+| **Combat** | `CombatTask` | `fightMobs()`, `fightEntity()`, `hitAndRun()` |
+| **Survival** | `SurviveTask` | `survive()`, `survivePassive()`, `surviveAndProgress()` |
+| **Trading** | `TradingTask` | `tradeWithVillager()`, `buyItem()`, `sellItem()` |
+| **Enchanting** | `EnchantTask` | `enchantItem()`, `enchantBestAvailable()` |
+| **Brewing** | `BrewingTask` | `brewPotion()`, `brewHealingPotions()`, `brewStrengthPotions()` |
+| **Building** | `BuildTask` | `buildCube()`, `buildPlatform()`, `buildWall()` |
+| **Repair** | `RepairTask` | `repairWithAnvil()`, `repairWithGrindstone()` |
+| **Storage** | `StorageTask` | `depositItems()`, `withdrawItems()`, `organizeStorage()` |
+| **Portal** | `PortalTask` | `enterNether()`, `enterEnd()`, `buildAndEnterNether()` |
+| **Fishing** | `FishingTask` | `goFishing()`, `fishUntilFull()` |
+| **Sleep** | `SleepTask` | `sleepInBed()`, `sleepNow()` |
+| **Boat** | `BoatTask` | `boatToPosition()`, `enterNearestBoat()` |
+| **Parkour** | `ParkourTask` | `parkourTo()`, `sprintJumpTo()` |
+| **Schematic** | `SchematicTask` | `buildSchematic()`, `buildCube()`, `buildHollowBox()` |
+| **Hunting** | `HuntTask` | `huntAnimals()`, `huntForFood()`, `huntCows()` |
+| **Defense** | `DefendAreaTask` | `defendArea()`, `defendCurrentPosition()` |
+| **Following** | `FollowPlayerTask` | `followPlayer()`, `followPlayerClose()` |
+| **Looting** | `LootChestTask` | `lootNearbyChests()`, `lootValuables()` |
+| **Fleeing** | `FleeTask` | `flee()`, `fleeFromMobs()`, `emergencyFlee()` |
+| **Smithing** | `SmithingTask` | `upgradeToNetherite()`, `upgradeTools()` |
+| **Taming** | `TameAnimalTask` | `tameWolf()`, `tameCat()`, `tameHorse()` |
+| **Riding** | `RideEntityTask` | `rideHorse()`, `ridePig()`, `rideStrider()` |
+| **Cleanup** | `CleanupTask` | `clearDebris()`, `flattenArea()`, `collectDroppedItems()` |
+| **Danger** | `EscapeDangerTask` | `escapeLava()`, `escapeFire()`, `escapeDrowning()` |
+| **Bridging** | `BridgeTask` | `bridgeTo()`, `bridgeNorth()`, `bridgeWithRailings()` |
+| **Scaffolding** | `ScaffoldTask` | `scaffoldUp()`, `scaffoldDown()`, `nerdPole()` |
+| **Mine Layers** | `MineLayerTask` | `mineLayer()`, `stripMine()`, `branchMine()` |
+| **Torches** | `TorchTask` | `placeTorches()`, `lightArea()`, `torchGrid()` |
+| **Trees** | `PlantTreeTask` | `plantOakTrees()`, `plantWithBonemeal()` |
+| **Composting** | `CompostTask` | `compost()`, `compostAll()`, `compostSeeds()` |
+| **Effects** | `UseEffectTask` | `useHealing()`, `useStrength()`, `maintainEffect()` |
+
+### Speedrun Tasks
+
+For automated Minecraft speedruns:
+
+```typescript
+import { BeatMinecraftTask, beatMinecraft, speedrunMinecraft } from 'baritone-ts';
+
+// Full automatic speedrun
+const task = new BeatMinecraftTask(bot, {
+  collectDiamonds: true,
+  buildPortal: true,
+  enterNether: true,
+  collectBlazeRods: true,
+  collectEnderPearls: true,
+  locateStronghold: true,
+  enterEnd: true,
+  killDragon: true
+});
+
+// Or use helper functions
+await beatMinecraft(bot);
+await speedrunMinecraft(bot);
+```

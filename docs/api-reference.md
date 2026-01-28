@@ -704,3 +704,388 @@ interface ContextOptions {
   // ... see Configuration docs
 }
 ```
+
+## Action Costs
+
+Tick-based movement cost constants:
+
+```typescript
+// Movement costs (ticks per block)
+const WALK_ONE_BLOCK_COST = 4.633;      // Walking
+const SPRINT_ONE_BLOCK_COST = 3.564;    // Sprinting
+const SPRINT_MULTIPLIER = 1.3;          // Sprint speed multiplier
+const SNEAK_ONE_BLOCK_COST = 15.385;    // Sneaking
+const WALK_ONE_IN_WATER_COST = 20.0;    // Walking in water
+const WALK_ONE_OVER_SOUL_SAND_COST = 6.0; // Soul sand penalty
+
+// Vertical movement
+const LADDER_UP_ONE_COST = 6.667;       // Climbing up ladder
+const LADDER_DOWN_ONE_COST = 3.333;     // Descending ladder
+const SWIM_UP_ONE_COST = 10.0;          // Swimming up
+const SWIM_DOWN_ONE_COST = 5.0;         // Swimming down
+
+// Jumping and falling
+const JUMP_ONE_BLOCK_COST = 2.5;        // Jump cost
+const WALK_OFF_BLOCK_COST = 1.8;        // Walking off edge
+const CENTER_AFTER_FALL_COST = 2.0;     // Centering after fall
+const FALL_N_BLOCKS_COST: number[];     // Pre-calculated fall costs (0-256)
+
+// Block interaction
+const PLACE_ONE_BLOCK_COST = 4.0;       // Placing a block
+const BACKPLACE_ADDITIONAL_PENALTY = 1.0; // Backplace penalty
+
+// Utility functions
+function getFallCost(blocks: number): number;
+function getBreakCost(block: Block, tool: Item): number;
+function getTerrainCost(block: Block): number;
+```
+
+## Control System
+
+### InputControls
+
+Low-level input state management:
+
+```typescript
+import { InputControls, Input, createInputControls } from 'baritone-ts';
+
+const controls = createInputControls(bot);
+
+// Input enum
+enum Input {
+  FORWARD, BACK, LEFT, RIGHT,
+  JUMP, SNEAK, SPRINT
+}
+
+// Set input state
+controls.set(Input.FORWARD, true);
+controls.set(Input.SPRINT, true);
+
+// Clear all inputs
+controls.clear();
+
+// Get current state
+const isForward = controls.get(Input.FORWARD);
+```
+
+### KillAura
+
+Combat automation system:
+
+```typescript
+import { KillAura, KillAuraStrategy, createKillAura } from 'baritone-ts';
+
+const aura = createKillAura(bot, {
+  strategy: KillAuraStrategy.NEAREST,
+  range: 4.0,
+  attackCooldown: true,
+  rotateToTarget: true,
+  targetHostiles: true,
+  targetPlayers: false,
+});
+
+// Strategies
+enum KillAuraStrategy {
+  NEAREST,      // Attack nearest entity
+  LOWEST_HEALTH, // Attack weakest entity
+  HIGHEST_THREAT // Attack most dangerous
+}
+
+// Enable/disable
+aura.enable();
+aura.disable();
+
+// Manual tick (if not auto-attached)
+aura.tick();
+```
+
+### PlayerExtraController
+
+Extended player actions:
+
+```typescript
+import { PlayerExtraController, createPlayerExtraController } from 'baritone-ts';
+
+const controller = createPlayerExtraController(bot);
+
+// Shield blocking
+controller.startBlocking();
+controller.stopBlocking();
+
+// Attack management
+controller.attack(entity);
+controller.attackWithCooldown(entity);
+```
+
+## Utility Helpers
+
+### ItemHelper
+
+Item classification and utilities:
+
+```typescript
+import {
+  WoodType, DyeColor,
+  isLog, isPlanks, isPickaxe, isAxe, isSword, isBed, isWool, isBoat,
+  logToPlanks, planksToLog, getCookedFood,
+  isRawFood, isFuel, getFuelAmount,
+  getToolTier, getArmorTier, areShearsEffective,
+  stripItemName, getWoodTypeFromItem, getColorFromItem
+} from 'baritone-ts';
+
+// Wood types
+enum WoodType {
+  Oak, Spruce, Birch, Jungle, Acacia, DarkOak, Mangrove, Cherry
+}
+
+// Dye colors (all 16)
+enum DyeColor {
+  White, Orange, Magenta, LightBlue, Yellow, Lime, Pink, Gray,
+  LightGray, Cyan, Purple, Blue, Brown, Green, Red, Black
+}
+
+// Classification
+isLog('oak_log');           // true
+isPlanks('spruce_planks');  // true
+isPickaxe('iron_pickaxe');  // true
+isFuel('coal');             // true
+getFuelAmount('coal');      // 1600 ticks
+
+// Conversions
+logToPlanks('oak_log');     // 'oak_planks'
+getCookedFood('beef');      // 'cooked_beef'
+getToolTier('diamond_pickaxe'); // 'diamond'
+```
+
+### EntityHelper
+
+Entity classification and calculations:
+
+```typescript
+import {
+  isHostileMob, isPassiveMob, isNeutralMob, isPlayer,
+  isAngryAtPlayer, isGenerallyHostileToPlayer,
+  isGrounded, isPlayerGrounded,
+  DamageSource, damageBypassesArmor,
+  calculateArmorReduction, calculateResultingPlayerDamage,
+  getPlayerArmor, getPlayerProtectionLevel,
+  getEntityDistance, getNearestEntity, getEntitiesInRange
+} from 'baritone-ts';
+
+// Entity classification
+isHostileMob(entity);    // zombie, skeleton, etc.
+isPassiveMob(entity);    // cow, pig, sheep, etc.
+isNeutralMob(entity);    // wolf, enderman, etc.
+
+// Damage calculation
+enum DamageSource {
+  MELEE, PROJECTILE, FALL, FIRE, LAVA, DROWNING, MAGIC, EXPLOSION
+}
+
+const finalDamage = calculateResultingPlayerDamage(bot, 10, DamageSource.MELEE);
+const armor = getPlayerArmor(bot);
+
+// Entity queries
+const nearest = getNearestEntity(bot, e => isHostileMob(e));
+const inRange = getEntitiesInRange(bot, 16, isHostileMob);
+```
+
+### WorldHelper
+
+World state queries:
+
+```typescript
+import {
+  Dimension, getCurrentDimension,
+  isSolid, isAir, isWater, isLava, isFallingBlock,
+  isSourceBlock, isInteractableBlock, isChest,
+  getGroundHeight, canSleep,
+  getBlocksTouchingPlayer, scanRegion,
+  getOverworldPosition, getNetherPosition, isOcean,
+  distanceXZ, inRangeXZ
+} from 'baritone-ts';
+
+// Dimensions
+enum Dimension {
+  Overworld = 0,
+  Nether = -1,
+  End = 1
+}
+
+// Block checks
+isSolid(block);           // true if solid
+isWater(block);           // true if water
+isLava(block);            // true if lava
+isSourceBlock(block);     // true if source (not flowing)
+
+// Position utilities
+const dim = getCurrentDimension(bot);
+const groundY = getGroundHeight(bot.world, x, z);
+const netherPos = getNetherPosition(overworldPos); // /8 for X and Z
+```
+
+### MathHelper
+
+Mathematical utilities:
+
+```typescript
+import {
+  clamp, lerp, lerpVec3,
+  distanceSquared, distanceSquaredXZ,
+  normalizeAngle, angleDifference,
+  toRadians, toDegrees,
+  yawFromDirection, pitchFromDirection, directionFromAngles,
+  projectVector, projectOntoPlane,
+  calculateGenericHeuristic
+} from 'baritone-ts';
+
+// Clamping and interpolation
+clamp(value, 0, 100);
+lerp(a, b, 0.5);          // Midpoint
+lerpVec3(vecA, vecB, t);  // Vector interpolation
+
+// Angles
+normalizeAngle(angle);     // Normalize to [-180, 180]
+angleDifference(a, b);     // Shortest angle difference
+yawFromDirection(vec);     // Get yaw from direction vector
+```
+
+### LookHelper
+
+Rotation management:
+
+```typescript
+import { LookHelper, createLookHelper, calculateLookRotation } from 'baritone-ts';
+
+const look = createLookHelper(bot);
+
+// Look at target
+look.lookAt(position);
+look.lookAtEntity(entity);
+look.lookAtBlock(blockPos);
+
+// Check if looking
+look.isLookingAt(position, tolerance);
+
+// Calculate rotation
+const { yaw, pitch } = calculateLookRotation(bot.entity.position, targetPos);
+```
+
+### ProjectileHelper
+
+Projectile physics:
+
+```typescript
+import {
+  ProjectileType, PROJECTILE_GRAVITY,
+  predictProjectilePosition, willProjectileHit,
+  calculateProjectileClosestApproach,
+  calculateAnglesForSimpleProjectileMotion,
+  getTimeToDistance
+} from 'baritone-ts';
+
+enum ProjectileType {
+  Arrow, ThrowableEntity, Fireball, Fireworks
+}
+
+// Prediction
+const futurePos = predictProjectilePosition(projectile, ticksAhead);
+const willHit = willProjectileHit(projectile, targetAABB);
+const closest = calculateProjectileClosestApproach(projectile, targetPos);
+
+// Aiming
+const angles = calculateAnglesForSimpleProjectileMotion(
+  startPos, targetPos, velocity, ProjectileType.Arrow
+);
+```
+
+## Crafting System
+
+```typescript
+import {
+  CraftingRecipe, RecipeTarget, CraftingGridSize,
+  COMMON_RECIPES, getRecipe, isCraftable, registerRecipe
+} from 'baritone-ts';
+
+// Grid sizes
+enum CraftingGridSize {
+  Inventory2x2,
+  Workbench3x3
+}
+
+// Check if can craft
+const canCraft = isCraftable(bot, 'diamond_pickaxe');
+
+// Get recipe
+const recipe = getRecipe('diamond_pickaxe');
+// { result: 'diamond_pickaxe', ingredients: [...], gridSize: Workbench3x3 }
+
+// Register custom recipe
+registerRecipe(new CraftingRecipe({
+  result: 'my_item',
+  resultCount: 1,
+  ingredients: [['diamond', 'diamond'], ['stick', null]],
+  gridSize: CraftingGridSize.Workbench3x3
+}));
+```
+
+## Enums Reference
+
+### Core Enums
+
+```typescript
+// Movement
+enum MovementStatus { PREPPING, WAITING, RUNNING, SUCCESS, UNREACHABLE, FAILED }
+enum Passability { PASSABLE, DANGEROUS, IMPASSABLE }
+enum PathingBlockType { AIR, WATER, AVOID, SOLID }
+
+// Process system
+enum ProcessPriority { Critical, High, Normal, Low, Lowest }
+enum ProcessState { Idle, Running, Paused, Completed, Failed }
+
+// Async pathfinding
+enum AsyncPathState { IDLE, COMPUTING, COMPLETE, CANCELLED, ERROR }
+
+// Task chains
+enum ChainPriority { INACTIVE = 0, USER_TASK = 50, FOOD = 55, DANGER = 100, DEATH = 1000 }
+
+// Events
+enum HandlerPriority { LOWEST = 0, LOW = 25, NORMAL = 50, HIGH = 75, HIGHEST = 100, MONITOR = 150 }
+
+// Elytra/Boat
+enum ElytraState { IDLE, LAUNCHING, FLYING, LANDING, LANDED }
+enum BoatState { IDLE, ENTERING, TRAVELING, EXITING, ARRIVED }
+
+// Entity tracking
+enum EntityCategory { Hostile, Neutral, Passive, Projectile, Player, Other }
+
+// Mining
+enum MiningRequirement { NONE, WOOD, STONE, IRON, DIAMOND, NETHERITE }
+
+// Slots
+enum SlotType { PLAYER, ARMOR, OFFHAND, HOTBAR, CONTAINER, CRAFTING }
+enum ClickType { LEFT, RIGHT, SHIFT_LEFT, SHIFT_RIGHT, DROP, CTRL_DROP }
+```
+
+### Dimension & World
+
+```typescript
+enum Dimension { Overworld = 0, Nether = -1, End = 1 }
+enum WoodType { Oak, Spruce, Birch, Jungle, Acacia, DarkOak, Mangrove, Cherry }
+enum DyeColor { White, Orange, Magenta, LightBlue, Yellow, Lime, Pink, Gray, LightGray, Cyan, Purple, Blue, Brown, Green, Red, Black }
+```
+
+## Complete Exports List
+
+For a complete list of all exports, see the [source index.ts](../src/index.ts).
+
+Main export categories:
+- **Goals**: 17 goal types
+- **Movements**: 22+ movement classes
+- **Tasks**: 300+ task implementations
+- **Chains**: 6 survival chains
+- **Processes**: 7 process types
+- **Trackers**: 5 tracker types
+- **Utilities**: 200+ helper functions
+- **Events**: Type-safe event bus
+- **Settings**: Comprehensive configuration
