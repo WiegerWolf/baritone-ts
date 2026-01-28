@@ -32,6 +32,45 @@ export {
   smeltDriedKelp,
 } from './SmeltTarget';
 
+// Armor Requirement
+export {
+  ArmorRequirement,
+  ARMOR_SETS,
+  ARMOR_PROTECTION,
+  ARMOR_TOUGHNESS,
+  getArmorItems,
+  getArmorSet,
+  getArmorTierIndex,
+  compareArmorTiers,
+  armorMeetsRequirement,
+  getArmorTierFromItem,
+  isArmorItem,
+  getArmorSlotFromItem,
+  getNextArmorTier,
+  getMinimumTierForProtection,
+} from './ArmorRequirement';
+export type { ArmorSet } from './ArmorRequirement';
+
+// Math Helper
+export {
+  projectVector,
+  projectOntoPlane,
+  calculateGenericHeuristic,
+  calculateGenericHeuristicXYZ,
+  clamp,
+  lerp,
+  lerpVec3,
+  distanceSquared,
+  distanceSquaredXZ,
+  normalizeAngle,
+  angleDifference,
+  toRadians,
+  toDegrees,
+  yawFromDirection,
+  pitchFromDirection,
+  directionFromAngles,
+} from './MathHelper';
+
 // Storage Helper
 export {
   StorageHelper,

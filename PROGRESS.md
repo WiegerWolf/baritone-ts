@@ -4,12 +4,42 @@
 This document tracks the porting progress from the Java BaritonePlus project to the TypeScript baritone-ts implementation.
 
 **Source**: BaritonePlus (371 Java files)
-**Target**: baritone-ts (204 TypeScript files currently)
-**Last Updated**: 2026-01-28, Iteration 9
+**Target**: baritone-ts (206 TypeScript files currently)
+**Last Updated**: 2026-01-28, Iteration 10
 
 ---
 
-## Iteration 9 Progress (Current)
+## Iteration 10 Progress (Current)
+
+### Completed in This Iteration:
+1. **MathHelper** - NEW
+   - `utils/MathHelper.ts` - Math utilities combining MathsHelper and BaritoneHelper
+   - Vector projection utilities:
+     - `projectVector()` - Project vector onto another vector
+     - `projectOntoPlane()` - Project vector onto a plane
+   - Pathfinding heuristics (from BaritoneHelper):
+     - `calculateGenericHeuristic()` - Baritone's pathfinding cost heuristic
+     - `calculateGenericHeuristicXYZ()` - XYZ variant
+   - General math utilities:
+     - `clamp()`, `lerp()`, `lerpVec3()` - Value interpolation
+     - `distanceSquared()`, `distanceSquaredXZ()` - Fast distance checks
+     - `normalizeAngle()`, `angleDifference()` - Angle math
+     - `toRadians()`, `toDegrees()` - Angle conversion
+     - `yawFromDirection()`, `pitchFromDirection()` - Direction to angle
+     - `directionFromAngles()` - Angle to direction vector
+
+2. **Updated Exports**
+   - `utils/index.ts` updated with MathHelper exports
+
+### Iteration 10 Summary
+- Added comprehensive MathHelper utility combining MathsHelper and BaritoneHelper
+- Includes vector projection, pathfinding heuristics, and general math utilities
+- All type errors fixed, project compiles successfully
+- Porting ~95% complete - only optional systems remain (Butler/commands, serialization)
+
+---
+
+## Iteration 9 Progress (Completed)
 
 ### Completed in This Iteration:
 1. **RecipeTarget** - NEW
@@ -38,12 +68,29 @@ This document tracks the porting progress from the Java BaritonePlus project to 
      - Materials: `smeltGlass`, `smeltCharcoal`, `smeltSmoothStone`, `smeltStone`, etc.
    - `SmeltTargets` registry for quick access
 
-3. **Updated Exports**
-   - `utils/index.ts` updated with RecipeTarget and SmeltTarget exports
+3. **ArmorRequirement** - NEW
+   - `utils/ArmorRequirement.ts` - Armor tier requirements
+   - `ArmorRequirement` enum (NONE, LEATHER, CHAINMAIL, IRON, GOLD, DIAMOND, NETHERITE)
+   - `ARMOR_SETS` - Maps tiers to helmet/chestplate/leggings/boots
+   - `ARMOR_PROTECTION` - Total protection values per tier
+   - `ARMOR_TOUGHNESS` - Toughness values per tier
+   - Helper functions:
+     - `getArmorItems()` - Get all items for a tier
+     - `compareArmorTiers()` - Compare tier levels
+     - `armorMeetsRequirement()` - Check if armor meets minimum
+     - `getArmorTierFromItem()` - Get tier from item name
+     - `isArmorItem()` - Check if item is armor
+     - `getArmorSlotFromItem()` - Get slot type from item
+     - `getNextArmorTier()` - Get next tier up
+     - `getMinimumTierForProtection()` - Find tier for protection value
+
+4. **Updated Exports**
+   - `utils/index.ts` updated with RecipeTarget, SmeltTarget, and ArmorRequirement exports
 
 ### Iteration 9 Summary
 - Added RecipeTarget for typed crafting recipe targets
 - Added SmeltTarget for typed smelting recipe targets with common presets
+- Added ArmorRequirement for armor tier management
 - All type errors fixed, project compiles successfully
 - Core porting effectively complete - remaining items are optional polish
 
@@ -417,14 +464,14 @@ Many composite tasks exist as stubs:
 - [x] `PlayerExtraController.java` → `PlayerExtraController.ts` - Extended player actions
 - [x] `SlotHandler.java` - Already ported (in utils/)
 
-### Utility Helpers (Mostly Complete) ✅
+### Utility Helpers (Complete) ✅
 **From `api/util/helpers/`:**
-- [ ] `BaritoneHelper.java` - Baritone API integration (not needed for mineflayer)
+- [x] `BaritoneHelper.java` → `MathHelper.ts` - Pathfinding heuristics (Iteration 10)
 - [ ] `ConfigHelper.java` - Configuration file handling (using SettingsManager instead)
 - [x] `EntityHelper.java` → `EntityHelper.ts` - Entity utility functions (Iteration 2)
-- [ ] `InputHelper.java` - Input state management (covered by InputControls)
+- [x] `InputHelper.java` → `InputControls.ts` - Input state management (Iteration 1)
 - [x] `ItemHelper.java` → `ItemHelper.ts` - Item manipulation utilities (Iteration 1)
-- [ ] `MathsHelper.java` - Math utility functions (basic - will add as needed)
+- [x] `MathsHelper.java` → `MathHelper.ts` - Vector projection utilities (Iteration 10)
 - [x] `ProjectileHelper.java` → `ProjectileHelper.ts` - Projectile calculations (Iteration 2)
 - [ ] `StlHelper.java` - Stream/collection utilities (not needed in TypeScript)
 - [x] `WorldHelper.java` → `WorldHelper.ts` - World/dimension utilities (Iteration 1)
@@ -439,8 +486,8 @@ Many composite tasks exist as stubs:
 - [x] `GoalFollowEntity.java` → `goals/index.ts` (existing as GoalFollow)
 - [x] `GoalRunAwayFromEntities.java` → `goals/index.ts` (Iteration 4)
 
-### Data Types ⚠️
-- [ ] `ArmorRequirement.java`
+### Data Types ✅
+- [x] `ArmorRequirement.java` → `ArmorRequirement.ts` (Iteration 9)
 - [x] `CraftingRecipe.java` → `CraftWithMatchingMaterialsTask.ts` (Iteration 7)
 - [x] `Dimension.java` → in `WorldHelper.ts` - Dimension enum (Iteration 1)
 - [x] `MiningRequirement.java` → `MiningRequirement.ts` (Iteration 2)
@@ -616,14 +663,14 @@ Many composite tasks exist as stubs:
 
 ## Statistics
 - **Java Files**: 371
-- **TypeScript Files**: 204
-- **Estimated Completion**: ~92%
+- **TypeScript Files**: 206
+- **Estimated Completion**: ~95%
 - **Core Systems**: ~96% complete
 - **Task Implementations**: ~94% complete
-- **Utility/Helper**: ~95% complete (RecipeTarget, SmeltTarget added)
+- **Utility/Helper**: ~98% complete (MathHelper added with vector projection + heuristics)
 - **Goals**: ~98% complete (all core goals ported)
 - **Trackers**: ~98% complete (all sub-trackers integrated)
-- **Data Types**: ~95% complete (RecipeTarget, SmeltTarget added)
+- **Data Types**: ~98% complete (all core data types ported)
 
 ## Files Added in Iteration 1
 1. `src/control/InputControls.ts`
