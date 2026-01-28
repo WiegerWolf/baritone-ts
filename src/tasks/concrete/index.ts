@@ -532,3 +532,11 @@ export {
   REPAIRABLE_ITEMS,
 } from './RepairToolTask';
 export type { RepairToolConfig } from './RepairToolTask';
+
+// Elytra navigation task
+export {
+  GetToXZWithElytraTask,
+  flyToXZWithElytra,
+  flyToPositionWithElytra,
+} from './GetToXZWithElytraTask';
+export type { GetToXZWithElytraConfig } from './GetToXZWithElytraTask';

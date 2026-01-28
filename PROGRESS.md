@@ -5,11 +5,66 @@ This document tracks the porting progress from the Java BaritonePlus project to 
 
 **Source**: BaritonePlus (371 Java files)
 **Target**: baritone-ts (195 TypeScript files currently)
-**Last Updated**: 2026-01-28, Iteration 6
+**Last Updated**: 2026-01-28, Iteration 7
 
 ---
 
-## Iteration 6 Progress (Current)
+## Iteration 7 Progress (Current)
+
+### Completed in This Iteration:
+1. **RepairToolTask** - NEW
+   - `tasks/concrete/RepairToolTask.ts` - Repair tools with Mending enchantment
+   - Finds items with Mending that need repair
+   - Collects XP orbs while holding damaged item
+   - Throws XP bottles if available
+   - Kills mobs for XP as fallback
+   - Supports item filtering and damage threshold config
+
+2. **MiscBlockTracker** - NEW
+   - `trackers/MiscBlockTracker.ts` - Track miscellaneous block positions
+   - Tracks last-used nether portal per dimension
+   - Detects dimension changes automatically
+   - Searches for portal after dimension transition
+   - Validates portal existence when queried
+
+3. **SimpleChunkTracker** - NEW
+   - `trackers/SimpleChunkTracker.ts` - Track loaded chunks
+   - Listens to chunk load/unload events
+   - Provides chunk scanning utilities (block-by-block)
+   - Supports radius-based scanning
+   - Block search within loaded chunks
+
+4. **GetToXZWithElytraTask** - NEW
+   - `tasks/concrete/GetToXZWithElytraTask.ts` - Navigate using elytra flight
+   - Walks if destination is close enough (128 blocks)
+   - Checks elytra durability and equips if needed
+   - Collects fireworks before takeoff (minimum 16)
+   - Navigates to surface before flight
+   - Manages flight at high altitude (325 blocks)
+   - Handles emergency landing on low durability
+   - Unequips elytra after landing
+
+5. **Updated Exports**
+   - `tasks/concrete/index.ts` updated with RepairToolTask and GetToXZWithElytraTask
+   - `trackers/index.ts` updated with MiscBlockTracker and SimpleChunkTracker
+
+## Files Added in Iteration 7
+1. `src/tasks/concrete/RepairToolTask.ts`
+2. `src/trackers/MiscBlockTracker.ts`
+3. `src/trackers/SimpleChunkTracker.ts`
+4. `src/tasks/concrete/GetToXZWithElytraTask.ts`
+
+### Iteration 7 Summary
+- Added RepairToolTask for Mending-based tool repair via XP collection
+- Added MiscBlockTracker for portal position tracking across dimensions
+- Added SimpleChunkTracker for chunk loading state and scanning
+- Added GetToXZWithElytraTask for intelligent elytra travel
+- All type errors fixed, project compiles successfully
+- Remaining gaps: Enhanced slot tasks, craft variants
+
+---
+
+## Iteration 6 Progress (Completed)
 
 ### Completed in This Iteration:
 1. **GoalDodgeProjectiles** - NEW (in `goals/index.ts`)
@@ -322,7 +377,7 @@ Many composite tasks exist as stubs:
 - [x] `GetToEntityTask.java` → PickupItemTask.ts (Iteration 3)
 - [x] `GetToOuterEndIslandsTask.java` → GetToOuterEndIslandsTask.ts (Iteration 5)
 - [x] `GetToXZTask.java` → GoToTask.ts
-- [ ] `GetToXZWithElytraTask.java`
+- [x] `GetToXZWithElytraTask.java` → `GetToXZWithElytraTask.ts` (Iteration 7)
 - [x] `GetToYTask.java` → MovementUtilTask.ts
 - [x] `GetWithinRangeOfBlockTask.java` → BlockSearchTask.ts
 - [x] `GoInDirectionXZTask.java` → BlockSearchTask.ts
@@ -404,7 +459,7 @@ Many composite tasks exist as stubs:
 - [x] `PlaceBedAndSetSpawnTask.java` → BedTask.ts (exists)
 - [x] `RavageDesertTemplesTask.java` → RavageStructuresTask.ts (exists)
 - [x] `RavageRuinedPortalsTask.java` → RavageStructuresTask.ts (exists)
-- [ ] `RepairToolTask.java` - Anvil-based repair, not ported
+- [x] `RepairToolTask.java` → `RepairToolTask.ts` (Iteration 7) - Mending enchantment repair
 - [x] `SleepThroughNightTask.java` → BedTask.ts (SleepInBedTask exists)
 
 #### Speedrun Tasks (~10 files)
@@ -417,8 +472,8 @@ Many composite tasks exist as stubs:
 
 ### Tracker Subsystems ⚠️
 **Missing from `api/trackers/`:**
-- [ ] `MiscBlockTracker.java`
-- [ ] `SimpleChunkTracker.java`
+- [x] `MiscBlockTracker.java` → `MiscBlockTracker.ts` (Iteration 7)
+- [x] `SimpleChunkTracker.java` → `SimpleChunkTracker.ts` (Iteration 7)
 - [x] `blacklisting/AbstractObjectBlacklist.java` → `blacklisting/AbstractObjectBlacklist.ts` (Iteration 4)
 - [x] `blacklisting/EntityLocateBlacklist.java` → `blacklisting/EntityLocateBlacklist.ts` (Iteration 4)
 - [x] `blacklisting/WorldLocateBlacklist.java` → `blacklisting/WorldLocateBlacklist.ts` (Iteration 4)
@@ -443,16 +498,13 @@ Many composite tasks exist as stubs:
 
 ## Priority Tasks for Next Iterations
 
-### Iteration 7 - Remaining Gaps
-1. Port `GetToXZWithElytraTask.java` - Elytra flight navigation
-2. Port `RepairToolTask.java` - Anvil-based repair
-3. Enhanced `MoveItemToSlotFromContainerTask` and `MoveItemToSlotFromInventoryTask`
-4. Port `CraftWithMatchingPlanTask` variants
+### Iteration 8 - Remaining Gaps
+1. Enhanced `MoveItemToSlotFromContainerTask` and `MoveItemToSlotFromInventoryTask`
+2. Port `CraftWithMatchingPlanTask` variants
 
-### Iteration 8+ - Polish & Edge Cases
+### Iteration 9+ - Polish & Edge Cases
 1. Butler/command system (if needed)
-2. Additional MiscBlockTracker, SimpleChunkTracker if needed
-3. Storage sub-trackers (ContainerSubTracker, InventorySubTracker)
+2. Storage sub-trackers (ContainerSubTracker, InventorySubTracker)
 
 ---
 
