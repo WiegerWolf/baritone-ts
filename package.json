@@ -3,6 +3,11 @@
   "version": "1.0.1",
   "description": "Baritone-quality pathfinding for Mineflayer in TypeScript",
   "main": "dist/index.js",
+  "exports": {
+    "bun": "./src/index.ts",
+    "import": "./dist/index.js",
+    "default": "./dist/index.js"
+  },
   "types": "dist/index.d.ts",
   "files": [
     "dist"
