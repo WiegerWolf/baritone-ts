@@ -4,6 +4,17 @@
   "description": "Baritone-quality pathfinding for Mineflayer in TypeScript",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/WiegerWolf/baritone-ts.git"
+  },
+  "bugs": {
+    "url": "https://github.com/WiegerWolf/baritone-ts/issues"
+  },
+  "homepage": "https://github.com/WiegerWolf/baritone-ts#readme",
   "scripts": {
     "build": "tsc",
     "watch": "tsc -w",
@@ -18,7 +29,7 @@
     "baritone",
     "astar"
   ],
-  "license": "MIT",
+  "license": "AGPL-3.0",
   "dependencies": {
     "mineflayer": ">=4.0.0",
     "prismarine-block": "^1.0.0",
@@ -26,10 +37,13 @@
     "vec3": "^0.1.0"
   },
   "devDependencies": {
+    "@semantic-release/changelog": "^6.0.3",
+    "@semantic-release/git": "^10.0.1",
     "@types/jest": "^29.5.14",
     "@types/node": "^20.0.0",
     "jest": "^29.7.0",
     "patch-package": "^8.0.1",
+    "semantic-release": "^25.0.2",
     "ts-jest": "^29.4.6",
     "typescript": "^5.0.0"
   },
