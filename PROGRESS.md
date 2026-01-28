@@ -5,7 +5,7 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 ## Summary
 
 **Status**: In Progress
-**Last Updated**: Iteration 11
+**Last Updated**: Iteration 12
 
 ### BaritonePlus Java Statistics:
 - Total Tasks: 173 Java files in tasks/
@@ -14,9 +14,9 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 
 ### baritone-ts TypeScript Statistics (Current):
 - Composite Tasks: 46 files
-- Concrete Tasks: 35 modules (GoTo, MineBlock, PlaceBlock, Craft, Smelt, Inventory, Interact, Slot, MovementUtil, Container, Construction, Entity, Escape, Resource, MineAndCollect, KillAndLoot, CollectFuel, BlockSearch, Portal, Armor, Bed, CollectLiquid, Dodge, Trade, MLG, ChunkSearch, InteractWithBlock, StorageContainer, CraftInInventory, GetToChunk, CollectFood, CollectBlazeRods, FastTravel, CollectObsidian, ConstructNetherPortal, LootDesertTemple, StoreInStash, RavageStructures, Stronghold, DragonFight)
+- Concrete Tasks: 36 modules (GoTo, MineBlock, PlaceBlock, Craft, Smelt, Inventory, Interact, Slot, MovementUtil, Container, Construction, Entity, Escape, Resource, MineAndCollect, KillAndLoot, CollectFuel, BlockSearch, Portal, Armor, Bed, CollectLiquid, Dodge, Trade, MLG, ChunkSearch, InteractWithBlock, StorageContainer, CraftInInventory, GetToChunk, CollectFood, CollectBlazeRods, FastTravel, CollectObsidian, ConstructNetherPortal, LootDesertTemple, StoreInStash, RavageStructures, Stronghold, DragonFight, AdvancedConstruction)
 - Chains: 6 files (FoodChain, MLGBucketChain, MobDefenseChain, WorldSurvivalChain, DeathMenuChain, PlayerInteractionFixChain)
-- Tests: 31 test files
+- Tests: 32 test files
 - Utilities: BlockRange (3D region definition)
 
 ## Missing Components to Port
@@ -113,16 +113,16 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [x] ScaffoldTask (exists)
 - [x] DestroyBlockTask (Completed Iteration 3)
 - [x] PlaceBlockNearbyTask (Completed Iteration 3)
-- [ ] PlaceSignTask
+- [x] PlaceSignTask (Completed Iteration 12)
 - [ ] PlaceObsidianBucketTask
 - [ ] PlaceStructureBlockTask
 - [x] ClearLiquidTask (Completed Iteration 3)
-- [ ] ClearRegionTask
-- [ ] CoverWithBlocksTask
+- [x] ClearRegionTask (Completed Iteration 12)
+- [x] CoverWithBlocksTask (Completed Iteration 12)
 - [x] PutOutFireTask (Completed Iteration 3)
 - [x] ConstructNetherPortalBucketTask (Completed Iteration 9 - as ConstructNetherPortalTask)
 - [x] ConstructNetherPortalObsidianTask (Completed Iteration 9 - as ConstructNetherPortalTask)
-- [ ] ConstructIronGolemTask
+- [x] ConstructIronGolemTask (Completed Iteration 12)
 
 #### Misc Tasks
 - [x] SleepTask (exists)
@@ -594,6 +594,43 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [x] Updated exports in index.ts
 - [x] All 1196 tests passing
 
+### Iteration 12 (Complete)
+- [x] Implemented advanced construction tasks (AdvancedConstructionTask.ts):
+  - PlaceSignTask - places signs with messages at specific or any location
+    - State machine: GETTING_SIGN -> CLEARING_POSITION -> PLACING_SIGN -> EDITING_SIGN -> FINISHED
+    - WOOD_SIGNS array with all wood sign types (oak, spruce, birch, jungle, etc.)
+    - Position clearing before placement
+    - getMessage() for retrieving the sign text
+  - ClearRegionTask - clears all blocks in a 3D region
+    - State machine: SCANNING -> DESTROYING -> FINISHED
+    - Coordinate normalization (min/max corners)
+    - Top-down iteration for gravity-affected blocks
+    - getRegion() for accessing the clear area
+  - CoverWithBlocksTask - covers lava with throwaway blocks for Nether safety
+    - State machine: GETTING_BLOCKS -> GOING_TO_NETHER -> SEARCHING_LAVA -> COVERING
+    - THROWAWAY_BLOCKS array (cobblestone, dirt, netherrack, etc.)
+    - Dimension awareness (collects blocks in overworld, covers lava in nether)
+    - Edge detection (prioritizes lava at pool edges)
+    - Continuous task (never finishes, runs until interrupted)
+  - ConstructIronGolemTask - builds iron golem from materials
+    - State machine: GETTING_MATERIALS -> FINDING_POSITION -> PLACING_BASE -> PLACING_CENTER -> PLACING_ARMS -> CLEARING_AREA -> PLACING_HEAD -> FINISHED
+    - Classic T-shape pattern with pumpkin head
+    - Automatic position finding if not specified
+    - Detects successful golem spawn nearby
+  - placeSign(), clearRegion(), coverWithBlocks(), constructIronGolem() helper functions
+- [x] Added comprehensive tests (AdvancedConstructionTask.test.ts):
+  - 49 tests covering all new tasks
+  - WHY/intent tests explaining purpose
+  - PlaceSignTask message handling and position tests
+  - ClearRegionTask coordinate normalization and completion tests
+  - CoverWithBlocksTask throwaway blocks and dimension tests
+  - ConstructIronGolemTask state machine and material tests
+  - State machine enum coverage tests
+  - Material requirements tests
+  - Integration scenario tests
+- [x] Updated exports in index.ts
+- [x] All 1245 tests passing
+
 ## Test Coverage Goals
 
 For each ported task, we need tests that verify:
@@ -646,4 +683,5 @@ For each ported task, we need tests that verify:
 24. ~~Implement remaining structure tasks (RavageDesertTemplesTask, RavageRuinedPortalsTask)~~ ✅ Done
 25. ~~Implement speedrun tasks (KillEnderDragonTask, LocateStrongholdCoordinatesTask)~~ ✅ Done
 26. Implement remaining speedrun tasks (BeatMinecraft2Task, MarvionBeatMinecraftTask)
-27. Implement remaining misc tasks (HeroTask, PlaceSignTask, ClearRegionTask)
+27. ~~Implement construction tasks (PlaceSignTask, ClearRegionTask, CoverWithBlocksTask, ConstructIronGolemTask)~~ ✅ Done
+28. Implement remaining misc tasks (HeroTask)

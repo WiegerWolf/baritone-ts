@@ -388,3 +388,21 @@ export {
   FOOD_ITEMS,
 } from './DragonFightTask';
 export type { IDragonWaiter } from './DragonFightTask';
+
+// Advanced construction tasks
+export {
+  PlaceSignTask,
+  PlaceSignState,
+  ClearRegionTask,
+  ClearRegionState,
+  CoverWithBlocksTask,
+  CoverWithBlocksState,
+  ConstructIronGolemTask,
+  ConstructIronGolemState,
+  placeSign,
+  clearRegion,
+  coverWithBlocks,
+  constructIronGolem,
+  THROWAWAY_BLOCKS,
+  WOOD_SIGNS,
+} from './AdvancedConstructionTask';
