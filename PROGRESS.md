@@ -5,7 +5,7 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 ## Summary
 
 **Status**: In Progress
-**Last Updated**: Iteration 13
+**Last Updated**: Iteration 14
 
 ### BaritonePlus Java Statistics:
 - Total Tasks: 173 Java files in tasks/
@@ -14,9 +14,9 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 
 ### baritone-ts TypeScript Statistics (Current):
 - Composite Tasks: 46 files
-- Concrete Tasks: 37 modules (GoTo, MineBlock, PlaceBlock, Craft, Smelt, Inventory, Interact, Slot, MovementUtil, Container, Construction, Entity, Escape, Resource, MineAndCollect, KillAndLoot, CollectFuel, BlockSearch, Portal, Armor, Bed, CollectLiquid, Dodge, Trade, MLG, ChunkSearch, InteractWithBlock, StorageContainer, CraftInInventory, GetToChunk, CollectFood, CollectBlazeRods, FastTravel, CollectObsidian, ConstructNetherPortal, LootDesertTemple, StoreInStash, RavageStructures, Stronghold, DragonFight, AdvancedConstruction, BeatMinecraft)
+- Concrete Tasks: 38 modules (GoTo, MineBlock, PlaceBlock, Craft, Smelt, Inventory, Interact, Slot, MovementUtil, Container, Construction, Entity, Escape, Resource, MineAndCollect, KillAndLoot, CollectFuel, BlockSearch, Portal, Armor, Bed, CollectLiquid, Dodge, Trade, MLG, ChunkSearch, InteractWithBlock, StorageContainer, CraftInInventory, GetToChunk, CollectFood, CollectBlazeRods, FastTravel, CollectObsidian, ConstructNetherPortal, LootDesertTemple, StoreInStash, RavageStructures, Stronghold, DragonFight, AdvancedConstruction, BeatMinecraft, Misc)
 - Chains: 6 files (FoodChain, MLGBucketChain, MobDefenseChain, WorldSurvivalChain, DeathMenuChain, PlayerInteractionFixChain)
-- Tests: 33 test files
+- Tests: 34 test files
 - Utilities: BlockRange (3D region definition)
 
 ## Missing Components to Port
@@ -65,7 +65,7 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [x] CollectFoodTask (Completed Iteration 8)
 - [x] CollectBucketLiquidTask (exists)
 - [x] CollectObsidianTask (Completed Iteration 9)
-- [ ] CarveThenCollectTask
+- [x] CarveThenCollectTask (Completed Iteration 14)
 - [x] TradeWithPiglinsTask (Completed Iteration 6)
 
 #### Movement Tasks (Completed Iteration 8)
@@ -101,7 +101,7 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [x] GiveItemToPlayerTask (Completed Iteration 4)
 - [x] KillPlayerTask (Completed Iteration 4)
 - [x] InteractWithEntityTask (Completed Iteration 4)
-- [ ] HeroTask
+- [x] HeroTask (Completed Iteration 14)
 
 #### Block Search Tasks (Completed Iteration 5)
 - [x] DoToClosestBlockTask (Completed Iteration 5)
@@ -114,7 +114,7 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [x] DestroyBlockTask (Completed Iteration 3)
 - [x] PlaceBlockNearbyTask (Completed Iteration 3)
 - [x] PlaceSignTask (Completed Iteration 12)
-- [ ] PlaceObsidianBucketTask
+- [x] PlaceObsidianBucketTask (Completed Iteration 14)
 - [ ] PlaceStructureBlockTask
 - [x] ClearLiquidTask (Completed Iteration 3)
 - [x] ClearRegionTask (Completed Iteration 12)
@@ -665,6 +665,42 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [x] Updated exports in index.ts
 - [x] All 1282 tests passing
 
+### Iteration 14 (Complete)
+- [x] Implemented miscellaneous tasks (MiscTask.ts):
+  - CarveThenCollectTask - carve blocks before collecting
+    - State machine: GETTING_TOOL -> FINDING_CARVED_BLOCK -> BREAKING_CARVED_BLOCK -> FINDING_CARVE_BLOCK -> CARVING_BLOCK -> COLLECTING_BLOCKS -> PLACING_BLOCKS
+    - Carve pumpkins into carved pumpkins using shears
+    - Break carved blocks to collect items
+    - Place uncarved blocks to carve more
+    - collectCarvedPumpkins() helper function
+  - HeroTask - autonomous hostile mob clearing
+    - State machine: EATING -> COLLECTING_XP -> KILLING_HOSTILE -> COLLECTING_DROPS -> SEARCHING
+    - Prioritizes eating when low on food
+    - Collects XP orbs for experience
+    - Kills hostile mobs (zombie, skeleton, spider, creeper, etc.)
+    - Collects mob drops (rotten_flesh, bone, gunpowder, ender_pearl, etc.)
+    - Wanders to find more mobs when none nearby
+    - beHero() helper function
+  - PlaceObsidianBucketTask - create obsidian using bucket casting
+    - State machine: GETTING_WATER_BUCKET -> GETTING_LAVA_BUCKET -> BUILDING_CAST -> CLEARING_SPACE -> POSITIONING -> PLACING_LAVA -> PLACING_WATER -> CLEARING_WATER -> FINISHED
+    - OBSIDIAN_CAST_FRAME constant with 6 frame positions
+    - Build cast frame around target position
+    - Place lava, then water to form obsidian
+    - Clear leftover water after obsidian forms
+    - Progress checking with wander fallback
+    - placeObsidianWithBucket() helper function
+  - HOSTILE_MOBS, HOSTILE_MOB_DROPS constants
+- [x] Added comprehensive tests (MiscTask.test.ts):
+  - 38 tests covering all new tasks
+  - WHY/intent tests for carving workflow
+  - State machine coverage tests
+  - Hero behavior tests (eating, killing, collecting)
+  - Obsidian completion detection tests
+  - Constant arrays coverage tests
+  - Integration scenario tests
+- [x] Updated exports in index.ts
+- [x] All 1320 tests passing
+
 ## Test Coverage Goals
 
 For each ported task, we need tests that verify:
@@ -718,5 +754,5 @@ For each ported task, we need tests that verify:
 25. ~~Implement speedrun tasks (KillEnderDragonTask, LocateStrongholdCoordinatesTask)~~ ✅ Done
 26. ~~Implement speedrun tasks (BeatMinecraft2Task, MarvionBeatMinecraftTask)~~ ✅ Done (as BeatMinecraftTask)
 27. ~~Implement construction tasks (PlaceSignTask, ClearRegionTask, CoverWithBlocksTask, ConstructIronGolemTask)~~ ✅ Done
-28. Implement remaining misc tasks (HeroTask, CarveThenCollectTask)
-29. Implement remaining construction tasks (PlaceObsidianBucketTask, PlaceStructureBlockTask)
+28. ~~Implement misc tasks (HeroTask, CarveThenCollectTask, PlaceObsidianBucketTask)~~ ✅ Done
+29. Implement remaining low-priority tasks (PlaceStructureBlockTask, CraftGenericManuallyTask, AbstractDoToClosestObjectTask)

@@ -418,3 +418,19 @@ export {
   IRON_ARMOR,
 } from './BeatMinecraftTask';
 export type { BeatMinecraftConfig } from './BeatMinecraftTask';
+
+// Miscellaneous tasks
+export {
+  CarveThenCollectTask,
+  CarveState,
+  HeroTask,
+  HeroState,
+  PlaceObsidianBucketTask,
+  ObsidianBucketState,
+  collectCarvedPumpkins,
+  beHero,
+  placeObsidianWithBucket,
+  HOSTILE_MOBS,
+  HOSTILE_MOB_DROPS,
+  OBSIDIAN_CAST_FRAME,
+} from './MiscTask';
