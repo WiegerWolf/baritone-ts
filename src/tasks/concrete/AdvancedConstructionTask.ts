@@ -20,7 +20,7 @@ import { DestroyBlockTask, PlaceBlockNearbyTask } from './ConstructionTask';
 import { PlaceBlockTask } from './PlaceBlockTask';
 import { InteractWithBlockTask, Direction } from './InteractWithBlockTask';
 import { MineAndCollectTask } from './MineAndCollectTask';
-import { GoToDimensionTask } from './PortalTask';
+import { GoToDimensionTask } from '../composite/PortalTask';
 import { TimeoutWanderTask } from './MovementUtilTask';
 import { BlockPos } from '../../types';
 import { BlockRange } from '../../utils/BlockRange';

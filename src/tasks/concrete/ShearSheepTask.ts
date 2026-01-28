@@ -30,6 +30,13 @@ enum ShearState {
 }
 
 /**
+ * Wool color type
+ */
+export type WoolColor = 'white' | 'orange' | 'magenta' | 'light_blue' | 'yellow' |
+                        'lime' | 'pink' | 'gray' | 'light_gray' | 'cyan' |
+                        'purple' | 'blue' | 'brown' | 'green' | 'red' | 'black' | 'any';
+
+/**
  * Configuration for ShearSheepTask
  */
 export interface ShearSheepConfig {
@@ -39,12 +46,18 @@ export interface ShearSheepConfig {
   preferredColors: string[];
   /** Maximum sheep to shear (0 = unlimited) */
   maxSheepToShear: number;
+  /** Overall timeout for the task (seconds) */
+  stuckTimeout: number;
+  /** Per-sheep approach timeout (seconds) */
+  approachTimeout: number;
 }
 
 const DEFAULT_CONFIG: ShearSheepConfig = {
   searchRange: 32,
   preferredColors: [],
   maxSheepToShear: 0,
+  stuckTimeout: 60,
+  approachTimeout: 5,
 };
 
 /**
@@ -60,12 +73,20 @@ export class ShearSheepTask extends Task {
   private lookHelper: LookHelper;
   private cooldown: TimerGame;
   private sheepSheared: number = 0;
+  /** Track sheep we've already tried to avoid retry loops */
+  private shearedEntities: Set<number> = new Set();
+  /** Overall timeout - give up if stuck too long */
+  private stuckTimer: TimerGame;
+  /** Per-sheep approach timeout - skip unreachable sheep */
+  private approachTimer: TimerGame;
 
   constructor(bot: Bot, config: Partial<ShearSheepConfig> = {}) {
     super(bot);
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.lookHelper = new LookHelper(bot);
     this.cooldown = new TimerGame(bot, 0.5);
+    this.stuckTimer = new TimerGame(bot, this.config.stuckTimeout);
+    this.approachTimer = new TimerGame(bot, this.config.approachTimeout);
   }
 
   get displayName(): string {
@@ -77,6 +98,9 @@ export class ShearSheepTask extends Task {
     this.targetSheep = null;
     this.sheepSheared = 0;
     this.cooldown.reset();
+    this.stuckTimer.reset();
+    this.approachTimer.reset();
+    this.shearedEntities.clear();
   }
 
   onTick(): Task | null {
@@ -105,6 +129,12 @@ export class ShearSheepTask extends Task {
   }
 
   private handleFindingSheep(): Task | null {
+    // Check overall timeout
+    if (this.stuckTimer.elapsed()) {
+      this.state = ShearState.FAILED;
+      return null;
+    }
+
     // Check if we have shears
     if (!this.hasShears()) {
       this.state = ShearState.FAILED;
@@ -120,12 +150,22 @@ export class ShearSheepTask extends Task {
       return null;
     }
 
+    // Reset approach timer for new target
+    this.approachTimer.reset();
     this.state = ShearState.APPROACHING;
     return null;
   }
 
   private handleApproaching(): Task | null {
     if (!this.targetSheep || !this.isValidTarget(this.targetSheep)) {
+      this.targetSheep = null;
+      this.state = ShearState.FINDING_SHEEP;
+      return null;
+    }
+
+    // Check approach timeout - skip unreachable sheep
+    if (this.approachTimer.elapsed()) {
+      this.shearedEntities.add(this.targetSheep.id);
       this.targetSheep = null;
       this.state = ShearState.FINDING_SHEEP;
       return null;
@@ -198,13 +238,19 @@ export class ShearSheepTask extends Task {
     try {
       this.bot.useOn(this.targetSheep);
       this.sheepSheared++;
+      this.shearedEntities.add(this.targetSheep.id);
       this.cooldown.reset();
 
       // Find next sheep
       this.targetSheep = null;
       this.state = ShearState.FINDING_SHEEP;
     } catch (err) {
-      // Retry
+      // Mark as attempted and move on
+      if (this.targetSheep) {
+        this.shearedEntities.add(this.targetSheep.id);
+      }
+      this.targetSheep = null;
+      this.state = ShearState.FINDING_SHEEP;
       this.cooldown.reset();
     }
 
@@ -226,6 +272,9 @@ export class ShearSheepTask extends Task {
       if (!entity) continue;
       if (entity.name !== 'sheep') continue;
       if (!this.isValidTarget(entity)) continue;
+
+      // Skip sheep we've already tried (unreachable or failed)
+      if (this.shearedEntities.has(entity.id)) continue;
 
       // Check color preference
       if (this.config.preferredColors.length > 0) {
