@@ -44,8 +44,15 @@ This document tracks the porting progress from the Java BaritonePlus project to 
    - Handles emergency landing on low durability
    - Unequips elytra after landing
 
-5. **Updated Exports**
-   - `tasks/concrete/index.ts` updated with RepairToolTask and GetToXZWithElytraTask
+5. **Enhanced Slot Tasks** - UPDATED
+   - `MoveItemsToSlotTask` - Base class for item searching and moving
+   - `MoveItemToSlotFromInventoryTask` - Move items from player inventory
+   - `MoveItemToSlotFromContainerTask` - Move items from container slots
+   - `matchItemNames()` helper for creating item matchers
+   - Supports target count for partial transfers
+
+6. **Updated Exports**
+   - `tasks/concrete/index.ts` updated with all new tasks
    - `trackers/index.ts` updated with MiscBlockTracker and SimpleChunkTracker
 
 ## Files Added in Iteration 7
@@ -54,13 +61,17 @@ This document tracks the porting progress from the Java BaritonePlus project to 
 3. `src/trackers/SimpleChunkTracker.ts`
 4. `src/tasks/concrete/GetToXZWithElytraTask.ts`
 
+## Files Modified in Iteration 7
+1. `src/tasks/concrete/SlotTask.ts` - Added enhanced move item tasks
+
 ### Iteration 7 Summary
 - Added RepairToolTask for Mending-based tool repair via XP collection
 - Added MiscBlockTracker for portal position tracking across dimensions
 - Added SimpleChunkTracker for chunk loading state and scanning
 - Added GetToXZWithElytraTask for intelligent elytra travel
+- Added enhanced slot tasks (MoveItemsToSlotTask, FromInventory, FromContainer)
 - All type errors fixed, project compiles successfully
-- Remaining gaps: Enhanced slot tasks, craft variants
+- Remaining gap: CraftWithMatchingPlanTask variants
 
 ---
 
@@ -448,8 +459,8 @@ Many composite tasks exist as stubs:
 - [x] `EnsureFreeInventorySlotTask.java` → SlotTask.ts (verified Iteration 5)
 - [x] `EnsureFreePlayerCraftingGridTask.java` → SlotTask.ts (verified Iteration 5)
 - [x] `MoveItemToSlotTask.java` → SlotTask.ts (verified Iteration 5)
-- [ ] `MoveItemToSlotFromContainerTask.java` - Enhanced version needed
-- [ ] `MoveItemToSlotFromInventoryTask.java` - Enhanced version needed
+- [x] `MoveItemToSlotFromContainerTask.java` → SlotTask.ts (Iteration 7)
+- [x] `MoveItemToSlotFromInventoryTask.java` → SlotTask.ts (Iteration 7)
 - [x] `ReceiveCraftingOutputSlotTask.java` → SlotTask.ts (verified Iteration 5)
 - [x] `ThrowCursorTask.java` → SlotTask.ts (verified Iteration 5)
 
@@ -499,8 +510,7 @@ Many composite tasks exist as stubs:
 ## Priority Tasks for Next Iterations
 
 ### Iteration 8 - Remaining Gaps
-1. Enhanced `MoveItemToSlotFromContainerTask` and `MoveItemToSlotFromInventoryTask`
-2. Port `CraftWithMatchingPlanTask` variants
+1. Port `CraftWithMatchingPlanTask` variants (if needed)
 
 ### Iteration 9+ - Polish & Edge Cases
 1. Butler/command system (if needed)

@@ -68,7 +68,12 @@ export {
   ThrowCursorTask,
   ReceiveCraftingOutputTask,
   MoveItemToSlotTask,
+  MoveItemsToSlotTask,
+  MoveItemToSlotFromInventoryTask,
+  MoveItemToSlotFromContainerTask,
+  matchItemNames,
 } from './SlotTask';
+export type { ItemMatcher } from './SlotTask';
 
 // Movement utility tasks
 export {
