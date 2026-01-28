@@ -13,11 +13,13 @@ export {
   MovementStatus,
   Passability,
   PathingBlockType,
+  MutableMoveResult
+} from './types';
+export type {
   PathResult,
   CalculationContext as CalculationContextInterface,
   Goal,
-  Movement as MovementInterface,
-  MutableMoveResult
+  Movement as MovementInterface
 } from './types';
 export * from './goals';
 export {
@@ -136,12 +138,14 @@ export {
 
 // Behavior/Process system
 export {
-  IProcess,
   BaseProcess,
   ProcessManager,
   ProcessPriority,
-  ProcessState,
-  type ProcessTickResult
+  ProcessState
+} from './behavior/Process';
+export type {
+  IProcess,
+  ProcessTickResult
 } from './behavior/Process';
 export { MineProcess, type MineConfig } from './behavior/MineProcess';
 export { FollowProcess, type FollowConfig } from './behavior/FollowProcess';
