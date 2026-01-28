@@ -5,7 +5,7 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 ## Summary
 
 **Status**: In Progress
-**Last Updated**: Iteration 4
+**Last Updated**: Iteration 5
 
 ### BaritonePlus Java Statistics:
 - Total Tasks: 173 Java files in tasks/
@@ -14,9 +14,9 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 
 ### baritone-ts TypeScript Statistics (Current):
 - Composite Tasks: 46 files
-- Concrete Tasks: 13 modules (GoTo, MineBlock, PlaceBlock, Craft, Smelt, Inventory, Interact, Slot, MovementUtil, Container, Construction, Entity, Escape)
+- Concrete Tasks: 17 modules (GoTo, MineBlock, PlaceBlock, Craft, Smelt, Inventory, Interact, Slot, MovementUtil, Container, Construction, Entity, Escape, Resource, MineAndCollect, KillAndLoot, CollectFuel, BlockSearch)
 - Chains: 6 files (FoodChain, MLGBucketChain, MobDefenseChain, WorldSurvivalChain, DeathMenuChain, PlayerInteractionFixChain)
-- Tests: 22 test files
+- Tests: 24 test files
 
 ## Missing Components to Port
 
@@ -50,18 +50,19 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [ ] PickupFromContainerTask
 - [ ] ContainerStoredTracker
 
-#### Resource Collection Tasks (Partially Exists)
+#### Resource Collection Tasks (Completed Iteration 5)
 - [x] CollectWoodTask (exists)
 - [x] GatherResourcesTask (exists)
 - [x] MineOresTask (exists)
+- [x] ResourceTask (base class - Completed Iteration 5)
+- [x] MineAndCollectTask (Completed Iteration 5)
+- [x] KillAndLootTask (Completed Iteration 5)
+- [x] CollectFuelTask (Completed Iteration 5)
 - [ ] CollectBlazeRodsTask
 - [ ] CollectFoodTask (partial - HuntTask exists)
-- [ ] CollectFuelTask
 - [ ] CollectBucketLiquidTask
 - [ ] CollectObsidianTask
-- [ ] MineAndCollectTask (base class)
 - [ ] CarveThenCollectTask
-- [ ] KillAndLootTask
 - [ ] TradeWithPiglinsTask
 
 #### Movement Tasks (Partially Exists)
@@ -73,7 +74,7 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [ ] SearchChunksExploreTask
 - [ ] GetToChunkTask
 - [x] GetToYTask (Completed Iteration 2)
-- [ ] GetWithinRangeOfBlockTask
+- [x] GetWithinRangeOfBlockTask (Completed Iteration 5)
 - [x] PickupDroppedItemTask (Exists as PickupItemTask)
 - [ ] DodgeProjectilesTask
 - [ ] MLGBucketTask (task version)
@@ -81,7 +82,7 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [x] EscapeFromLavaTask (Completed Iteration 4)
 - [x] RunAwayFromCreepersTask (Completed Iteration 4)
 - [x] RunAwayFromHostilesTask (Completed Iteration 4)
-- [ ] GoInDirectionXZTask
+- [x] GoInDirectionXZTask (Completed Iteration 5)
 - [x] SafeRandomShimmyTask (Completed Iteration 2)
 - [x] IdleTask (Completed Iteration 2)
 - [ ] FastTravelTask
@@ -98,6 +99,10 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [x] KillPlayerTask (Completed Iteration 4)
 - [x] InteractWithEntityTask (Completed Iteration 4)
 - [ ] HeroTask
+
+#### Block Search Tasks (Completed Iteration 5)
+- [x] DoToClosestBlockTask (Completed Iteration 5)
+- [ ] AbstractDoToClosestObjectTask (base class - partially implemented)
 
 #### Construction Tasks (Completed Iteration 3)
 - [x] BuildTask (exists)
@@ -136,8 +141,6 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [ ] CraftInInventoryTask
 - [ ] CraftGenericManuallyTask
 - [ ] CraftGenericWithRecipeBooksTask
-- [ ] AbstractDoToClosestObjectTask
-- [ ] DoToClosestBlockTask
 - [ ] InteractWithBlockTask
 
 ## Completed This Iteration
@@ -276,6 +279,68 @@ This document tracks the porting progress from BaritonePlus (Java) to baritone-t
 - [x] Fixed MovementProgressChecker API usage (setProgress + failed, not check)
 - [x] All 805 tests passing
 
+### Iteration 5 (Complete)
+- [x] Implemented resource collection base class (ResourceTask.ts):
+  - ResourceTask abstract base class for item collection tasks
+  - ItemTarget interface for specifying items and counts
+  - itemTarget() helper function for creating targets
+  - Dimension enum for dimension-specific behavior
+  - Item count tracking and completion detection
+- [x] Implemented mine and collect task (MineAndCollectTask.ts):
+  - MineAndCollectTask - mines blocks and collects dropped items
+    - State machine: SEARCHING -> APPROACHING -> MINING -> COLLECTING
+    - Blacklists unreachable positions
+    - Progress checking for stuck detection
+    - Configurable search radius
+    - Prefers nearby dropped items when preferDrops enabled
+  - mineAndCollect() and mineOre() helper functions
+- [x] Implemented kill and loot task (KillAndLootTask.ts):
+  - KillAndLootTask - kills entities and collects their drops
+    - State machine: SEARCHING -> KILLING -> LOOTING -> WANDERING
+    - Entity type filtering
+    - Custom entity filter predicates
+    - Attack cooldown management
+    - Loot collection with timeout
+  - killAndLoot(), huntForFood(), huntMobForDrop() helper functions
+- [x] Implemented fuel collection task (CollectFuelTask.ts):
+  - CollectFuelTask - collects fuel for smelting
+    - Dimension-aware fuel source selection
+    - Fuel value calculation from inventory
+    - Mining subtask delegation
+  - FUEL_SOURCES constant with all standard fuels
+  - collectFuel(), collectFuelForSmelting() helper functions
+- [x] Implemented block search tasks (BlockSearchTask.ts):
+  - DoToClosestBlockTask - find closest block and run task
+    - Block type filtering
+    - Custom block filter predicates
+    - Blacklisting unreachable blocks
+    - Wander on missing (configurable)
+  - GetWithinRangeOfBlockTask - navigate within range of position
+    - Simple range checking
+    - Returns navigation subtask
+  - GoInDirectionXZTask - move in XZ direction
+    - Normalized direction vector
+    - Distance tracking
+    - Target point calculation
+  - doToClosestBlock(), getWithinRangeOf(), goInDirection() helpers
+- [x] Added comprehensive tests for resource tasks (ResourceTasks.test.ts):
+  - 31 tests covering ItemTarget helper
+  - MineAndCollectTask creation, block finding, completion
+  - KillAndLootTask creation, entity finding, filtering
+  - CollectFuelTask creation, fuel calculation, fuel sources
+  - Convenience function tests
+  - Equality checks
+- [x] Added comprehensive tests for block search tasks (BlockSearchTasks.test.ts):
+  - 27 tests covering DoToClosestBlockTask
+  - GetWithinRangeOfBlockTask range checking
+  - GoInDirectionXZTask directional movement
+  - Block filtering
+  - Unreachable handling
+  - Convenience functions
+  - Equality checks
+- [x] Updated concrete task exports in index.ts
+- [x] All 863 tests passing
+
 ## Test Coverage Goals
 
 For each ported task, we need tests that verify:
@@ -310,7 +375,9 @@ For each ported task, we need tests that verify:
 6. ~~Implement construction tasks (DestroyBlockTask, PlaceBlockNearbyTask)~~ ✅ Done
 7. ~~Implement entity interaction base classes (AbstractDoToEntityTask, DoToClosestEntityTask)~~ ✅ Done
 8. ~~Implement escape/safety tasks (EscapeFromLavaTask, RunAwayFromCreepersTask)~~ ✅ Done
-9. Implement resource collection tasks (CollectBlazeRodsTask, CollectFuelTask)
-10. Implement search/exploration tasks (SearchChunkForBlockTask)
+9. ~~Implement resource collection tasks (MineAndCollectTask, KillAndLootTask, CollectFuelTask)~~ ✅ Done
+10. ~~Implement block search tasks (DoToClosestBlockTask, GetWithinRangeOfBlockTask, GoInDirectionXZTask)~~ ✅ Done
 11. Implement nether tasks (EnterNetherPortalTask, TradeWithPiglinsTask)
-12. Add comprehensive tests for new tasks
+12. Implement search/exploration tasks (SearchChunkForBlockTask)
+13. Implement remaining misc tasks (EquipArmorTask, PlaceBedAndSetSpawnTask)
+14. Add comprehensive tests for new tasks

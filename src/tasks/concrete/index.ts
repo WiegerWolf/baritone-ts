@@ -124,3 +124,45 @@ export {
   runFromAllHostiles,
 } from './EscapeTask';
 export type { LavaEscapeConfig, CreeperFleeConfig, HostileFleeConfig } from './EscapeTask';
+
+// Resource collection tasks
+export {
+  ResourceTask,
+  itemTarget,
+  Dimension,
+} from './ResourceTask';
+export type { ItemTarget } from './ResourceTask';
+
+export {
+  MineAndCollectTask,
+  mineAndCollect,
+  mineOre,
+} from './MineAndCollectTask';
+export type { MineAndCollectConfig } from './MineAndCollectTask';
+
+export {
+  KillAndLootTask,
+  killAndLoot,
+  huntForFood,
+  huntMobForDrop,
+} from './KillAndLootTask';
+export type { KillAndLootConfig } from './KillAndLootTask';
+
+export {
+  CollectFuelTask,
+  collectFuel,
+  collectFuelForSmelting,
+  FUEL_SOURCES,
+} from './CollectFuelTask';
+export type { FuelSource, CollectFuelConfig } from './CollectFuelTask';
+
+// Block search and interaction tasks
+export {
+  DoToClosestBlockTask,
+  GetWithinRangeOfBlockTask,
+  GoInDirectionXZTask,
+  doToClosestBlock,
+  getWithinRangeOf,
+  goInDirection,
+} from './BlockSearchTask';
+export type { BlockFilter, BlockTaskFactory, DoToClosestBlockConfig } from './BlockSearchTask';
