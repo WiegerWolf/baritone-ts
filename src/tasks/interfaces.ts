@@ -46,6 +46,25 @@ export interface ITaskOverridesGrounded {
 }
 
 /**
+ * Marker interface for tasks that use the 2x2 crafting grid.
+ * Tasks implementing this interface require the crafting grid
+ * to be clear before they can execute.
+ *
+ * Used by container tasks that break if items are in the crafting grid.
+ */
+export interface ITaskUsesCraftingGrid {
+  readonly usesCraftingGrid: true;
+}
+
+/**
+ * Check if a task uses the crafting grid
+ */
+export function taskUsesCraftingGrid(task: ITask | null): boolean {
+  if (!task) return false;
+  return 'usesCraftingGrid' in task && (task as ITaskUsesCraftingGrid).usesCraftingGrid === true;
+}
+
+/**
  * Check if a task overrides grounded requirements
  */
 export function taskOverridesGrounded(task: ITask | null): boolean {
