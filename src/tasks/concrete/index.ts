@@ -483,3 +483,20 @@ export {
   isInBiome,
 } from './BiomeSearchTask';
 export type { BiomeKey, LocateDesertTempleConfig } from './BiomeSearchTask';
+
+// Pickup item tasks
+export {
+  GetToEntityTask,
+  PickupDroppedItemTask,
+  PickupNearbyItemsTask,
+} from './PickupItemTask';
+
+// Flee from entities tasks
+export {
+  RunAwayFromEntitiesTask,
+  RunAwayFromHostilesTask as FleeFromHostilesTask,
+  RunAwayFromPlayersTask as FleeFromPlayersTask,
+  RunAwayFromCreepersTask as FleeFromCreepersTask,
+  DodgeProjectilesTask as FleeFromProjectilesTask,
+} from './FleeFromEntitiesTask';
+export type { EntitySupplier } from './FleeFromEntitiesTask';

@@ -5,11 +5,37 @@ This document tracks the porting progress from the Java BaritonePlus project to 
 
 **Source**: BaritonePlus (371 Java files)
 **Target**: baritone-ts (185 TypeScript files currently)
-**Last Updated**: 2026-01-28, Iteration 2
+**Last Updated**: 2026-01-28, Iteration 3
 
 ---
 
-## Iteration 2 Progress (Current)
+## Iteration 3 Progress (Current)
+
+### Completed in This Iteration:
+1. **Pickup Item Tasks** - NEW
+   - `PickupItemTask.ts` - Pick up dropped items from ground
+   - `GetToEntityTask` - Navigate to entity position
+   - `PickupDroppedItemTask` - Pick up items matching criteria
+   - `PickupNearbyItemsTask` - Pick up any nearby items
+
+2. **Flee From Entities Tasks** - NEW
+   - `FleeFromEntitiesTask.ts` - Run away from entities
+   - `RunAwayFromEntitiesTask` - Base flee task with direction calculation
+   - `RunAwayFromHostilesTask` - Flee from hostile mobs
+   - `RunAwayFromPlayersTask` - Flee from players
+   - `RunAwayFromCreepersTask` - Special handling for creepers
+   - `DodgeProjectilesTask` - Dodge incoming projectiles
+
+3. **Already Existed (verified)**
+   - `TimeoutWanderTask` in MovementUtilTask.ts
+   - Entity interaction tasks in EntityTask.ts
+
+4. **Updated Exports**
+   - `concrete/index.ts` updated with new task exports
+
+---
+
+## Iteration 2 Progress (Completed)
 
 ### Completed in This Iteration:
 1. **Entity Helper** - NEW
@@ -178,35 +204,35 @@ Many composite tasks exist as stubs:
 ### Main Tasks ❌
 **BaritonePlus `main/tasks/` - Core task implementations:**
 
-#### Movement Tasks (~25 files)
-- [ ] `CustomBaritoneGoalTask.java` - Base for Baritone goals
-- [ ] `DefaultGoToDimensionTask.java`
-- [ ] `DodgeProjectilesTask.java`
-- [ ] `EnterNetherPortalTask.java`
-- [ ] `EscapeFromLavaTask.java`
-- [ ] `FastTravelTask.java`
-- [ ] `FollowPlayerTask.java` - Needs full port
-- [ ] `GetCloseToBlockTask.java`
-- [ ] `GetToBlockTask.java` - Partially done
-- [ ] `GetToChunkTask.java`
-- [ ] `GetToEntityTask.java`
+#### Movement Tasks (~25 files) - Mostly Complete ✅
+- [x] `CustomBaritoneGoalTask.java` → GoToTask.ts (goals)
+- [x] `DefaultGoToDimensionTask.java` → PortalTask.ts
+- [x] `DodgeProjectilesTask.java` → FleeFromEntitiesTask.ts (Iteration 3)
+- [x] `EnterNetherPortalTask.java` → PortalTask.ts
+- [x] `EscapeFromLavaTask.java` → EscapeTask.ts
+- [x] `FastTravelTask.java` → FastTravelTask.ts
+- [x] `FollowPlayerTask.java` → EntityTask.ts
+- [x] `GetCloseToBlockTask.java` → BlockSearchTask.ts
+- [x] `GetToBlockTask.java` → GoToTask.ts
+- [x] `GetToChunkTask.java` → GetToChunkTask.ts
+- [x] `GetToEntityTask.java` → PickupItemTask.ts (Iteration 3)
 - [ ] `GetToOuterEndIslandsTask.java`
-- [ ] `GetToXZTask.java`
+- [x] `GetToXZTask.java` → GoToTask.ts
 - [ ] `GetToXZWithElytraTask.java`
-- [ ] `GetToYTask.java`
-- [ ] `GetWithinRangeOfBlockTask.java`
-- [ ] `GoInDirectionXZTask.java`
-- [ ] `GoToStrongholdPortalTask.java`
-- [ ] `IdleTask.java`
-- [ ] `LocateDesertTempleTask.java`
-- [ ] `LocateStrongholdCoordinatesTask.java`
-- [ ] `MLGBucketTask.java`
-- [ ] `PickupDroppedItemTask.java`
-- [ ] `RunAwayFrom*Task.java` (multiple variants)
-- [ ] `SafeRandomShimmyTask.java`
-- [ ] `SearchChunk*Task.java` (multiple)
+- [x] `GetToYTask.java` → MovementUtilTask.ts
+- [x] `GetWithinRangeOfBlockTask.java` → BlockSearchTask.ts
+- [x] `GoInDirectionXZTask.java` → BlockSearchTask.ts
+- [x] `GoToStrongholdPortalTask.java` → StrongholdTask.ts
+- [x] `IdleTask.java` → MovementUtilTask.ts
+- [x] `LocateDesertTempleTask.java` → BiomeSearchTask.ts
+- [x] `LocateStrongholdCoordinatesTask.java` → StrongholdTask.ts
+- [x] `MLGBucketTask.java` → MLGTask.ts
+- [x] `PickupDroppedItemTask.java` → PickupItemTask.ts (Iteration 3)
+- [x] `RunAwayFrom*Task.java` → FleeFromEntitiesTask.ts (Iteration 3)
+- [x] `SafeRandomShimmyTask.java` → MovementUtilTask.ts
+- [x] `SearchChunk*Task.java` → ChunkSearchTask.ts
 - [ ] `ThrowEnderPearlSimpleProjectileTask.java`
-- [ ] `TimeoutWanderTask.java`
+- [x] `TimeoutWanderTask.java` → MovementUtilTask.ts
 
 #### Construction Tasks (~20 files)
 - [ ] `ClearLiquidTask.java`
@@ -347,11 +373,11 @@ Many composite tasks exist as stubs:
 
 ## Statistics
 - **Java Files**: 371
-- **TypeScript Files**: 188 (was 185)
-- **Estimated Completion**: ~50%
-- **Core Systems**: ~85% complete (up from ~80%)
-- **Task Implementations**: ~20% complete
-- **Utility/Helper**: ~70% complete (up from ~50%)
+- **TypeScript Files**: 190 (was 188)
+- **Estimated Completion**: ~55%
+- **Core Systems**: ~85% complete
+- **Task Implementations**: ~35% complete (up from ~20%)
+- **Utility/Helper**: ~70% complete
 
 ## Files Added in Iteration 1
 1. `src/control/InputControls.ts`
@@ -377,4 +403,15 @@ Many composite tasks exist as stubs:
 - Added MiningRequirement for tool tier requirements and block mining capabilities
 - Added ProjectileHelper for projectile physics and trajectory calculations
 - All type errors fixed, project compiles successfully
-- Ready for next iteration focusing on core movement tasks
+
+## Files Added in Iteration 3
+1. `src/tasks/concrete/PickupItemTask.ts`
+2. `src/tasks/concrete/FleeFromEntitiesTask.ts`
+
+### Iteration 3 Summary
+- Added PickupDroppedItemTask for collecting items from ground
+- Added GetToEntityTask for navigating to entities
+- Added RunAwayFromEntitiesTask family for fleeing from threats
+- Added DodgeProjectilesTask for avoiding arrows/fireballs
+- All type errors fixed, project compiles successfully
+- Ready for next iteration focusing on container tasks
