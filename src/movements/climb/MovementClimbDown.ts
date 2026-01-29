@@ -1,6 +1,7 @@
 import { BlockPos, CalculationContext, MovementStatus, COST_INF } from '../../types';
 import { LADDER_DOWN_ONE_COST } from '../../core/ActionCosts';
-import { Movement, MovementState } from '../Movement';
+import { Movement } from '../Movement';
+import { MovementState } from '../MovementState';
 import { getMovementHelper } from '../MovementHelper';
 import { isClimbable, isVine } from './ClimbUtils';
 

@@ -1,6 +1,14 @@
 import { PathNode, MovementStatus, BlockPos, CalculationContext } from '../types';
 import { Vec3 } from 'vec3';
-import { Movement, MovementTraverse, MovementAscend, MovementDescend, MovementDiagonal, MovementPillar, MovementParkour } from '../movements/Movement';
+import { Movement } from '../movements/Movement';
+import {
+  MovementTraverse,
+  MovementAscend,
+  MovementDescend,
+  MovementDiagonal,
+  MovementPillar,
+  MovementParkour
+} from '../movements';
 import { MovementFall } from '../movements/MovementFall';
 import { getMovementHelper } from '../movements/MovementHelper';
 import { getChunkLoadingHelper, ChunkLoadingHelper } from './ChunkLoadingHelper';
@@ -398,8 +406,8 @@ export class PathExecutor {
         const movement = this.movements[movementIdx];
 
         if (Math.abs(pos.y - movement.dest.y) < 1 &&
-            Math.abs(pos.x - (movement.dest.x + 0.5)) < 0.5 &&
-            Math.abs(pos.z - (movement.dest.z + 0.5)) < 0.5) {
+          Math.abs(pos.x - (movement.dest.x + 0.5)) < 0.5 &&
+          Math.abs(pos.z - (movement.dest.z + 0.5)) < 0.5) {
           // Landed at this movement's destination
           this.pathPosition = movementIdx + 1;
           this.fallOverrideActive = false;
@@ -454,8 +462,8 @@ export class PathExecutor {
     for (let i = 0; i < this.pathPosition && i < this.path.length; i++) {
       const pathNode = this.path[i];
       if (pathNode.x === currentPos.x &&
-          pathNode.y === currentPos.y &&
-          pathNode.z === currentPos.z) {
+        pathNode.y === currentPos.y &&
+        pathNode.z === currentPos.z) {
         // We've been teleported back
         this.pathPosition = i;
         this.movements[i].reset();

@@ -1,17 +1,8 @@
 import { BlockPos, CalculationContext, MovementStatus, COST_INF } from '../types';
 import { MovementHelper, getMovementHelper } from './MovementHelper';
+import { MovementState } from './MovementState';
 
-/**
- * Movement execution state
- */
-export enum MovementState {
-  NOT_STARTED,
-  BREAKING,
-  PLACING,
-  MOVING,
-  WAITING,
-  FINISHED
-}
+export { MovementState } from './MovementState';
 
 /**
  * Base class for all movement types
@@ -197,70 +188,4 @@ export abstract class Movement {
   }
 }
 
-export { MovementTraverse } from './MovementTraverse';
-export { MovementAscend } from './MovementAscend';
-export { MovementDescend } from './MovementDescend';
-export { MovementDiagonal } from './MovementDiagonal';
-export { MovementPillar } from './MovementPillar';
-export { MovementParkour } from './MovementParkour';
-export { MovementParkourAscend } from './MovementParkourAscend';
-
-export {
-  isClimbable,
-  isLadder,
-  isVine,
-  MovementClimbUp,
-  MovementClimbDown,
-  MovementMountLadder,
-  MovementDismountLadder
-} from './climb';
-export {
-  SWIM_UP_COST,
-  SWIM_DOWN_COST,
-  SWIM_HORIZONTAL_COST,
-  MovementSwimHorizontal,
-  MovementSwimUp,
-  MovementSwimDown,
-  MovementWaterExit,
-  MovementWaterEntry
-} from './swim';
-export {
-  isDoor,
-  isFenceGate,
-  isTrapdoor,
-  isOpenable,
-  requiresRedstone,
-  MovementThroughDoor,
-  MovementThroughFenceGate,
-  MovementThroughTrapdoor
-} from './door';
-export {
-  ELYTRA_TAKEOFF_COST,
-  ELYTRA_GLIDE_COST_PER_BLOCK,
-  ELYTRA_BOOST_COST,
-  ELYTRA_LAND_COST,
-  ElytraState,
-  hasElytraEquipped,
-  hasFireworkRockets,
-  ElytraPathSegment,
-  calculateFlightCost,
-  planElytraPath,
-  isElytraViable,
-  ElytraController
-} from './elytra';
-export {
-  BOAT_BOARD_COST,
-  BOAT_TRAVEL_COST_PER_BLOCK,
-  BOAT_DISEMBARK_COST,
-  BoatState,
-  isInBoat,
-  findNearbyBoat,
-  hasBoatItem,
-  BoatPathSegment,
-  isWaterSurface,
-  findWaterSurface,
-  hasWaterPath,
-  planBoatPath,
-  isBoatViable,
-  BoatController
-} from './boat';
+// Note: Movement subclasses are exported from index.ts to avoid circular dependencies

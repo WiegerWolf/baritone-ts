@@ -1,6 +1,7 @@
 import { BlockPos, CalculationContext, MovementStatus, COST_INF } from '../../types';
 import { WALK_ONE_BLOCK_COST } from '../../core/ActionCosts';
-import { Movement, MovementState } from '../Movement';
+import { Movement } from '../Movement';
+import { MovementState } from '../MovementState';
 import { getMovementHelper } from '../MovementHelper';
 import { isClimbable } from './ClimbUtils';
 

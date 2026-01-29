@@ -1,5 +1,6 @@
 import { BlockPos, CalculationContext, MovementStatus, COST_INF } from '../../types';
-import { Movement, MovementState } from '../Movement';
+import { Movement } from '../Movement';
+import { MovementState } from '../MovementState';
 import { getMovementHelper } from '../MovementHelper';
 import { SWIM_HORIZONTAL_COST } from './SwimCosts';
 

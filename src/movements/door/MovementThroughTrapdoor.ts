@@ -1,5 +1,6 @@
 import { BlockPos, CalculationContext, MovementStatus, COST_INF } from '../../types';
-import { Movement, MovementState } from '../Movement';
+import { Movement } from '../Movement';
+import { MovementState } from '../MovementState';
 import { getMovementHelper } from '../MovementHelper';
 import { Vec3 } from 'vec3';
 import { DOOR_OPEN_COST, isTrapdoor, requiresRedstone } from './DoorUtils';

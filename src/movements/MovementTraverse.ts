@@ -1,5 +1,6 @@
 import { BlockPos, CalculationContext, MovementStatus, COST_INF } from '../types';
-import { Movement, MovementState } from './Movement';
+import { Movement } from './Movement';
+import { MovementState } from './MovementState';
 import {
   WALK_ONE_BLOCK_COST,
   SPRINT_MULTIPLIER,
@@ -35,7 +36,7 @@ export class MovementTraverse extends Movement {
       // Calculate placement cost
       const placeCost = PLACE_ONE_BLOCK_COST;
       const needBackplace = !this.isSolid(ctx, src.x, src.y - 1, src.z + this.direction.dz) &&
-                           !this.isSolid(ctx, src.x + this.direction.dx, src.y - 1, src.z);
+        !this.isSolid(ctx, src.x + this.direction.dx, src.y - 1, src.z);
       const backplacePenalty = needBackplace ? BACKPLACE_ADDITIONAL_PENALTY : 0;
 
       this.toPlace.push(dest.offset(0, -1, 0));

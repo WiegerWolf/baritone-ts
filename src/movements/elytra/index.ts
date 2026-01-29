@@ -14,8 +14,8 @@ export {
     getHeightAboveGround
 } from './ElytraConstants';
 
+export type { ElytraPathSegment, ElytraPathSegmentType } from './ElytraUtils';
 export {
-    ElytraPathSegment,
     isSafeLandingSpot,
     findLandingSpot,
     calculateFlightCost,

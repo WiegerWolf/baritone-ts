@@ -90,11 +90,13 @@ export function calculateFlightCost(
     return cost;
 }
 
+export type ElytraPathSegmentType = 'takeoff' | 'glide' | 'boost' | 'land';
+
 /**
  * Elytra path segment - represents a flight path
  */
 export interface ElytraPathSegment {
-    type: 'takeoff' | 'glide' | 'boost' | 'land';
+    type: ElytraPathSegmentType;
     from: Vec3;
     to: Vec3;
     cost: number;

@@ -12,8 +12,8 @@ export {
     hasBoatItem
 } from './BoatConstants';
 
+export type { BoatPathSegment } from './BoatUtils';
 export {
-    BoatPathSegment,
     isWaterSurface,
     findWaterSurface,
     hasWaterPath,
