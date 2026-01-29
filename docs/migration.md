@@ -323,7 +323,7 @@ const diamondLocations = bot.pathfinder.trackers.storage.findItem('diamond');
 
 Make sure you've installed baritone-ts:
 ```bash
-npm install baritone-ts
+bun add baritone-ts
 ```
 
 ### "bot.pathfinder is undefined"

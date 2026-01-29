@@ -17,6 +17,23 @@ Baritone-TS includes these tracker types:
 | **SimpleChunkTracker** | Track chunk load state |
 | **TrackerManager** | Coordinate all trackers, handle dimension changes |
 
+## Directory Structure
+
+```
+src/trackers/
+├── Tracker.ts               # Base class with dirty-flag pattern
+├── TrackerManager.ts        # Coordinates all trackers
+├── BlockTracker.ts          # Block type scanning
+├── EntityTracker.ts         # Entity categorization and threats
+├── ItemStorageTracker.ts    # Container contents
+├── MiscBlockTracker.ts      # Special blocks per dimension
+├── SimpleChunkTracker.ts    # Chunk load state
+└── blacklisting/            # Failed attempt tracking
+    ├── AbstractObjectBlacklist.ts
+    ├── WorldLocateBlacklist.ts
+    └── EntityLocateBlacklist.ts
+```
+
 ## Tracker Manager
 
 The TrackerManager coordinates updates across all trackers and handles dimension changes:

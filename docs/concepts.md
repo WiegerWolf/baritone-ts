@@ -148,11 +148,13 @@ const ChainPriority = {
 ```
 
 Built-in chains:
+- **PlayerInteractionFixChain** - Fix stuck player interactions (priority 50)
 - **UserTaskChain** - User-initiated tasks (priority 50)
 - **FoodChain** - Automatic eating when hungry (priority 55)
 - **MobDefenseChain** - Combat when threatened (priority 100)
 - **MLGBucketChain** - Fall protection (priority 100)
-- **WorldSurvivalChain** - Escape lava/fire (priority 100)
+- **WorldSurvivalChain** - Escape lava/fire/suffocation/drowning (priority 100)
+- **DeathMenuChain** - Auto-respawn after death (priority 1000)
 
 Example tasks:
 - `MineOresTask` - Mine ores with tool management

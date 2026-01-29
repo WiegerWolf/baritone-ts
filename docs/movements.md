@@ -2,6 +2,51 @@
 
 Movements are the individual steps that make up a path. Each movement takes the bot from one position to another with associated cost and execution logic.
 
+## Directory Structure
+
+The movement system is organized into feature-based subdirectories:
+
+```
+src/movements/
+├── Movement.ts              # Base class
+├── MovementState.ts         # Movement state enum
+├── MovementHelper.ts        # Shared movement utilities
+├── MovementTraverse.ts      # Horizontal walk
+├── MovementAscend.ts        # Jump up 1 block
+├── MovementDescend.ts       # Drop down
+├── MovementDiagonal.ts      # Diagonal walk
+├── MovementPillar.ts        # Place and jump up
+├── MovementParkour.ts       # Long jump across gaps
+├── MovementParkourAscend.ts # Jump up and forward
+├── MovementFall.ts          # Extended fall with water bucket
+├── swim/                    # Water movements
+│   ├── SwimCosts.ts
+│   ├── MovementSwimHorizontal.ts
+│   ├── MovementSwimUp.ts
+│   ├── MovementSwimDown.ts
+│   ├── MovementWaterEntry.ts
+│   └── MovementWaterExit.ts
+├── climb/                   # Ladder/vine climbing
+│   ├── ClimbUtils.ts
+│   ├── MovementClimbUp.ts
+│   ├── MovementClimbDown.ts
+│   ├── MovementMountLadder.ts
+│   └── MovementDismountLadder.ts
+├── door/                    # Door/gate movements
+│   ├── DoorUtils.ts
+│   ├── MovementThroughDoor.ts
+│   ├── MovementThroughFenceGate.ts
+│   └── MovementThroughTrapdoor.ts
+├── elytra/                  # Elytra flight
+│   ├── ElytraConstants.ts
+│   ├── ElytraController.ts
+│   └── ElytraUtils.ts
+└── boat/                    # Boat travel
+    ├── BoatConstants.ts
+    ├── BoatController.ts
+    └── BoatUtils.ts
+```
+
 ## Movement Types
 
 Baritone-TS includes 20+ movement types covering all Minecraft locomotion:

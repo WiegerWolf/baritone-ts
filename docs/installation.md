@@ -2,11 +2,16 @@
 
 ## Requirements
 
-- **Node.js** 16.0.0 or later
-- **npm** or **yarn** package manager
+- **Bun**, **Node.js** 16.0.0+, or compatible runtime
 - **Minecraft server** Java Edition 1.16 - 1.20
 
 ## Package Installation
+
+### bun
+
+```bash
+bun add baritone-ts
+```
 
 ### npm
 
@@ -31,7 +36,7 @@ pnpm add baritone-ts
 Baritone-TS requires Mineflayer as a peer dependency:
 
 ```bash
-npm install mineflayer
+bun add mineflayer
 ```
 
 The following packages are included automatically:
@@ -46,7 +51,7 @@ Baritone-TS is written in TypeScript and includes full type definitions.
 For TypeScript projects:
 
 ```bash
-npm install typescript ts-node @types/node
+bun add typescript ts-node @types/node
 ```
 
 Your `tsconfig.json` should include:
@@ -106,7 +111,7 @@ console.log('AStar:', typeof AStar);
 Run it:
 
 ```bash
-npx ts-node test.ts
+bun run test.ts
 ```
 
 You should see:
@@ -129,7 +134,7 @@ If you get module resolution errors, ensure:
 Baritone-TS requires Mineflayer 4.0.0 or later. Check your version:
 
 ```bash
-npm list mineflayer
+bun pm ls | grep mineflayer
 ```
 
 ### TypeScript Compilation Errors

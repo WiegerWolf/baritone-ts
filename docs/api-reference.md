@@ -1081,11 +1081,13 @@ For a complete list of all exports, see the [source index.ts](../src/index.ts).
 
 Main export categories:
 - **Goals**: 17 goal types
-- **Movements**: 22+ movement classes
-- **Tasks**: 300+ task implementations
-- **Chains**: 6 survival chains
-- **Processes**: 7 process types
-- **Trackers**: 5 tracker types
-- **Utilities**: 200+ helper functions
-- **Events**: Type-safe event bus
-- **Settings**: Comprehensive configuration
+- **Movements**: 20+ movement classes organized in feature subdirectories (swim, climb, door, elytra, boat)
+- **Tasks**: 200+ task implementations (150+ concrete, 44 composite) in base/, chain/, resource/, concrete/, composite/
+- **Chains**: 6 survival chains (FoodChain, MLGBucketChain, MobDefenseChain, WorldSurvivalChain, DeathMenuChain, PlayerInteractionFixChain)
+- **Processes**: 7 process types with BaseProcess architecture in behavior/process/
+- **Trackers**: 7 tracker types (Block, Entity, ItemStorage, MiscBlock, SimpleChunk + base Tracker/AsyncTracker) with blacklisting/
+- **Utilities**: 200+ helper functions across slot/, progress/, timers/ subdirectories
+- **Events**: Type-safe event bus with priority-based handlers
+- **Settings**: Comprehensive configuration with validation and presets
+- **Control**: InputControls, KillAura, PlayerExtraController
+- **Crafting**: Recipe system with common recipes registry

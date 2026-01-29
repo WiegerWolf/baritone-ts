@@ -4,14 +4,14 @@ Get Baritone-TS up and running in minutes.
 
 ## Prerequisites
 
-- Node.js 16 or later
+- Bun, Node.js 16+, or compatible runtime
 - A Minecraft server (Java Edition 1.16-1.20)
 - Basic familiarity with [Mineflayer](https://github.com/PrismarineJS/mineflayer)
 
 ## Installation
 
 ```bash
-npm install mineflayer baritone-ts
+bun add mineflayer baritone-ts
 ```
 
 ## Your First Bot
@@ -71,7 +71,7 @@ bot.on('path_reset', (reason) => {
 Run your bot:
 
 ```bash
-npx ts-node bot.ts
+bun run bot.ts
 ```
 
 Then in Minecraft chat, type: `goto 100 64 100`

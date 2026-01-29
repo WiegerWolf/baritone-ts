@@ -16,6 +16,29 @@ Baritone-TS includes 7 process types:
 | **GatherProcess** | Collect dropped items |
 | **ExploreProcess** | Explore unknown areas |
 
+## Directory Structure
+
+The process system is organized under `src/behavior/`:
+
+```
+src/behavior/
+├── BotBehaviour.ts         # Core bot behaviour coordination
+├── process/                # Process architecture
+│   ├── IProcess.ts         # Process interface
+│   ├── BaseProcess.ts      # Abstract base class
+│   ├── ProcessManager.ts   # Process coordination
+│   ├── ProcessPriority.ts  # Priority levels
+│   ├── ProcessState.ts     # State enum (Idle, Running, Paused, etc.)
+│   └── ProcessTickResult.ts
+├── MineProcess.ts          # Find and mine blocks
+├── FollowProcess.ts        # Follow entities
+├── FarmProcess.ts          # Harvest and replant
+├── CombatProcess.ts        # Fight or flee
+├── BuildProcess.ts         # Build structures
+├── GatherProcess.ts        # Collect dropped items
+└── ExploreProcess.ts       # Explore terrain
+```
+
 ## Process Manager
 
 All processes are managed through the ProcessManager:

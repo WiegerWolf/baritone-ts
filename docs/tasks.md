@@ -9,8 +9,40 @@ Baritone-TS includes a comprehensive task system organized into:
 - **Base Classes**: `Task`, `WrapperTask`, `GroundedTask`
 - **Task Chains**: Priority-based execution system (`TaskChain`, `SingleTaskChain`, `UserTaskChain`)
 - **Task Runner**: Central orchestrator (`TaskRunner`)
-- **Concrete Tasks**: Low-level task implementations
-- **Composite Tasks**: High-level workflows combining multiple tasks
+- **Resource Tasks**: Generic resource acquisition (`ResourceTask`, `CollectItemTask`, `GatherItemTask`, `MineAndCollectTask`)
+- **Concrete Tasks**: 150+ low-level task implementations
+- **Composite Tasks**: 44 high-level workflows combining multiple tasks
+
+## Directory Structure
+
+```
+src/tasks/
+├── TaskRunner.ts           # Central task orchestrator
+├── TaskCatalogue.ts        # Task factory registry
+├── interfaces.ts           # ITask, ITaskChain, ITaskCanForce, etc.
+├── base/                   # Core task classes
+│   ├── Task.ts             # Abstract base class
+│   ├── WrapperTask.ts      # Decorator pattern
+│   └── GroundedTask.ts     # Ground-safety enforcement
+├── chain/                  # Task chain system
+│   ├── TaskChain.ts        # Base chain
+│   ├── SingleTaskChain.ts  # Single-task chain (for survival)
+│   ├── UserTaskChain.ts    # User-initiated chain
+│   └── ChainPriority.ts    # Priority constants
+├── resource/               # Resource acquisition
+│   ├── ResourceTask.ts     # Base resource task
+│   ├── CollectItemTask.ts  # Collect from any source
+│   ├── GatherItemTask.ts   # Gather from world
+│   ├── MineAndCollectTask.ts
+│   ├── ItemSourceBlocks.ts # Block-to-item mappings
+│   └── ResourceTaskConfig.ts
+├── concrete/               # 150+ atomic tasks
+│   ├── GoToTask.ts, MineBlockTask.ts, CraftTask.ts, ...
+│   └── index.ts            # Barrel exports
+└── composite/              # 44 high-level workflows
+    ├── FarmTask.ts, CombatTask.ts, BuildTask.ts, ...
+    └── index.ts            # Barrel exports
+```
 
 ## Task System Architecture
 
@@ -691,7 +723,7 @@ runner.registerChain(new EmergencyChain(bot));
 
 ## Complete Task Catalogue
 
-Baritone-TS includes 300+ task implementations organized into categories:
+Baritone-TS includes 200+ task implementations organized into categories:
 
 ### Concrete Tasks (Low-Level)
 
