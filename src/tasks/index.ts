@@ -14,13 +14,13 @@ export {
   isGroundedOrSafe,
   defaultGroundedShouldForce,
 } from './interfaces';
-export { Task, WrapperTask, GroundedTask } from './Task';
+export { Task, WrapperTask, GroundedTask } from './base';
 export {
   TaskChain,
   SingleTaskChain,
   UserTaskChain,
   ChainPriority,
-} from './TaskChain';
+} from './chain';
 export {
   TaskRunner,
   createTaskRunner,
@@ -34,7 +34,7 @@ export {
   ITEM_SOURCE_BLOCKS,
   createSourceBlockMap,
   type ResourceTaskConfig,
-} from './ResourceTask';
+} from './resource';
 export {
   TaskCatalogue,
   createTaskCatalogue,
