@@ -1,834 +1,84 @@
 # Examples
 
-Practical code examples for common use cases.
+Runnable examples live in the [`examples/`](../examples/) folder. Each file is a self-contained bot you can run with `bun run examples/<file>.ts`.
+
+| Example | File | What it demonstrates |
+|---------|------|----------------------|
+| [Basic Navigation](#basic-navigation) | [`basic.ts`](../examples/basic.ts) | Chat commands: goto, follow, near, runaway, stop |
+| [Navigation](#navigation) | [`navigation.ts`](../examples/navigation.ts) | GoalBlock, GoalFollow, async goto, obstacle navigation |
+| [Mining](#mining) | [`mining.ts`](../examples/mining.ts) | MineProcess, multi-ore mining, inventory management with chest deposits |
+| [Follow & Guard](#follow--guard) | [`follow-and-guard.ts`](../examples/follow-and-guard.ts) | FollowProcess, CombatProcess, priority-based process management |
+| [Farming](#farming) | [`farming.ts`](../examples/farming.ts) | FarmProcess with crop harvesting and replanting |
+| [Task Automation](#task-automation) | [`task-automation.ts`](../examples/task-automation.ts) | TaskRunner, UserTaskChain, chaining tasks for resource gathering |
+| [Survival](#survival) | [`survival.ts`](../examples/survival.ts) | TaskRunner with survival chains (food, mob defense, MLG, world survival) |
+| [Elytra Travel](#elytra-travel) | [`elytra-travel.ts`](../examples/elytra-travel.ts) | ElytraController for long-distance flight with fireworks |
+| [Building](#building) | [`building.ts`](../examples/building.ts) | BuildProcess for constructing structures |
+| [Multiplayer](#multiplayer-mining-team) | [`multiplayer-mining-team.ts`](../examples/multiplayer-mining-team.ts) | Two-bot coordination: leader finds ores, helper navigates to them |
+| [Beat the Game](#beat-the-game) | [`beat-the-game.ts`](../examples/beat-the-game.ts) | Full speedrun from spawn to Ender Dragon kill |
+| [Benchmark](#benchmark) | [`benchmark-example.ts`](../examples/benchmark-example.ts) | Performance profiling utilities |
+
+---
 
 ## Basic Navigation
 
-### Go to Coordinates
+**[`examples/basic.ts`](../examples/basic.ts)** — Chat-driven bot with commands for goto, follow, near, runaway, and stop. Good starting point for understanding the pathfinder plugin.
 
-```typescript
-import { createBot } from 'mineflayer';
-import { pathfinder, GoalBlock } from 'baritone-ts';
+## Navigation
 
-const bot = createBot({
-  host: 'localhost',
-  port: 25565,
-  username: 'NavigationBot'
-});
+**[`examples/navigation.ts`](../examples/navigation.ts)** — Shows three navigation patterns:
+- **Go to coordinates** with `GoalBlock`
+- **Follow a player** with `GoalFollow` (dynamic goal)
+- **Async goto** with error handling for obstacle navigation
 
-bot.once('spawn', () => {
-  pathfinder(bot);
+## Mining
 
-  // Navigate to specific coordinates
-  bot.pathfinder.setGoal(new GoalBlock(100, 64, 100));
-});
+**[`examples/mining.ts`](../examples/mining.ts)** — Two mining bots:
+- **Basic ore miner** — `MineProcess` for diamond mining with chat start/stop
+- **Smart miner** — Multi-ore mining with automatic chest deposits when inventory fills up
 
-bot.on('goal_reached', () => {
-  console.log('Arrived at destination!');
-});
-```
+## Follow & Guard
 
-### Go to Player
+**[`examples/follow-and-guard.ts`](../examples/follow-and-guard.ts)** — Two patterns:
+- **Basic follow** — `FollowProcess` that tracks a player
+- **Guard bot** — `CombatProcess` (priority 100) + `FollowProcess` (priority 50) so combat interrupts following when mobs appear
 
-```typescript
-import { pathfinder, GoalFollow } from 'baritone-ts';
+## Farming
 
-bot.once('spawn', () => {
-  pathfinder(bot);
-});
+**[`examples/farming.ts`](../examples/farming.ts)** — `FarmProcess` that harvests mature wheat/carrots/potatoes, replants, and collects drops.
 
-bot.on('chat', (username, message) => {
-  if (message === 'come here') {
-    const player = bot.players[username]?.entity;
-    if (player) {
-      bot.pathfinder.setGoal(new GoalFollow(player, 2), true);
-      bot.chat(`Coming to you, ${username}!`);
-    }
-  }
+## Task Automation
 
-  if (message === 'stop') {
-    bot.pathfinder.stop();
-    bot.chat('Stopped');
-  }
-});
-```
+**[`examples/task-automation.ts`](../examples/task-automation.ts)** — Uses the `TaskRunner` and `UserTaskChain` to run hierarchical tasks. Shows wood gathering and resource chain orchestration via chat commands.
 
-### Navigate with Obstacles
+## Survival
 
-```typescript
-import { pathfinder, GoalBlock } from 'baritone-ts';
+**[`examples/survival.ts`](../examples/survival.ts)** — `TaskRunner` with survival chains registered:
+- **WorldSurvivalChain** — escape lava, fire, drowning
+- **MobDefenseChain** — fight or flee hostile mobs
+- **MLGBucketChain** — water bucket clutch on falls
+- **FoodChain** — auto-eat when hungry
 
-bot.once('spawn', () => {
-  // Enable block breaking and placing for obstacles
-  pathfinder(bot, {
-    canDig: true,
-    canPlace: true,
-    scaffoldingBlocks: ['cobblestone', 'dirt'],
-    allowParkour: true,
-    maxFallHeight: 3
-  });
-});
+Higher-priority chains automatically interrupt lower-priority tasks like diamond mining.
 
-async function goTo(x: number, y: number, z: number) {
-  try {
-    await bot.pathfinder.goto(new GoalBlock(x, y, z));
-    console.log(`Arrived at ${x}, ${y}, ${z}`);
-  } catch (error) {
-    console.log(`Could not reach ${x}, ${y}, ${z}:`, error.message);
-  }
-}
-```
+## Elytra Travel
 
-## Mining Bot
+**[`examples/elytra-travel.ts`](../examples/elytra-travel.ts)** — `ElytraController` with firework rockets for long-distance flight. Chat command: `fly to <x> <z>`.
 
-### Basic Ore Miner
+## Building
 
-```typescript
-import { createBot } from 'mineflayer';
-import { pathfinder, MineProcess } from 'baritone-ts';
+**[`examples/building.ts`](../examples/building.ts)** — `BuildProcess` that constructs a simple house (floor, walls, roof) from a blueprint with automatic material collection.
 
-const bot = createBot({
-  host: 'localhost',
-  username: 'MinerBot'
-});
+## Multiplayer Mining Team
 
-bot.once('spawn', () => {
-  pathfinder(bot, {
-    canDig: true
-  });
+**[`examples/multiplayer-mining-team.ts`](../examples/multiplayer-mining-team.ts)** — Two bots coordinating: the leader mines and whispers ore coordinates, the helper navigates to those positions.
 
-  const miner = new MineProcess(bot, bot.pathfinder, {
-    blockNames: ['diamond_ore', 'deepslate_diamond_ore'],
-    searchRadius: 64,
-    collectDrops: true
-  });
+## Beat the Game
 
-  bot.pathfinder.processManager.register('mine', miner);
+**[`examples/beat-the-game.ts`](../examples/beat-the-game.ts)** — A bot that beats Minecraft from start to finish. Uses `BeatMinecraftTask` to orchestrate the entire run while survival chains keep it alive.
 
-  miner.on('block_mined', (block) => {
-    console.log(`Mined ${block.name}!`);
-  });
+### State Machine
 
-  miner.on('complete', () => {
-    console.log('No more ores found');
-  });
-});
-
-// Start mining on command
-bot.on('chat', (username, message) => {
-  if (message === 'mine') {
-    bot.pathfinder.processManager.activate('mine');
-    bot.chat('Starting to mine diamonds!');
-  }
-
-  if (message === 'stop') {
-    bot.pathfinder.processManager.deactivate('mine');
-    bot.chat('Stopped mining');
-  }
-});
-```
-
-### Multi-Ore Miner with Inventory Management
-
-```typescript
-import { createBot } from 'mineflayer';
-import { pathfinder, MineProcess, GoalGetToBlock } from 'baritone-ts';
-
-const bot = createBot({ host: 'localhost', username: 'SmartMiner' });
-
-let chestLocation: Vec3 | null = null;
-const INVENTORY_THRESHOLD = 30; // slots
-
-bot.once('spawn', () => {
-  pathfinder(bot, { canDig: true });
-
-  const miner = new MineProcess(bot, bot.pathfinder, {
-    blockNames: [
-      'diamond_ore', 'deepslate_diamond_ore',
-      'iron_ore', 'deepslate_iron_ore',
-      'gold_ore', 'deepslate_gold_ore',
-      'coal_ore', 'deepslate_coal_ore'
-    ],
-    searchRadius: 48,
-    collectDrops: true
-  });
-
-  bot.pathfinder.processManager.register('mine', miner);
-
-  // Check inventory after each block mined
-  miner.on('block_mined', async () => {
-    const usedSlots = bot.inventory.slots.filter(s => s !== null).length;
-
-    if (usedSlots >= INVENTORY_THRESHOLD && chestLocation) {
-      console.log('Inventory nearly full, depositing...');
-      bot.pathfinder.processManager.deactivate('mine');
-      await depositItems();
-      bot.pathfinder.processManager.activate('mine');
-    }
-  });
-});
-
-async function depositItems() {
-  if (!chestLocation) return;
-
-  await bot.pathfinder.goto(new GoalGetToBlock(
-    chestLocation.x, chestLocation.y, chestLocation.z
-  ));
-
-  const chest = await bot.openContainer(bot.blockAt(chestLocation));
-
-  for (const item of bot.inventory.items()) {
-    if (['diamond', 'iron_ingot', 'gold_ingot', 'coal'].includes(item.name)) {
-      await chest.deposit(item.type, null, item.count);
-    }
-  }
-
-  chest.close();
-}
-
-bot.on('chat', (username, message) => {
-  if (message === 'set chest') {
-    const player = bot.players[username]?.entity;
-    if (player) {
-      // Find chest near player
-      const chest = bot.findBlock({
-        matching: bot.registry.blocksByName.chest.id,
-        maxDistance: 5,
-        point: player.position
-      });
-      if (chest) {
-        chestLocation = chest.position;
-        bot.chat(`Chest set at ${chestLocation}`);
-      }
-    }
-  }
-
-  if (message === 'mine') {
-    bot.pathfinder.processManager.activate('mine');
-  }
-});
-```
-
-## Following Bot
-
-### Basic Follow
-
-```typescript
-import { createBot } from 'mineflayer';
-import { pathfinder, FollowProcess } from 'baritone-ts';
-
-const bot = createBot({ host: 'localhost', username: 'FollowerBot' });
-
-bot.once('spawn', () => {
-  pathfinder(bot);
-});
-
-bot.on('chat', (username, message) => {
-  if (message === 'follow me') {
-    const player = bot.players[username]?.entity;
-    if (!player) {
-      bot.chat("I can't see you!");
-      return;
-    }
-
-    const follower = new FollowProcess(bot, bot.pathfinder, {
-      target: player,
-      minDistance: 2,
-      maxDistance: 4,
-      sprint: true
-    });
-
-    bot.pathfinder.processManager.register('follow', follower);
-    bot.pathfinder.processManager.activate('follow');
-    bot.chat(`Following ${username}!`);
-  }
-
-  if (message === 'stay') {
-    bot.pathfinder.processManager.deactivate('follow');
-    bot.chat('Staying here');
-  }
-});
-```
-
-### Guard Bot (Follow + Combat)
-
-```typescript
-import { createBot } from 'mineflayer';
-import { pathfinder, FollowProcess, CombatProcess } from 'baritone-ts';
-
-const bot = createBot({ host: 'localhost', username: 'GuardBot' });
-
-bot.once('spawn', () => {
-  pathfinder(bot);
-
-  // Combat has higher priority
-  const combat = new CombatProcess(bot, bot.pathfinder, {
-    mode: 'attack',
-    targetTypes: ['zombie', 'skeleton', 'spider', 'creeper'],
-    attackRange: 3.5,
-    useShield: true
-  });
-
-  bot.pathfinder.processManager.register('combat', combat, { priority: 100 });
-  bot.pathfinder.processManager.activate('combat');
-
-  combat.on('target_killed', (entity) => {
-    bot.chat(`Killed ${entity.name}!`);
-  });
-});
-
-bot.on('chat', (username, message) => {
-  if (message === 'guard me') {
-    const player = bot.players[username]?.entity;
-    if (!player) return;
-
-    const follower = new FollowProcess(bot, bot.pathfinder, {
-      target: player,
-      minDistance: 2,
-      maxDistance: 5
-    });
-
-    bot.pathfinder.processManager.register('follow', follower, { priority: 50 });
-    bot.pathfinder.processManager.activate('follow');
-    bot.chat(`Guarding ${username}. Stay close!`);
-  }
-});
-```
-
-## Farming Bot
-
-### Automatic Farmer
-
-```typescript
-import { createBot } from 'mineflayer';
-import { pathfinder, FarmProcess } from 'baritone-ts';
-
-const bot = createBot({ host: 'localhost', username: 'FarmerBot' });
-
-bot.once('spawn', () => {
-  pathfinder(bot);
-
-  const farmer = new FarmProcess(bot, bot.pathfinder, {
-    cropTypes: ['wheat', 'carrots', 'potatoes'],
-    searchRadius: 32,
-    replant: true,
-    harvestOnlyMature: true,
-    collectDrops: true
-  });
-
-  bot.pathfinder.processManager.register('farm', farmer);
-
-  farmer.on('crop_harvested', (block) => {
-    console.log(`Harvested ${block.name}`);
-  });
-
-  farmer.on('crop_planted', (pos, type) => {
-    console.log(`Planted ${type}`);
-  });
-});
-
-bot.on('chat', (username, message) => {
-  if (message === 'farm') {
-    bot.pathfinder.processManager.activate('farm');
-    bot.chat('Starting farming!');
-  }
-
-  if (message === 'stop') {
-    bot.pathfinder.processManager.deactivate('farm');
-    bot.chat('Stopped farming');
-  }
-});
-```
-
-## Task-Based Automation
-
-### Gather Resources Task
-
-```typescript
-import { createBot } from 'mineflayer';
-import { pathfinder, TaskRunner, TaskChain, GatherWoodTask, MineOresTask, CraftItemTask } from 'baritone-ts';
-
-const bot = createBot({ host: 'localhost', username: 'TaskBot' });
-
-bot.once('spawn', () => {
-  pathfinder(bot, { canDig: true, canPlace: true });
-
-  const runner = new TaskRunner(bot, bot.pathfinder);
-
-  // Tick the runner
-  bot.on('physicsTick', () => {
-    runner.tick();
-  });
-
-  // Store runner for commands
-  (bot as any).taskRunner = runner;
-});
-
-bot.on('chat', (username, message) => {
-  const runner = (bot as any).taskRunner as TaskRunner;
-
-  if (message === 'get wood') {
-    runner.setTask(new GatherWoodTask(bot, {
-      woodType: 'any',
-      quantity: 32
-    }));
-    bot.chat('Getting wood!');
-  }
-
-  if (message === 'get iron') {
-    // Chain: get wood -> make pick -> mine iron
-    runner.setTask(new TaskChain(bot, [
-      new GatherWoodTask(bot, { woodType: 'any', quantity: 8 }),
-      new CraftItemTask(bot, { itemName: 'crafting_table', quantity: 1 }),
-      new CraftItemTask(bot, { itemName: 'wooden_pickaxe', quantity: 1 }),
-      new MineOresTask(bot, { targetOres: ['stone'], quantity: 3 }),
-      new CraftItemTask(bot, { itemName: 'stone_pickaxe', quantity: 1 }),
-      new MineOresTask(bot, { targetOres: ['iron_ore'], quantity: 10 })
-    ]));
-    bot.chat('Starting iron gathering expedition!');
-  }
-
-  if (message === 'status') {
-    if (runner.isComplete()) {
-      bot.chat('No active task');
-    } else {
-      bot.chat(`Working on: ${runner.getCurrentTask()?.name || 'unknown'}`);
-    }
-  }
-});
-```
-
-## Survival Bot
-
-### Full Survival Automation
-
-```typescript
-import { createBot } from 'mineflayer';
-import { pathfinder, WorldSurvivalChain, TaskRunner, MineOresTask } from 'baritone-ts';
-
-const bot = createBot({ host: 'localhost', username: 'SurvivalBot' });
-
-bot.once('spawn', () => {
-  pathfinder(bot, {
-    canDig: true,
-    canPlace: true,
-    allowParkour: true,
-    allowWaterBucket: true
-  });
-
-  // Enable survival features
-  const survival = new WorldSurvivalChain(bot, bot.pathfinder, {
-    food: true,
-    mlg: true,
-    mobDefense: true,
-    armor: true,
-    health: true,
-    fire: true,
-    defenseOptions: { mode: 'smart' }
-  });
-  survival.enable();
-
-  // Set up task runner
-  const runner = new TaskRunner(bot, bot.pathfinder);
-  survival.setTaskRunner(runner);
-
-  // Log survival actions
-  survival.on('action', (action, chain) => {
-    console.log(`[Survival] ${chain}: ${action}`);
-  });
-
-  survival.on('fleeing', (threat) => {
-    bot.chat(`Running from ${threat.name}!`);
-  });
-
-  // Tick runner
-  bot.on('physicsTick', () => {
-    runner.tick();
-  });
-
-  (bot as any).runner = runner;
-});
-
-bot.on('chat', (username, message) => {
-  const runner = (bot as any).runner as TaskRunner;
-
-  if (message === 'mine diamonds') {
-    runner.setTask(new MineOresTask(bot, {
-      targetOres: ['diamond_ore', 'deepslate_diamond_ore'],
-      quantity: 10
-    }));
-    bot.chat('Mining diamonds with survival protection!');
-  }
-});
-```
-
-## Long Distance Travel
-
-### Elytra Travel
-
-```typescript
-import { createBot } from 'mineflayer';
-import { pathfinder, ElytraController, hasElytraEquipped } from 'baritone-ts';
-import { Vec3 } from 'vec3';
-
-const bot = createBot({ host: 'localhost', username: 'ElytraBot' });
-
-bot.once('spawn', () => {
-  pathfinder(bot);
-});
-
-bot.on('chat', async (username, message) => {
-  const match = message.match(/^fly to (-?\d+) (-?\d+)$/);
-  if (!match) return;
-
-  if (!hasElytraEquipped(bot)) {
-    bot.chat("I don't have an elytra equipped!");
-    return;
-  }
-
-  const [, x, z] = match.map(Number);
-  const destination = new Vec3(x, 100, z);
-
-  bot.chat(`Flying to ${x}, ${z}...`);
-
-  const elytra = new ElytraController(bot, bot.pathfinder.ctx, {
-    useFireworks: true,
-    cruiseAltitude: 100
-  });
-
-  if (elytra.startFlight(destination)) {
-    const interval = setInterval(() => {
-      if (elytra.tick()) {
-        clearInterval(interval);
-        bot.chat('Arrived!');
-      }
-    }, 50);
-  } else {
-    bot.chat("Couldn't take off!");
-  }
-});
-```
-
-## Building Bot
-
-### Simple Structure Builder
-
-```typescript
-import { createBot } from 'mineflayer';
-import { pathfinder, BuildProcess } from 'baritone-ts';
-
-const bot = createBot({ host: 'localhost', username: 'BuilderBot' });
-
-bot.once('spawn', () => {
-  pathfinder(bot, {
-    canDig: true,
-    canPlace: true,
-    scaffoldingBlocks: ['dirt', 'cobblestone']
-  });
-});
-
-bot.on('chat', (username, message) => {
-  if (message.startsWith('build house')) {
-    const pos = bot.entity.position.floored();
-
-    // Create simple house blueprint
-    const instructions = [
-      // Floor
-      ...BuildProcess.createFloor(pos.x, pos.y, pos.z, 5, 5, 'oak_planks'),
-      // Walls
-      ...BuildProcess.createWalls(pos.x, pos.y + 1, pos.z, 5, 3, 5, 'oak_planks'),
-      // Roof
-      ...BuildProcess.createFloor(pos.x, pos.y + 4, pos.z, 5, 5, 'oak_planks')
-    ];
-
-    const builder = new BuildProcess(bot, bot.pathfinder, {
-      instructions,
-      collectMaterials: true
-    });
-
-    bot.pathfinder.processManager.register('build', builder);
-    bot.pathfinder.processManager.activate('build');
-
-    builder.on('progress', (placed, total) => {
-      if (placed % 10 === 0) {
-        bot.chat(`Building: ${placed}/${total}`);
-      }
-    });
-
-    builder.on('complete', () => {
-      bot.chat('House complete!');
-    });
-  }
-});
-```
-
-## Multiplayer Coordination
-
-### Two-Bot Mining Team
-
-```typescript
-// Leader bot
-const leader = createBot({ host: 'localhost', username: 'MineLeader' });
-
-leader.once('spawn', () => {
-  pathfinder(leader);
-
-  // Mine and share coordinates
-  const miner = new MineProcess(leader, leader.pathfinder, {
-    blockNames: ['diamond_ore'],
-    searchRadius: 32
-  });
-
-  miner.on('block_found', (block) => {
-    // Tell follower about ore
-    leader.chat(`/msg MineHelper found ${block.position.x} ${block.position.y} ${block.position.z}`);
-  });
-});
-
-// Helper bot
-const helper = createBot({ host: 'localhost', username: 'MineHelper' });
-
-helper.once('spawn', () => {
-  pathfinder(helper);
-});
-
-helper.on('whisper', (username, message) => {
-  if (username === 'MineLeader' && message.startsWith('found')) {
-    const [, x, y, z] = message.split(' ').map(Number);
-    helper.pathfinder.setGoal(new GoalGetToBlock(x, y, z));
-  }
-});
-```
-
-## Beat the Game Bot
-
-A bot that beats Minecraft from start to finish: gather resources, enter the Nether, collect blaze rods and ender pearls, locate the stronghold, and kill the Ender Dragon.
-
-### Minimal Setup
-
-```typescript
-import { createBot } from 'mineflayer';
-import {
-  pathfinder,
-  createTaskRunner,
-  BeatMinecraftTask,
-  FoodChain,
-  MobDefenseChain,
-  MLGBucketChain,
-  WorldSurvivalChain,
-  DeathMenuChain,
-  BeatMinecraftState,
-} from 'baritone-ts';
-
-const bot = createBot({
-  host: 'localhost',
-  port: 25565,
-  username: 'SpeedrunBot',
-});
-
-bot.once('spawn', () => {
-  // Initialize pathfinder with all movement capabilities
-  pathfinder(bot, {
-    canDig: true,
-    canPlace: true,
-    allowParkour: true,
-    allowWaterBucket: true,
-    maxFallHeight: 3,
-    scaffoldingBlocks: ['cobblestone', 'dirt', 'netherrack'],
-  });
-
-  // Create task runner (automatically creates a UserTaskChain)
-  const runner = createTaskRunner(bot);
-
-  // Register survival chains so the bot stays alive
-  runner.registerChain(new DeathMenuChain(bot));        // Auto-respawn (priority 1000)
-  runner.registerChain(new WorldSurvivalChain(bot));     // Escape lava/fire (priority 100)
-  runner.registerChain(new MobDefenseChain(bot));        // Fight/flee mobs (priority 100)
-  runner.registerChain(new MLGBucketChain(bot));         // Water bucket clutch (priority 100)
-  runner.registerChain(new FoodChain(bot));              // Auto-eat (priority 55)
-
-  // Set the main objective: beat the game
-  runner.setUserTask(new BeatMinecraftTask(bot));
-
-  // Start ticking
-  runner.start();
-
-  console.log('Bot spawned — beating Minecraft!');
-});
-```
-
-### Full Example with Logging and Chat Commands
-
-```typescript
-import { createBot } from 'mineflayer';
-import {
-  pathfinder,
-  createTaskRunner,
-  BeatMinecraftTask,
-  beatMinecraft,
-  speedrunMinecraft,
-  BeatMinecraftState,
-  FoodChain,
-  MobDefenseChain,
-  MLGBucketChain,
-  WorldSurvivalChain,
-  DeathMenuChain,
-  type TaskRunner,
-} from 'baritone-ts';
-
-const bot = createBot({
-  host: process.env.MC_HOST ?? 'localhost',
-  port: Number(process.env.MC_PORT ?? 25565),
-  username: process.env.MC_USER ?? 'SpeedrunBot',
-});
-
-let runner: TaskRunner;
-let beatTask: BeatMinecraftTask;
-
-bot.once('spawn', () => {
-  pathfinder(bot, {
-    canDig: true,
-    canPlace: true,
-    allowParkour: true,
-    allowWaterBucket: true,
-    maxFallHeight: 3,
-    scaffoldingBlocks: ['cobblestone', 'dirt', 'netherrack'],
-  });
-
-  runner = createTaskRunner(bot);
-
-  // Survival chains (highest priority interrupts lower)
-  runner.registerChain(new DeathMenuChain(bot));
-  runner.registerChain(new WorldSurvivalChain(bot));
-  runner.registerChain(new MobDefenseChain(bot, { mode: 'smart' }));
-  runner.registerChain(new MLGBucketChain(bot));
-  runner.registerChain(new FoodChain(bot, { minHunger: 14 }));
-
-  // Log chain switches
-  runner.on('chain_changed', (newChain, oldChain) => {
-    if (newChain) {
-      console.log(`[Chain] ${oldChain?.displayName ?? 'none'} → ${newChain.displayName}`);
-    }
-  });
-
-  // Start with the default beat-the-game config
-  beatTask = new BeatMinecraftTask(bot);
-  runner.setUserTask(beatTask);
-  runner.start();
-
-  console.log('Bot spawned — starting speedrun');
-});
-
-// --- Chat commands ---
-
-bot.on('chat', (username, message) => {
-  if (username === bot.username) return;
-
-  switch (message) {
-    case 'status': {
-      const state = BeatMinecraftState[beatTask.getState()];
-      const health = Math.round(bot.health);
-      const food = bot.food;
-      const dim = (bot as any).game?.dimension ?? 'overworld';
-      bot.chat(`[${state}] HP:${health} Food:${food} Dim:${dim}`);
-      break;
-    }
-
-    case 'debug':
-      console.log(runner.getDebugInfo());
-      break;
-
-    case 'stop':
-      runner.cancelUserTask();
-      bot.chat('Speedrun cancelled');
-      break;
-
-    case 'resume':
-      beatTask = new BeatMinecraftTask(bot);
-      runner.setUserTask(beatTask);
-      bot.chat('Resuming speedrun');
-      break;
-
-    case 'speedrun':
-      // Aggressive settings: barter pearls, skip sleep, fewer beds
-      beatTask = speedrunMinecraft(bot);
-      runner.setUserTask(beatTask);
-      bot.chat('Speedrun mode activated');
-      break;
-  }
-});
-
-// --- Lifecycle events ---
-
-bot.on('death', () => {
-  console.log('[Death] Bot died — DeathMenuChain will auto-respawn');
-});
-
-bot.on('end', (reason) => {
-  console.log(`Disconnected: ${reason}`);
-  runner?.stop();
-});
-
-bot.on('error', (err) => {
-  console.error('Bot error:', err);
-});
-```
-
-### Custom Configuration
-
-```typescript
-import { createBot } from 'mineflayer';
-import {
-  pathfinder,
-  createTaskRunner,
-  BeatMinecraftTask,
-  FoodChain,
-  MobDefenseChain,
-  MLGBucketChain,
-  WorldSurvivalChain,
-  DeathMenuChain,
-} from 'baritone-ts';
-
-const bot = createBot({ host: 'localhost', username: 'CustomBot' });
-
-bot.once('spawn', () => {
-  pathfinder(bot, { canDig: true, canPlace: true, allowParkour: true, allowWaterBucket: true });
-
-  const runner = createTaskRunner(bot);
-  runner.registerChain(new DeathMenuChain(bot));
-  runner.registerChain(new WorldSurvivalChain(bot));
-  runner.registerChain(new MobDefenseChain(bot));
-  runner.registerChain(new MLGBucketChain(bot));
-  runner.registerChain(new FoodChain(bot));
-
-  const task = new BeatMinecraftTask(bot, {
-    // Barter with piglins for ender pearls instead of hunting endermen
-    barterPearlsInsteadOfEndermanHunt: true,
-    // Don't waste time sleeping
-    sleepThroughNight: false,
-    // Loot ruined portals and desert temples for bonus gear
-    searchRuinedPortals: true,
-    searchDesertTemples: true,
-    // Collect extra eyes in case some break
-    targetEyes: 14,
-    minimumEyes: 12,
-    // Beds for the dragon fight (bed explosions deal massive damage in the End)
-    requiredBeds: 7,
-    // Food buffer
-    minFoodUnits: 180,
-    foodUnits: 220,
-    // Set spawn near end portal so death doesn't reset progress
-    placeSpawnNearEndPortal: true,
-  });
-
-  runner.setUserTask(task);
-  runner.start();
-});
-```
-
-### How It Works
-
-The `BeatMinecraftTask` runs a state machine through these phases:
+The `BeatMinecraftTask` progresses through these phases:
 
 | Phase | State | What happens |
 |-------|-------|-------------|
@@ -846,9 +96,57 @@ The `BeatMinecraftTask` runs a state machine through these phases:
 | 12 | `FIGHTING_DRAGON` | Kill the Ender Dragon (melee + bed explosions) |
 | 13 | `FINISHED` | Dragon defeated |
 
-Throughout the run, survival chains automatically interrupt when needed:
-- **DeathMenuChain** (priority 1000) auto-respawns the bot on death
-- **WorldSurvivalChain** (priority 100) escapes lava, fire, and drowning
-- **MobDefenseChain** (priority 100) fights or flees hostile mobs
-- **MLGBucketChain** (priority 100) water-bucket clutches dangerous falls
-- **FoodChain** (priority 55) eats when hunger drops
+### Survival Chains
+
+Throughout the run, these chains automatically interrupt the main task when needed:
+
+| Chain | Priority | Trigger |
+|-------|----------|---------|
+| DeathMenuChain | 1000 | Bot dies — auto-respawn |
+| WorldSurvivalChain | 100 | In lava, fire, drowning, or suffocating |
+| MobDefenseChain | 100 | Hostile mob within range |
+| MLGBucketChain | 100 | Falling from dangerous height |
+| FoodChain | 55 | Hunger below threshold |
+
+### Chat Commands
+
+The example responds to these in-game messages:
+
+- `status` — Print current state, health, food, and dimension
+- `debug` — Print full TaskRunner debug info to console
+- `stop` — Cancel the run
+- `resume` — Restart from the beginning
+- `speedrun` — Switch to aggressive settings (barter pearls, skip sleep, fewer beds)
+
+### Configuration
+
+Pass options to `BeatMinecraftTask` to customize behavior:
+
+```typescript
+new BeatMinecraftTask(bot, {
+  barterPearlsInsteadOfEndermanHunt: true,  // Piglins instead of endermen
+  sleepThroughNight: false,                  // Skip sleep for speed
+  searchRuinedPortals: true,                 // Loot ruined portals
+  searchDesertTemples: true,                 // Loot desert temples
+  targetEyes: 14,                            // Eyes of Ender to collect
+  minimumEyes: 12,                           // Min before stronghold search
+  requiredBeds: 7,                           // Beds for dragon fight
+  minFoodUnits: 180,                         // Minimum food buffer
+  foodUnits: 220,                            // Target food to collect
+  placeSpawnNearEndPortal: true,             // Set spawn before entering End
+});
+```
+
+Or use the convenience functions:
+
+```typescript
+// Default balanced settings
+const task = beatMinecraft(bot);
+
+// Aggressive speedrun settings (barter, no sleep, fewer beds)
+const task = speedrunMinecraft(bot);
+```
+
+## Benchmark
+
+**[`examples/benchmark-example.ts`](../examples/benchmark-example.ts)** — Performance profiling utilities for measuring pathfinding speed.
