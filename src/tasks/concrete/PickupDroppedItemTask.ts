@@ -161,7 +161,7 @@ export class PickupDroppedItemTask extends Task {
 
     for (const entity of Object.values(this.bot.entities)) {
       if (!entity) continue;
-      if (entity.type !== 'object' || (entity as any).objectType !== 'Item') {
+      if (entity.type !== 'object' || (entity as any).displayName !== 'Item') {
         // Check by name
         if (entity.name !== 'item') continue;
       }

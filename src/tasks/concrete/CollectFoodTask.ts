@@ -374,7 +374,7 @@ export class CollectFoodTask extends Task {
    */
   private findNearbyDroppedItem(itemName: string): boolean {
     for (const entity of Object.values(this.bot.entities)) {
-      if (entity.name === 'item' || entity.objectType === 'Item') {
+      if (entity.name === 'item' || entity.displayName === 'Item') {
         const itemEntity = entity as any;
         if (itemEntity.metadata?.[8]?.itemId) {
           // Check item type
