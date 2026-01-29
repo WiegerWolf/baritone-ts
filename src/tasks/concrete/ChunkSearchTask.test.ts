@@ -12,13 +12,15 @@ import { Vec3 } from 'vec3';
 import {
   blockToChunk,
   chunkToBlock,
+} from './ChunkSearchTask';
+import type { ChunkPos } from './ChunkSearchTask';
+import {
   SearchChunkForBlockTask,
-  SearchChunkByConditionTask,
   searchForBlocks,
   searchForStronghold,
   searchForNetherFortress,
-} from './ChunkSearchTask';
-import type { ChunkPos } from './ChunkSearchTask';
+} from './SearchChunkForBlockTask';
+import { SearchChunkByConditionTask } from './SearchChunkByConditionTask';
 
 // Mock bot for testing
 function createMockBot(overrides: Record<string, any> = {}): any {

@@ -64,12 +64,12 @@ function createMockItem(name: string, count: number): any {
 // Import tasks
 import {
   CraftInInventoryTask,
-  CraftWithRecipeBookTask,
   INVENTORY_RECIPES,
   craftPlanks,
   craftSticks,
   craftCraftingTable,
 } from './CraftInInventoryTask';
+import { CraftWithRecipeBookTask } from './CraftWithRecipeBookTask';
 
 describe('Inventory Crafting Tasks', () => {
   let bot: Bot;

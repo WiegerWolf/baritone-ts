@@ -21,13 +21,16 @@ import { TimerGame } from '../../utils/timers/TimerGame';
 
 // Import subtasks
 import { GoToDimensionTask } from '../composite/PortalTask';
-import { GoToStrongholdPortalTask, LocateStrongholdCoordinatesTask } from './StrongholdTask';
+import { LocateStrongholdCoordinatesTask } from './LocateStrongholdCoordinatesTask';
+import { GoToStrongholdPortalTask } from './GoToStrongholdPortalTask';
 import { KillEnderDragonTask, WaitForDragonAndPearlTask } from './DragonFightTask';
 import { CollectBlazeRodsTask } from './CollectBlazeRodsTask';
 import { CollectFoodTask } from './CollectFoodTask';
 import { TradeWithPiglinsTask } from './TradeTask';
-import { EquipArmorTask, EquipSpecificArmorTask } from './ArmorTask';
-import { PlaceBedAndSetSpawnTask, SleepInBedTask } from './BedTask';
+import { EquipArmorTask } from './EquipArmorTask';
+import { EquipSpecificArmorTask } from './EquipSpecificArmorTask';
+import { PlaceBedAndSetSpawnTask } from './PlaceBedAndSetSpawnTask';
+import { SleepInBedTask } from './SleepInBedTask';
 import { DoToClosestBlockTask } from './BlockSearchTask';
 import { DestroyBlockTask } from './ConstructionTask';
 import { PickupItemTask } from './InventoryPickupItemTask';
@@ -36,7 +39,7 @@ import { Dimension, itemTarget } from './ResourceTask';
 import { InteractWithBlockTask, Direction } from './InteractWithBlockTask';
 import { GetToBlockTask } from './GetToBlockTask';
 import { GoToBlockTask } from './GoToBlockTask';
-import { SearchChunkForBlockTask } from './ChunkSearchTask';
+import { SearchChunkForBlockTask } from './SearchChunkForBlockTask';
 
 /**
  * Configuration for BeatMinecraftTask

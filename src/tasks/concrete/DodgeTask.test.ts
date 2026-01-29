@@ -9,10 +9,12 @@
 import { describe, it, expect, mock } from 'bun:test';
 import {
   DodgeProjectilesTask,
-  StrafeAndDodgeTask,
   dodgeProjectiles,
+} from './DodgeProjectilesTask';
+import {
+  StrafeAndDodgeTask,
   strafeAndDodge,
-} from './DodgeTask';
+} from './StrafeAndDodgeTask';
 import { Vec3 } from 'vec3';
 
 // Mock bot for testing

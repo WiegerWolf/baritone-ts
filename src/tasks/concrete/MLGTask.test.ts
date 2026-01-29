@@ -11,11 +11,13 @@ import { describe, it, expect, mock } from 'bun:test';
 import { Vec3 } from 'vec3';
 import {
   MLGBucketTask,
-  MLGBucketMonitorTask,
   mlgBucket,
-  monitorForMLG,
   shouldMLG,
-} from './MLGTask';
+} from './MLGBucketTask';
+import {
+  MLGBucketMonitorTask,
+  monitorForMLG,
+} from './MLGBucketMonitorTask';
 
 // Mock bot for testing
 function createMockBot(overrides: Record<string, any> = {}): any {

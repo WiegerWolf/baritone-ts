@@ -14,22 +14,16 @@ export { GoToXZTask } from './GoToXZTask';
 export { FollowEntityTask } from './FollowEntityTask';
 
 // Mining tasks
-export {
-  MineBlockTask,
-  MineBlockTypeTask,
-} from './MineBlockTask';
+export { MineBlockTask } from './MineBlockTask';
+export { MineBlockTypeTask } from './MineBlockTypeTask';
 
 // Placement tasks
-export {
-  PlaceBlockTask,
-  PlaceAgainstTask,
-} from './PlaceBlockTask';
+export { PlaceBlockTask } from './PlaceBlockTask';
+export { PlaceAgainstTask } from './PlaceAgainstTask';
 
 // Crafting tasks
-export {
-  CraftTask,
-  EnsureItemTask,
-} from './CraftTask';
+export { CraftTask } from './CraftTask';
+export { EnsureItemTask } from './EnsureItemTask';
 
 // Smelting tasks
 export {
@@ -186,20 +180,18 @@ export {
   ArmorSlot,
   ArmorMaterial,
   EquipArmorTask,
-  EquipSpecificArmorTask,
   equipBestArmor,
+} from './EquipArmorTask';
+export type { ArmorPiece, EquipArmorConfig } from './EquipArmorTask';
+export {
+  EquipSpecificArmorTask,
   equipArmor,
-} from './ArmorTask';
-export type { ArmorPiece, EquipArmorConfig } from './ArmorTask';
+} from './EquipSpecificArmorTask';
 
 // Bed/sleep tasks
-export {
-  PlaceBedAndSetSpawnTask,
-  SleepInBedTask,
-  placeBedAndSetSpawn,
-  sleepInBed,
-} from './BedTask';
-export type { BedTaskConfig } from './BedTask';
+export { PlaceBedAndSetSpawnTask, placeBedAndSetSpawn } from './PlaceBedAndSetSpawnTask';
+export { SleepInBedTask, sleepInBed } from './SleepInBedTask';
+export type { BedTaskConfig } from './PlaceBedAndSetSpawnTask';
 
 // Liquid collection tasks
 export {
@@ -215,11 +207,13 @@ export type { CollectLiquidConfig } from './CollectLiquidTask';
 // Dodge/evasion tasks
 export {
   DodgeProjectilesTask,
-  StrafeAndDodgeTask,
   dodgeProjectiles,
+} from './DodgeProjectilesTask';
+export type { DodgeProjectilesConfig } from './DodgeProjectilesTask';
+export {
+  StrafeAndDodgeTask,
   strafeAndDodge,
-} from './DodgeTask';
-export type { DodgeProjectilesConfig } from './DodgeTask';
+} from './StrafeAndDodgeTask';
 
 // Trading tasks
 export {
@@ -233,25 +227,31 @@ export type { PiglinTradeConfig } from './TradeTask';
 // MLG/fall damage prevention tasks
 export {
   MLGBucketTask,
-  MLGBucketMonitorTask,
   mlgBucket,
-  monitorForMLG,
   shouldMLG,
-} from './MLGTask';
-export type { MLGConfig } from './MLGTask';
+} from './MLGBucketTask';
+export type { MLGConfig } from './MLGBucketTask';
+export {
+  MLGBucketMonitorTask,
+  monitorForMLG,
+} from './MLGBucketMonitorTask';
 
 // Chunk search/exploration tasks
 export {
   blockToChunk,
   chunkToBlock,
   SearchChunksExploreTask,
+} from './ChunkSearchTask';
+export type { ChunkPos, ChunkSearchConfig } from './ChunkSearchTask';
+export {
   SearchChunkForBlockTask,
-  SearchChunkByConditionTask,
   searchForBlocks,
   searchForStronghold,
   searchForNetherFortress,
-} from './ChunkSearchTask';
-export type { ChunkPos, ChunkSearchConfig } from './ChunkSearchTask';
+} from './SearchChunkForBlockTask';
+export {
+  SearchChunkByConditionTask,
+} from './SearchChunkByConditionTask';
 
 // Enhanced block interaction tasks
 export {
@@ -264,29 +264,25 @@ export {
 } from './InteractWithBlockTask';
 export type { InteractWithBlockConfig } from './InteractWithBlockTask';
 
+// Storage container shared types
+export { containerItemTarget, itemMatchesTarget } from './ContainerItemTarget';
+export type { ContainerItemTarget } from './ContainerItemTarget';
+
 // Storage container tasks
-export {
-  containerItemTarget,
-  itemMatchesTarget,
-  PickupFromContainerTask,
-  StoreInContainerTask,
-  LootContainerTask,
-  pickupFromContainer,
-  storeInContainer,
-  lootContainer,
-} from './StorageContainerTask';
-export type { ContainerItemTarget } from './StorageContainerTask';
+export { PickupFromContainerTask, pickupFromContainer } from './PickupFromContainerTask';
+export { StoreInContainerTask, storeInContainer } from './StoreInContainerTask';
+export { LootContainerTask, lootContainer } from './LootContainerTask';
 
 // Inventory crafting tasks
 export {
   INVENTORY_RECIPES,
   CraftInInventoryTask,
-  CraftWithRecipeBookTask,
   craftPlanks,
   craftSticks,
   craftCraftingTable,
 } from './CraftInInventoryTask';
 export type { RecipeSlot, InventoryRecipe, InventoryRecipeTarget } from './CraftInInventoryTask';
+export { CraftWithRecipeBookTask } from './CraftWithRecipeBookTask';
 
 // Chunk navigation tasks
 export {
@@ -361,24 +357,28 @@ export type { StoreInStashConfig } from './StoreInStashTask';
 // Structure ravaging tasks
 export {
   RavageDesertTemplesTask,
-  RavageRuinedPortalsTask,
   RavageState,
   ravageDesertTemples,
-  ravageRuinedPortals,
   DESERT_TEMPLE_LOOT,
+} from './RavageDesertTemplesTask';
+export {
+  RavageRuinedPortalsTask,
+  ravageRuinedPortals,
   RUINED_PORTAL_LOOT,
-} from './RavageStructuresTask';
+} from './RavageRuinedPortalsTask';
 
 // Stronghold location tasks
 export {
   LocateStrongholdCoordinatesTask,
-  GoToStrongholdPortalTask,
   LocateState,
-  GoToStrongholdState,
   locateStronghold,
-  goToStrongholdPortal,
   calculateIntersection,
-} from './StrongholdTask';
+} from './LocateStrongholdCoordinatesTask';
+export {
+  GoToStrongholdPortalTask,
+  GoToStrongholdState,
+  goToStrongholdPortal,
+} from './GoToStrongholdPortalTask';
 
 // Dragon fight tasks
 export {
@@ -459,35 +459,40 @@ export type { DoToClosestObjectConfig } from './AbstractDoToClosestObjectTask';
 export {
   MiningRequirement,
   SatisfyMiningRequirementTask,
-  GetBuildingMaterialsTask,
   satisfyMiningRequirement,
   ensureStonePickaxe,
   ensureIronPickaxe,
   ensureDiamondPickaxe,
-  getBuildingMaterials,
   miningRequirementMet,
   getBlockMiningRequirement,
+} from './SatisfyMiningRequirementTask';
+
+export {
+  GetBuildingMaterialsTask,
+  getBuildingMaterials,
   BUILDING_MATERIALS,
-} from './MiningRequirementTask';
+} from './GetBuildingMaterialsTask';
 
 // Biome search tasks
 export {
   Biomes,
   SearchWithinBiomeTask,
-  LocateDesertTempleTask,
   searchWithinBiome,
-  locateDesertTemple,
   getCurrentBiome,
   isInBiome,
-} from './BiomeSearchTask';
-export type { BiomeKey, LocateDesertTempleConfig } from './BiomeSearchTask';
+} from './SearchWithinBiomeTask';
+export type { BiomeKey } from './SearchWithinBiomeTask';
+
+export {
+  LocateDesertTempleTask,
+  locateDesertTemple,
+} from './LocateDesertTempleTask';
+export type { LocateDesertTempleConfig } from './LocateDesertTempleTask';
 
 // Pickup item tasks
-export {
-  GetToEntityTask,
-  PickupDroppedItemTask,
-  PickupNearbyItemsTask,
-} from './PickupItemTask';
+export { GetToEntityTask } from './GetToEntityTask';
+export { PickupDroppedItemTask } from './PickupDroppedItemTask';
+export { PickupNearbyItemsTask } from './PickupNearbyItemsTask';
 
 // Flee from entities tasks
 export { RunAwayFromEntitiesTask, type EntitySupplier } from './RunAwayFromEntitiesTask';
@@ -539,10 +544,8 @@ export type { GetToXZWithElytraConfig } from './GetToXZWithElytraTask';
 // Craft with matching materials tasks
 export {
   CraftWithMatchingMaterialsTask,
-  CraftWithMatchingPlanksTask,
-  CraftWithMatchingWoolTask,
-  craftBed,
-  craftFence,
   craftSlot,
 } from './CraftWithMatchingMaterialsTask';
 export type { CraftingSlot, CraftingRecipe } from './CraftWithMatchingMaterialsTask';
+export { CraftWithMatchingPlanksTask, craftFence } from './CraftWithMatchingPlanksTask';
+export { CraftWithMatchingWoolTask, craftBed } from './CraftWithMatchingWoolTask';

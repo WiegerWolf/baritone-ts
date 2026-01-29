@@ -17,13 +17,15 @@ import { Bot } from 'mineflayer';
 import { Vec3 } from 'vec3';
 import {
   LocateStrongholdCoordinatesTask,
-  GoToStrongholdPortalTask,
   LocateState,
-  GoToStrongholdState,
   locateStronghold,
-  goToStrongholdPortal,
   calculateIntersection,
-} from './StrongholdTask';
+} from './LocateStrongholdCoordinatesTask';
+import {
+  GoToStrongholdPortalTask,
+  GoToStrongholdState,
+  goToStrongholdPortal,
+} from './GoToStrongholdPortalTask';
 import {
   KillEnderDragonTask,
   killEnderDragon,

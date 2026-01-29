@@ -12,13 +12,15 @@ import { Vec3 } from 'vec3';
 import {
   MiningRequirement,
   SatisfyMiningRequirementTask,
-  GetBuildingMaterialsTask,
   satisfyMiningRequirement,
-  getBuildingMaterials,
   miningRequirementMet,
   getBlockMiningRequirement,
+} from './SatisfyMiningRequirementTask';
+import {
+  GetBuildingMaterialsTask,
+  getBuildingMaterials,
   BUILDING_MATERIALS,
-} from './MiningRequirementTask';
+} from './GetBuildingMaterialsTask';
 
 // Mock bot for testing
 const createMockBot = (overrides: any = {}) => ({

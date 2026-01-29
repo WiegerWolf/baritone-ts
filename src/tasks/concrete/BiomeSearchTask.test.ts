@@ -12,11 +12,13 @@ import { Vec3 } from 'vec3';
 import {
   Biomes,
   SearchWithinBiomeTask,
-  LocateDesertTempleTask,
   searchWithinBiome,
-  locateDesertTemple,
   isInBiome,
-} from './BiomeSearchTask';
+} from './SearchWithinBiomeTask';
+import {
+  LocateDesertTempleTask,
+  locateDesertTemple,
+} from './LocateDesertTempleTask';
 
 // Mock bot for testing
 const createMockBot = (overrides: any = {}) => ({

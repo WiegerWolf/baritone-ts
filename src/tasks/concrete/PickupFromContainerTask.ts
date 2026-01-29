@@ -20,7 +20,8 @@ import { BlockPos } from '../../types';
 import { AbstractDoToStorageContainerTask } from './ContainerTask';
 import { EnsureFreeInventorySlotTask } from './SlotTask';
 import { TimerGame } from '../../utils/timers/TimerGame';
-import { ContainerItemTarget, containerItemTarget, itemMatchesTarget } from './ContainerItemTarget';
+import type { ContainerItemTarget } from './ContainerItemTarget';
+import { containerItemTarget, itemMatchesTarget } from './ContainerItemTarget';
 
 /**
  * Slot info from container

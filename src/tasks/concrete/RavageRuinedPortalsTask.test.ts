@@ -2,11 +2,13 @@ import { describe, it, expect, beforeEach, mock } from 'bun:test';
 import { Bot } from 'mineflayer';
 import { Vec3 } from 'vec3';
 import {
-  RavageRuinedPortalsTask,
   RavageState,
+} from './RavageDesertTemplesTask';
+import {
+  RavageRuinedPortalsTask,
   ravageRuinedPortals,
   RUINED_PORTAL_LOOT,
-} from './RavageStructuresTask';
+} from './RavageRuinedPortalsTask';
 
 // Mock Bot
 function createMockBot(): Bot {

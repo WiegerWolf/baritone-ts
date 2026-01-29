@@ -18,7 +18,7 @@ import { Vec3 } from 'vec3';
 import { Task } from '../Task';
 import type { ITask } from '../interfaces';
 import { DestroyBlockTask } from './ConstructionTask';
-import { LootContainerTask } from './StorageContainerTask';
+import { LootContainerTask } from './LootContainerTask';
 import { BlockPos } from '../../types';
 
 /**

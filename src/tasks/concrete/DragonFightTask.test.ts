@@ -14,7 +14,7 @@ import {
   BedDragonState,
   BED_ITEMS,
 } from './DragonFightTask';
-import { LocateDesertTempleTask, locateDesertTemple } from './BiomeSearchTask';
+import { LocateDesertTempleTask, locateDesertTemple } from './LocateDesertTempleTask';
 
 // Mock bot for testing
 const createMockBot = (overrides: any = {}) => ({

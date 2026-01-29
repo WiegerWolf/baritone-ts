@@ -3,13 +3,15 @@ import { Bot } from 'mineflayer';
 import { Vec3 } from 'vec3';
 import {
   RavageDesertTemplesTask,
-  RavageRuinedPortalsTask,
   RavageState,
   ravageDesertTemples,
-  ravageRuinedPortals,
   DESERT_TEMPLE_LOOT,
+} from './RavageDesertTemplesTask';
+import {
+  RavageRuinedPortalsTask,
+  ravageRuinedPortals,
   RUINED_PORTAL_LOOT,
-} from './RavageStructuresTask';
+} from './RavageRuinedPortalsTask';
 
 // Mock Bot
 function createMockBot(): Bot {

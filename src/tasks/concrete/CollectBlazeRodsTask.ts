@@ -22,7 +22,7 @@ import { Task } from '../Task';
 import type { ITask } from '../interfaces';
 import { ResourceTask, Dimension, itemTarget } from './ResourceTask';
 import { GoToDimensionTask } from '../composite/PortalTask';
-import { SearchChunkForBlockTask } from './ChunkSearchTask';
+import { SearchChunkForBlockTask } from './SearchChunkForBlockTask';
 import { GetToBlockTask } from './GetToBlockTask';
 import { GoToNearTask } from './GoToNearTask';
 import { RunAwayFromHostilesTask } from './EscapeTask';
