@@ -59,7 +59,7 @@ export {
   MovementPillar,
   MovementParkour,
   MovementParkourAscend
-} from './movements/Movement';
+} from './movements';
 
 // Swimming movements
 export {
@@ -68,7 +68,7 @@ export {
   MovementSwimDown,
   MovementWaterExit,
   MovementWaterEntry
-} from './movements/MovementSwim';
+} from './movements/swim';
 
 // Door movements
 export {
@@ -80,7 +80,7 @@ export {
   isTrapdoor,
   isOpenable,
   requiresRedstone
-} from './movements/MovementDoor';
+} from './movements/door';
 
 // Ladder/vine climbing movements
 export {
@@ -91,7 +91,7 @@ export {
   isClimbable,
   isLadder,
   isVine
-} from './movements/MovementClimb';
+} from './movements/climb';
 
 // Elytra flight controller and utilities
 export {
@@ -102,7 +102,7 @@ export {
   planElytraPath,
   isElytraViable,
   type ElytraPathSegment
-} from './movements/MovementElytra';
+} from './movements/elytra';
 
 // Boat travel controller and utilities
 export {
@@ -114,7 +114,7 @@ export {
   planBoatPath,
   isBoatViable,
   type BoatPathSegment
-} from './movements/MovementBoat';
+} from './movements/boat';
 
 // Path smoothing utilities
 export {
@@ -612,7 +612,6 @@ export {
   ArmorSlot,
   OffhandSlot,
   ContainerSlot,
-  createSlotHandler,
   type SlotHandlerConfig,
   // Look Helper
   LookHelper,

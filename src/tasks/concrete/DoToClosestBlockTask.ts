@@ -333,8 +333,8 @@ export function getWithinRangeOf(
   y: number,
   z: number,
   range: number
-): import('./GetWithinRangeOfBlockTask').GetWithinRangeOfBlockTask {
-  const { GetWithinRangeOfBlockTask } = require('./GetWithinRangeOfBlockTask');
+): import('./BlockSearchTask').GetWithinRangeOfBlockTask {
+  const { GetWithinRangeOfBlockTask } = require('./BlockSearchTask');
   return new GetWithinRangeOfBlockTask(bot, x, y, z, range);
 }
 
@@ -346,8 +346,8 @@ export function goInDirection(
   dirX: number,
   dirZ: number,
   distance: number = 100
-): import('./GoInDirectionXZTask').GoInDirectionXZTask {
-  const { GoInDirectionXZTask } = require('./GoInDirectionXZTask');
+): import('./BlockSearchTask').GoInDirectionXZTask {
+  const { GoInDirectionXZTask } = require('./BlockSearchTask');
   return new GoInDirectionXZTask(
     bot,
     bot.entity.position,
