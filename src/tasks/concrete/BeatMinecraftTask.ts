@@ -18,6 +18,7 @@ import { Task } from '../Task';
 import type { ITask } from '../interfaces';
 import { BlockPos } from '../../types';
 import { TimerGame } from '../../utils/timers/TimerGame';
+import { BlockTracker } from '../../trackers/BlockTracker';
 
 // Import subtasks
 import { GoToDimensionTask } from '../composite/PortalTask';
@@ -174,12 +175,22 @@ export class BeatMinecraftTask extends Task {
   private locateStrongholdTask: GoToStrongholdPortalTask;
   private dragonKillTask: KillEnderDragonTask;
   private ranStrongholdLocator: boolean = false;
+  private blockTracker: BlockTracker | null = null;
 
   constructor(bot: Bot, config: Partial<BeatMinecraftConfig> = {}) {
     super(bot);
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.locateStrongholdTask = new GoToStrongholdPortalTask(bot, this.config.targetEyes);
     this.dragonKillTask = new KillEnderDragonTask(bot);
+  }
+
+  /**
+   * Set the block tracker for efficient block lookups.
+   * When set, block searches use the tracker's async-scanned cache
+   * instead of brute-force iteration.
+   */
+  setBlockTracker(tracker: BlockTracker): void {
+    this.blockTracker = tracker;
   }
 
   get displayName(): string {
@@ -191,6 +202,13 @@ export class BeatMinecraftTask extends Task {
     this.endPortalCenter = null;
     this.bedSpawnLocation = null;
     this.ranStrongholdLocator = false;
+
+    // Register block types we need to find with the tracker
+    if (this.blockTracker) {
+      this.blockTracker.trackBlock('end_portal');
+      this.blockTracker.trackBlock('end_portal_frame');
+      this.blockTracker.trackBlock('end_gateway');
+    }
   }
 
   onTick(): Task | null {
@@ -424,41 +442,35 @@ export class BeatMinecraftTask extends Task {
 
   /**
    * Check for end portal in nearby chunks.
-   * Uses mineflayer's indexed findBlock/findBlocks instead of brute-force iteration.
+   * Uses BlockTracker's async-scanned cache when available.
    */
   private checkForEndPortal(): void {
-    // Already found it
     if (this.endPortalCenter) return;
 
-    // Search for active end portal block
-    const portalBlock = this.bot.findBlock({
-      matching: (block: any) => block.name === 'end_portal',
-      maxDistance: 64,
-    });
-    if (portalBlock) {
-      this.endPortalCenter = new BlockPos(portalBlock.position.x, portalBlock.position.y, portalBlock.position.z);
-      return;
-    }
-
-    // Try to calculate center from frames
-    const framePositions = this.bot.findBlocks({
-      matching: (block: any) => block.name === 'end_portal_frame',
-      maxDistance: 64,
-      count: 12,
-    });
-
-    if (framePositions.length >= 12) {
-      let sumX = 0, sumY = 0, sumZ = 0;
-      for (const pos of framePositions) {
-        sumX += pos.x;
-        sumY += pos.y;
-        sumZ += pos.z;
+    if (this.blockTracker) {
+      // Use tracker's cached positions (async-scanned, no blocking)
+      const portalPos = this.blockTracker.getNearestBlock('end_portal');
+      if (portalPos) {
+        this.endPortalCenter = new BlockPos(
+          Math.floor(portalPos.x), Math.floor(portalPos.y), Math.floor(portalPos.z)
+        );
+        return;
       }
-      this.endPortalCenter = new BlockPos(
-        Math.floor(sumX / framePositions.length),
-        Math.floor(sumY / framePositions.length),
-        Math.floor(sumZ / framePositions.length)
-      );
+
+      const frames = this.blockTracker.getKnownPositions('end_portal_frame', 12);
+      if (frames.length >= 12) {
+        let sumX = 0, sumY = 0, sumZ = 0;
+        for (const pos of frames) {
+          sumX += pos.x;
+          sumY += pos.y;
+          sumZ += pos.z;
+        }
+        this.endPortalCenter = new BlockPos(
+          Math.floor(sumX / frames.length),
+          Math.floor(sumY / frames.length),
+          Math.floor(sumZ / frames.length)
+        );
+      }
     }
   }
 
@@ -570,9 +582,13 @@ export class BeatMinecraftTask extends Task {
 
   /**
    * Find nearby block by name.
-   * Uses mineflayer's indexed findBlock instead of brute-force iteration.
+   * Uses BlockTracker when available, falls back to mineflayer's findBlock.
    */
   private findNearbyBlock(blockName: string): Vec3 | null {
+    if (this.blockTracker && this.blockTracker.isTracking(blockName)) {
+      return this.blockTracker.getNearestBlock(blockName);
+    }
+    // Fallback for block types not registered with the tracker
     const result = this.bot.findBlock({
       matching: (block: any) => block.name.includes(blockName),
       maxDistance: 32,
@@ -606,7 +622,12 @@ export class BeatMinecraftTask extends Task {
   }
 
   onStop(interruptTask: ITask | null): void {
-    // Clean up
+    // Unregister tracked block types
+    if (this.blockTracker) {
+      this.blockTracker.stopTracking('end_portal');
+      this.blockTracker.stopTracking('end_portal_frame');
+      this.blockTracker.stopTracking('end_gateway');
+    }
   }
 
   isFinished(): boolean {

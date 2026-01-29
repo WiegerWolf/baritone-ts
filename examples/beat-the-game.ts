@@ -28,6 +28,7 @@ import {
   MLGBucketChain,
   WorldSurvivalChain,
   DeathMenuChain,
+  BlockTracker,
   type TaskRunner,
 } from '../src';
 
@@ -41,6 +42,7 @@ const bot = createBot({
 
 let runner: TaskRunner;
 let beatTask: BeatMinecraftTask;
+let blockTracker: BlockTracker;
 
 bot.once('spawn', () => {
   // Initialize pathfinder with all movement capabilities
@@ -69,8 +71,12 @@ bot.once('spawn', () => {
     }
   });
 
+  // Create block tracker for efficient async block lookups
+  blockTracker = new BlockTracker(bot);
+
   // Set the main objective: beat the game
   beatTask = new BeatMinecraftTask(bot);
+  beatTask.setBlockTracker(blockTracker);
   runner.setUserTask(beatTask);
   runner.start();
 
@@ -103,6 +109,7 @@ bot.on('chat', (username, message) => {
 
     case 'resume':
       beatTask = new BeatMinecraftTask(bot);
+      beatTask.setBlockTracker(blockTracker);
       runner.setUserTask(beatTask);
       bot.chat('Resuming speedrun');
       break;
@@ -110,6 +117,7 @@ bot.on('chat', (username, message) => {
     case 'speedrun':
       // Aggressive settings: barter pearls, skip sleep, fewer beds
       beatTask = speedrunMinecraft(bot);
+      beatTask.setBlockTracker(blockTracker);
       runner.setUserTask(beatTask);
       bot.chat('Speedrun mode activated');
       break;
