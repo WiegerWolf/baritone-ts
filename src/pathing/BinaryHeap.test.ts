@@ -107,6 +107,66 @@ describe('BinaryHeap', () => {
     });
   });
 
+  describe('clear', () => {
+    it('should clear all elements', () => {
+      heap.push(createNode(0, 0, 0, 10));
+      heap.push(createNode(1, 0, 0, 20));
+      heap.push(createNode(2, 0, 0, 30));
+
+      expect(heap.getSize()).toBe(3);
+      heap.clear();
+      expect(heap.getSize()).toBe(0);
+      expect(heap.isEmpty()).toBe(true);
+    });
+
+    it('should reset node heap positions', () => {
+      const node = createNode(0, 0, 0, 10);
+      heap.push(node);
+      expect(node.heapPosition).toBeGreaterThan(0);
+
+      heap.clear();
+      expect(node.heapPosition).toBe(-1);
+    });
+  });
+
+  describe('contains', () => {
+    it('should return true for nodes in heap', () => {
+      const node = createNode(0, 0, 0, 10);
+      heap.push(node);
+      expect(heap.contains(node)).toBe(true);
+    });
+
+    it('should return false for nodes not in heap', () => {
+      const node = createNode(0, 0, 0, 10);
+      expect(heap.contains(node)).toBe(false);
+    });
+
+    it('should return false after node is popped', () => {
+      const node = createNode(0, 0, 0, 10);
+      heap.push(node);
+      heap.pop();
+      expect(heap.contains(node)).toBe(false);
+    });
+  });
+
+  describe('grow', () => {
+    it('should handle inserting more elements than initial capacity', () => {
+      // Default capacity is typically small, insert many to trigger grow
+      for (let i = 0; i < 100; i++) {
+        heap.push(createNode(i, 0, 0, i));
+      }
+      expect(heap.getSize()).toBe(100);
+
+      // Verify heap property still holds
+      let last = -1;
+      while (!heap.isEmpty()) {
+        const node = heap.pop()!;
+        expect(node.combinedCost).toBeGreaterThanOrEqual(last);
+        last = node.combinedCost;
+      }
+    });
+  });
+
   describe('large heap', () => {
     it('should handle many elements', () => {
       const count = 1000;

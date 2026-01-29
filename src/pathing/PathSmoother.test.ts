@@ -1,4 +1,5 @@
 import {
+  smoothPath,
   simplifyPath,
   calculatePathCost,
   calculatePathDistance,
@@ -7,7 +8,7 @@ import {
   getPathSegment,
   mergePaths
 } from './PathSmoother';
-import { PathNode } from '../types';
+import { PathNode, CalculationContext } from '../types';
 
 describe('PathSmoother', () => {
   describe('simplifyPath', () => {
@@ -230,6 +231,97 @@ describe('PathSmoother', () => {
     });
   });
 });
+
+  describe('smoothPath', () => {
+    function createMockCtx(solidBlocks: Set<string> = new Set()): CalculationContext {
+      const solid = { name: 'stone', type: 1 } as any;
+      const air = { name: 'air', type: 0 } as any;
+
+      return {
+        bot: {} as any,
+        world: {},
+        canWalkOn: (block: any) => block === solid,
+        canWalkThrough: (block: any) => block !== solid,
+        isWater: () => false,
+        isLava: () => false,
+        getBlock: (x: number, y: number, z: number) => {
+          if (solidBlocks.has(`${x},${y},${z}`)) return solid;
+          // Ground level at y=63 is solid
+          if (y === 63) return solid;
+          return air;
+        },
+        getBreakTime: () => 1,
+        getBestTool: () => null,
+        canDig: true,
+        canPlace: true,
+        allowSprint: true,
+      } as any;
+    }
+
+    it('should return short paths unchanged', () => {
+      const ctx = createMockCtx();
+      const path = [createNode(0, 64, 0, 0)];
+      expect(smoothPath(path, ctx)).toEqual(path);
+    });
+
+    it('should return two-node paths unchanged', () => {
+      const ctx = createMockCtx();
+      const path = [
+        createNode(0, 64, 0, 0),
+        createNode(1, 64, 0, 1),
+      ];
+      expect(smoothPath(path, ctx)).toEqual(path);
+    });
+
+    it('should smooth a straight-line path', () => {
+      const ctx = createMockCtx();
+      const path = [
+        createNode(0, 64, 0, 0),
+        createNode(1, 64, 0, 1),
+        createNode(2, 64, 0, 2),
+        createNode(3, 64, 0, 3),
+      ];
+      const smoothed = smoothPath(path, ctx);
+      // Should shortcut intermediate nodes
+      expect(smoothed.length).toBeLessThanOrEqual(path.length);
+      // First and last should always be preserved
+      expect(smoothed[0]).toBe(path[0]);
+      expect(smoothed[smoothed.length - 1]).toBe(path[path.length - 1]);
+    });
+
+    it('should not smooth past obstacles', () => {
+      // Place a wall at x=2 blocking direct path
+      const solidBlocks = new Set(['2,64,0', '2,65,0']);
+      const ctx = createMockCtx(solidBlocks);
+      const path = [
+        createNode(0, 64, 0, 0),
+        createNode(0, 64, 1, 1),
+        createNode(1, 64, 1, 2),
+        createNode(2, 64, 1, 3),
+        createNode(3, 64, 0, 4),
+      ];
+      const smoothed = smoothPath(path, ctx);
+      // Should still have multiple nodes due to obstacle
+      expect(smoothed.length).toBeGreaterThan(2);
+    });
+  });
+
+  describe('mergePaths with overlap in middle', () => {
+    it('should merge when overlap is not at start of second path', () => {
+      const path1 = [
+        createNode(0, 64, 0, 0),
+        createNode(1, 64, 0, 1),
+      ];
+      const path2 = [
+        createNode(0, 64, 0, 0), // Different start
+        createNode(1, 64, 0, 1), // This matches path1 end
+        createNode(2, 64, 0, 2),
+      ];
+      const merged = mergePaths(path1, path2);
+      expect(merged).not.toBeNull();
+      expect(merged!.length).toBe(3);
+    });
+  });
 
 function createNode(x: number, y: number, z: number, cost: number): PathNode {
   const node = new PathNode(x, y, z, 0);

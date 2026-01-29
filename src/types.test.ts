@@ -1,4 +1,5 @@
-import { BlockPos, PathNode } from './types';
+import { BlockPos, PathNode, MutableMoveResult } from './types';
+import { Vec3 } from 'vec3';
 
 describe('BlockPos', () => {
   describe('constructor', () => {
@@ -107,6 +108,34 @@ describe('BlockPos', () => {
     });
   });
 
+  describe('toVec3', () => {
+    it('should convert to Vec3', () => {
+      const pos = new BlockPos(10, 64, 20);
+      const v = pos.toVec3();
+      expect(v.x).toBe(10);
+      expect(v.y).toBe(64);
+      expect(v.z).toBe(20);
+    });
+  });
+
+  describe('fromVec3', () => {
+    it('should floor coordinates', () => {
+      const v = new Vec3(10.7, 64.3, 20.9);
+      const pos = BlockPos.fromVec3(v);
+      expect(pos.x).toBe(10);
+      expect(pos.y).toBe(64);
+      expect(pos.z).toBe(20);
+    });
+
+    it('should handle negative coordinates', () => {
+      const v = new Vec3(-0.5, -1.5, -2.5);
+      const pos = BlockPos.fromVec3(v);
+      expect(pos.x).toBe(-1);
+      expect(pos.y).toBe(-2);
+      expect(pos.z).toBe(-3);
+    });
+  });
+
   describe('distanceSquared', () => {
     it('should return 0 for same position', () => {
       const pos = new BlockPos(10, 64, 20);
@@ -171,5 +200,34 @@ describe('PathNode', () => {
       node.heapPosition = 5;
       expect(node.heapPosition).toBe(5);
     });
+  });
+});
+
+describe('MutableMoveResult', () => {
+  it('should initialize with defaults', () => {
+    const result = new MutableMoveResult();
+    expect(result.x).toBe(0);
+    expect(result.y).toBe(0);
+    expect(result.z).toBe(0);
+    expect(result.cost).toBe(Infinity);
+  });
+
+  it('should set values', () => {
+    const result = new MutableMoveResult();
+    result.set(10, 64, 20, 5.5);
+    expect(result.x).toBe(10);
+    expect(result.y).toBe(64);
+    expect(result.z).toBe(20);
+    expect(result.cost).toBe(5.5);
+  });
+
+  it('should reset to defaults', () => {
+    const result = new MutableMoveResult();
+    result.set(10, 64, 20, 5.5);
+    result.reset();
+    expect(result.x).toBe(0);
+    expect(result.y).toBe(0);
+    expect(result.z).toBe(0);
+    expect(result.cost).toBe(Infinity);
   });
 });

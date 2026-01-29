@@ -179,6 +179,21 @@ describe('TimerReal', () => {
     expect(timer.getProgress()).toBeCloseTo(1.0, 1);
   });
 
+  test('should get current millis', () => {
+    const timer = new TimerReal(1.0);
+    expect(timer.getCurrentMillis()).toBe(now);
+  });
+
+  test('should get interval in millis', () => {
+    const timer = new TimerReal(2.5);
+    expect(timer.getIntervalMillis()).toBe(2500);
+  });
+
+  test('should set interval in millis', () => {
+    const timer = new TimerReal(1.0);
+    timer.setIntervalMillis(3000);
+    expect(timer.getInterval()).toBe(3.0);
+  });
 });
 
 
