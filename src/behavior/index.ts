@@ -8,7 +8,7 @@ export {
   ProcessPriority,
   ProcessState,
   type ProcessTickResult
-} from './Process';
+} from './process';
 
 export { MineProcess, type MineConfig } from './MineProcess';
 export { FollowProcess, type FollowConfig } from './FollowProcess';
