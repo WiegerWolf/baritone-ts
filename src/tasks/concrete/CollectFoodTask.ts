@@ -373,17 +373,30 @@ export class CollectFoodTask extends Task {
    * Check if item is dropped nearby
    */
   private findNearbyDroppedItem(itemName: string): boolean {
+    const mcData = require('minecraft-data')(this.bot.version);
     for (const entity of Object.values(this.bot.entities)) {
-      if (entity.name === 'item' || entity.displayName === 'Item') {
-        const itemEntity = entity as any;
-        if (itemEntity.metadata?.[8]?.itemId) {
-          // Check item type
-          const dist = this.bot.entity.position.distanceTo(entity.position);
-          if (dist < this.config.maxSearchRadius) {
-            // Would need to check actual item name from metadata
-            return true;
+      if (entity.name !== 'item' && entity.displayName !== 'Item') continue;
+
+      const metadata = (entity as any).metadata;
+      if (!metadata) continue;
+
+      // Find the item slot in metadata (contains itemId)
+      let droppedName: string | null = null;
+      for (const entry of metadata) {
+        if (entry && typeof entry === 'object' && 'itemId' in entry) {
+          const itemInfo = mcData.items[entry.itemId];
+          if (itemInfo) {
+            droppedName = itemInfo.name;
           }
+          break;
         }
+      }
+
+      if (droppedName !== itemName) continue;
+
+      const dist = this.bot.entity.position.distanceTo(entity.position);
+      if (dist < this.config.maxSearchRadius) {
+        return true;
       }
     }
     return false;

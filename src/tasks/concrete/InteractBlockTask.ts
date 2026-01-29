@@ -98,6 +98,7 @@ export class InteractBlockTask extends Task {
     );
 
     this.lookHelper.startLookingAt(blockCenter);
+    this.lookHelper.tick();
     this.state = InteractState.INTERACTING;
     this.interactTimer.reset();
     return null;

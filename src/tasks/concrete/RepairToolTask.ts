@@ -298,6 +298,7 @@ export class RepairToolTask extends Task {
     const dist = this.bot.entity.position.distanceTo(mob.position);
     if (dist <= 3.5) {
       this.lookHelper.startLookingAt(mob.position.offset(0, mob.height / 2, 0));
+      this.lookHelper.tick();
       this.bot.attack(mob);
     } else {
       return new FollowEntityTask(this.bot, mob.id, 2);

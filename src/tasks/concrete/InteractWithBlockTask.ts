@@ -370,6 +370,7 @@ export class InteractWithBlockTask extends Task {
 
     // Look at block
     this.lookHelper.startLookingAt(targetVec);
+    this.lookHelper.tick();
 
     // Check if looking at block
     if (!this.isLookingAtTarget()) {

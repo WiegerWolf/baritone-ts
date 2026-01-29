@@ -26,9 +26,13 @@ export class PickupItemTask extends Task {
   private state: PickupState = PickupState.SEARCHING;
   private targetEntity: Entity | null = null;
   private waitTimer: TimerGame;
+  private timeoutTimer: TimerGame;
   private pickupRadius: number = 2.0;
   private searchRadius: number = 32;
   private initialCount: number = 0;
+  private searchAttempts: number = 0;
+  private static readonly MAX_SEARCH_ATTEMPTS = 3;
+  private static readonly PICKUP_TIMEOUT_SECONDS = 15;
 
   constructor(bot: Bot, items: string | string[] | ItemTarget, count: number = 1) {
     super(bot);
@@ -38,6 +42,7 @@ export class PickupItemTask extends Task {
       this.itemTarget = new ItemTarget(Array.isArray(items) ? items : [items], count);
     }
     this.waitTimer = new TimerGame(bot, 1.0);
+    this.timeoutTimer = new TimerGame(bot, PickupItemTask.PICKUP_TIMEOUT_SECONDS);
   }
 
   get displayName(): string {
@@ -48,6 +53,8 @@ export class PickupItemTask extends Task {
     this.state = PickupState.SEARCHING;
     this.targetEntity = null;
     this.initialCount = this.getCurrentCount();
+    this.searchAttempts = 0;
+    this.timeoutTimer.reset();
   }
 
   onTick(): Task | null {
@@ -55,6 +62,12 @@ export class PickupItemTask extends Task {
     const pickedUp = this.getCurrentCount() - this.initialCount;
     if (pickedUp >= this.itemTarget.getTargetCount()) {
       this.state = PickupState.FINISHED;
+      return null;
+    }
+
+    // Fail if taking too long (item unreachable / can't be picked up)
+    if (this.timeoutTimer.elapsed()) {
+      this.state = PickupState.FAILED;
       return null;
     }
 
@@ -76,10 +89,15 @@ export class PickupItemTask extends Task {
   private handleSearching(): Task | null {
     this.targetEntity = this.findNearestItemDrop();
     if (!this.targetEntity) {
-      this.state = PickupState.FAILED;
+      this.searchAttempts++;
+      if (this.searchAttempts >= PickupItemTask.MAX_SEARCH_ATTEMPTS) {
+        this.state = PickupState.FAILED;
+      }
+      // Stay in SEARCHING for a retry next tick (up to MAX_SEARCH_ATTEMPTS)
       return null;
     }
 
+    this.searchAttempts = 0;
     this.state = PickupState.GOING_TO_ITEM;
     return null;
   }
