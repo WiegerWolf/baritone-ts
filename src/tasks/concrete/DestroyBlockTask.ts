@@ -262,12 +262,11 @@ export class DestroyBlockTask extends Task {
 
     // Start/continue mining
     if (!this.isMining) {
-      try {
-        this.bot.dig(block, true);
-        this.isMining = true;
-      } catch (err) {
-        // May already be mining or error
-      }
+      this.isMining = true;
+      this.bot.dig(block, true).catch(() => {
+        // Mining failed (block broken, moved away, etc.)
+        this.isMining = false;
+      });
     }
 
     return null;

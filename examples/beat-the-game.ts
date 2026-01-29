@@ -76,6 +76,18 @@ bot.once('spawn', () => {
   runner.start();
 
   console.log('Bot spawned — starting speedrun');
+
+  // Log task chain every 5 seconds for observability
+  let debugTicks = 0;
+  bot.on('physicsTick', () => {
+    debugTicks++;
+    if (debugTicks % 100 === 0) {
+      const chain = runner.getActiveChain();
+      const task = chain?.getCurrentTask();
+      const pos = bot.entity.position;
+      console.log(`[${(debugTicks/20).toFixed(0)}s] (${pos.x.toFixed(1)}, ${pos.y.toFixed(1)}, ${pos.z.toFixed(1)}) ${task?.getTaskChainString() ?? 'idle'}`);
+    }
+  });
 });
 
 // --- Chat commands ---
