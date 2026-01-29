@@ -175,8 +175,6 @@ export class BeatMinecraftTask extends Task {
   private locateStrongholdTask: GoToStrongholdPortalTask;
   private dragonKillTask: KillEnderDragonTask;
   private ranStrongholdLocator: boolean = false;
-  private blockTracker: BlockTracker | null = null;
-
   constructor(bot: Bot, config: Partial<BeatMinecraftConfig> = {}) {
     super(bot);
     this.config = { ...DEFAULT_CONFIG, ...config };
@@ -185,12 +183,10 @@ export class BeatMinecraftTask extends Task {
   }
 
   /**
-   * Set the block tracker for efficient block lookups.
-   * When set, block searches use the tracker's async-scanned cache
-   * instead of brute-force iteration.
+   * Get the block tracker from the pathfinder plugin.
    */
-  setBlockTracker(tracker: BlockTracker): void {
-    this.blockTracker = tracker;
+  private get blockTracker(): BlockTracker | null {
+    return (this.bot as any).pathfinder?.blockTracker ?? null;
   }
 
   get displayName(): string {
@@ -283,8 +279,12 @@ export class BeatMinecraftTask extends Task {
 
     // Get beds before entering nether
     if (this.needsBeds()) {
-      this.state = BeatMinecraftState.GETTING_BEDS;
-      return this.getBedTask();
+      const bedTask = this.getBedTask();
+      if (bedTask) {
+        this.state = BeatMinecraftState.GETTING_BEDS;
+        return bedTask;
+      }
+      // No beds found nearby — fall through to other priorities
     }
 
     // Get food if needed
@@ -295,9 +295,8 @@ export class BeatMinecraftTask extends Task {
 
     // Get basic gear
     if (!this.hasBasicGear()) {
-      this.state = BeatMinecraftState.GETTING_GEAR;
-      // Would return task to get gear
-      return null;
+      // TODO: implement gear acquisition task
+      // For now, fall through to nether to avoid blocking the state machine
     }
 
     // Sleep through night if configured
