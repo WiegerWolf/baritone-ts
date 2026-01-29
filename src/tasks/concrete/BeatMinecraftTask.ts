@@ -423,44 +423,41 @@ export class BeatMinecraftTask extends Task {
   }
 
   /**
-   * Check for end portal in nearby chunks
+   * Check for end portal in nearby chunks.
+   * Uses mineflayer's indexed findBlock/findBlocks instead of brute-force iteration.
    */
   private checkForEndPortal(): void {
-    // Search for end portal or end portal frames
-    const portalBlock = this.findNearbyBlock('end_portal');
+    // Already found it
+    if (this.endPortalCenter) return;
+
+    // Search for active end portal block
+    const portalBlock = this.bot.findBlock({
+      matching: (block: any) => block.name === 'end_portal',
+      maxDistance: 64,
+    });
     if (portalBlock) {
-      this.endPortalCenter = new BlockPos(portalBlock.x, portalBlock.y, portalBlock.z);
+      this.endPortalCenter = new BlockPos(portalBlock.position.x, portalBlock.position.y, portalBlock.position.z);
       return;
     }
 
     // Try to calculate center from frames
-    const frames: Vec3[] = [];
-    const playerPos = this.bot.entity.position;
+    const framePositions = this.bot.findBlocks({
+      matching: (block: any) => block.name === 'end_portal_frame',
+      maxDistance: 64,
+      count: 12,
+    });
 
-    for (let x = -64; x <= 64; x++) {
-      for (let z = -64; z <= 64; z++) {
-        for (let y = -32; y <= 32; y++) {
-          const pos = playerPos.offset(x, y, z);
-          const block = this.bot.blockAt(pos);
-          if (block && block.name === 'end_portal_frame') {
-            frames.push(pos);
-          }
-        }
-      }
-    }
-
-    if (frames.length >= 12) {
-      // Calculate center
+    if (framePositions.length >= 12) {
       let sumX = 0, sumY = 0, sumZ = 0;
-      for (const frame of frames) {
-        sumX += frame.x;
-        sumY += frame.y;
-        sumZ += frame.z;
+      for (const pos of framePositions) {
+        sumX += pos.x;
+        sumY += pos.y;
+        sumZ += pos.z;
       }
       this.endPortalCenter = new BlockPos(
-        Math.floor(sumX / frames.length),
-        Math.floor(sumY / frames.length),
-        Math.floor(sumZ / frames.length)
+        Math.floor(sumX / framePositions.length),
+        Math.floor(sumY / framePositions.length),
+        Math.floor(sumZ / framePositions.length)
       );
     }
   }
@@ -572,24 +569,15 @@ export class BeatMinecraftTask extends Task {
   }
 
   /**
-   * Find nearby block by name
+   * Find nearby block by name.
+   * Uses mineflayer's indexed findBlock instead of brute-force iteration.
    */
   private findNearbyBlock(blockName: string): Vec3 | null {
-    const playerPos = this.bot.entity.position;
-
-    for (let x = -32; x <= 32; x++) {
-      for (let z = -32; z <= 32; z++) {
-        for (let y = -16; y <= 16; y++) {
-          const pos = playerPos.offset(x, y, z);
-          const block = this.bot.blockAt(pos);
-          if (block && block.name.includes(blockName)) {
-            return pos;
-          }
-        }
-      }
-    }
-
-    return null;
+    const result = this.bot.findBlock({
+      matching: (block: any) => block.name.includes(blockName),
+      maxDistance: 32,
+    });
+    return result ? result.position : null;
   }
 
   /**

@@ -34,6 +34,8 @@ import {
 const bot = createBot({
   host: process.env.MC_HOST ?? 'localhost',
   port: Number(process.env.MC_PORT ?? 25565),
+  version: process.env.MC_VERSION ?? '1.21.6',
+  auth: 'offline',
   username: process.env.MC_USER ?? 'SpeedrunBot',
 });
 
