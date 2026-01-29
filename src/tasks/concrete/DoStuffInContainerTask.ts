@@ -12,7 +12,7 @@ import { Vec3 } from 'vec3';
 import { Task } from '../Task';
 import type { ITask } from '../interfaces';
 import { GetToBlockTask } from './GetToBlockTask';
-import { InteractBlockTask } from './InteractTask';
+import { InteractBlockTask } from './InteractBlockTask';
 import { TimerGame } from '../../utils/timers/TimerGame';
 import { BlockPos } from '../../types';
 

@@ -39,13 +39,10 @@ export {
 } from './SmeltTask';
 
 // Inventory tasks
-export {
-  EquipmentSlot,
-  PickupItemTask,
-  EquipTask,
-  DropItemTask,
-  MoveItemTask,
-} from './InventoryTask';
+export { EquipmentSlot, EquipTask } from './EquipTask';
+export { PickupItemTask } from './InventoryPickupItemTask';
+export { DropItemTask } from './DropItemTask';
+export { MoveItemTask } from './MoveItemTask';
 
 // Interaction tasks
 export {

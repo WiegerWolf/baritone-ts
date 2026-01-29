@@ -30,7 +30,7 @@ import { EquipArmorTask, EquipSpecificArmorTask } from './ArmorTask';
 import { PlaceBedAndSetSpawnTask, SleepInBedTask } from './BedTask';
 import { DoToClosestBlockTask } from './BlockSearchTask';
 import { DestroyBlockTask } from './ConstructionTask';
-import { PickupItemTask } from './InventoryTask';
+import { PickupItemTask } from './InventoryPickupItemTask';
 import { KillAndLootTask } from './KillAndLootTask';
 import { Dimension, itemTarget } from './ResourceTask';
 import { InteractWithBlockTask, Direction } from './InteractWithBlockTask';

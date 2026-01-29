@@ -17,7 +17,7 @@ import { DoToClosestEntityTask } from './EntityTask';
 import { GetToYTask } from './GetToYTask';
 import { TimeoutWanderTask } from './TimeoutWanderTask';
 import { GoToBlockTask } from './GoToBlockTask';
-import { EquipTask, EquipmentSlot } from './InventoryTask';
+import { EquipTask, EquipmentSlot } from './EquipTask';
 import { BlockPos } from '../../types';
 import { TimerGame } from '../../utils/timers/TimerGame';
 

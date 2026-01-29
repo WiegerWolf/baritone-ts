@@ -10,7 +10,7 @@ import type { Bot } from 'mineflayer';
 import { Task } from '../Task';
 import type { ITask } from '../interfaces';
 import { CraftTask } from '../concrete/CraftTask';
-import { EquipTask, EquipmentSlot } from '../concrete/InventoryTask';
+import { EquipTask, EquipmentSlot } from '../concrete/EquipTask';
 import { CollectWoodTask } from './CollectWoodTask';
 import { ItemTarget } from '../../utils/ItemTarget';
 import { getRecipe } from '../../crafting/CraftingRecipe';

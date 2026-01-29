@@ -14,7 +14,7 @@ import type { ITask } from '../interfaces';
 import { GetToBlockTask } from '../concrete/GetToBlockTask';
 import { GoToNearTask } from '../concrete/GoToNearTask';
 import { PlaceBlockTask } from '../concrete/PlaceBlockTask';
-import { InteractBlockTask } from '../concrete/InteractTask';
+import { InteractBlockTask } from '../concrete/InteractBlockTask';
 import { TimeoutWanderTask } from '../concrete/TimeoutWanderTask';
 import { TimerGame } from '../../utils/timers/TimerGame';
 

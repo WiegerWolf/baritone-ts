@@ -12,7 +12,7 @@ import { Vec3 } from 'vec3';
 import { Task } from '../Task';
 import type { ITask } from '../interfaces';
 import { GoToNearTask } from '../concrete/GoToNearTask';
-import { EquipTask, EquipmentSlot } from '../concrete/InventoryTask';
+import { EquipTask, EquipmentSlot } from '../concrete/EquipTask';
 import { TimerGame } from '../../utils/timers/TimerGame';
 
 /**

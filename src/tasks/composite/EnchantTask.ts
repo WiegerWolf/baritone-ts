@@ -13,7 +13,7 @@ import { Task } from '../Task';
 import type { ITask } from '../interfaces';
 import { GetToBlockTask } from '../concrete/GetToBlockTask';
 import { GoToNearTask } from '../concrete/GoToNearTask';
-import { InteractBlockTask } from '../concrete/InteractTask';
+import { InteractBlockTask } from '../concrete/InteractBlockTask';
 import { TimerGame } from '../../utils/timers/TimerGame';
 
 /**

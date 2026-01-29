@@ -15,7 +15,7 @@ import type { ITask } from '../interfaces';
 import { ResourceTask, ItemTarget, itemTarget } from './ResourceTask';
 import { GoToNearTask } from './GoToNearTask';
 import { MineBlockTask } from './MineBlockTask';
-import { PickupItemTask } from './InventoryTask';
+import { PickupItemTask } from './InventoryPickupItemTask';
 import { TimeoutWanderTask } from './TimeoutWanderTask';
 import { TimerGame } from '../../utils/timers/TimerGame';
 import { MovementProgressChecker } from '../../utils/progress/MovementProgressChecker';

@@ -22,7 +22,7 @@ import { TimeoutWanderTask } from './TimeoutWanderTask';
 import { KillAndLootTask } from './KillAndLootTask';
 import { DestroyBlockTask } from './ConstructionTask';
 import { DoToClosestBlockTask } from './BlockSearchTask';
-import { PickupItemTask } from './InventoryTask';
+import { PickupItemTask } from './InventoryPickupItemTask';
 import { TimerGame } from '../../utils/timers/TimerGame';
 
 /**

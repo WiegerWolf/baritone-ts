@@ -13,7 +13,7 @@ import { Task } from '../Task';
 import type { ITask } from '../interfaces';
 import { ItemTarget } from '../../utils/ItemTarget';
 import { MineBlockTask, MineBlockTypeTask } from '../concrete/MineBlockTask';
-import { PickupItemTask } from '../concrete/InventoryTask';
+import { PickupItemTask } from '../concrete/InventoryPickupItemTask';
 import { CraftTask } from '../concrete/CraftTask';
 import { GoToNearTask } from '../concrete/GoToNearTask';
 import { CollectWoodTask } from './CollectWoodTask';

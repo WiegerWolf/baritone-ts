@@ -13,7 +13,7 @@ import type { ITask } from '../interfaces';
 import { itemTarget } from './ResourceTask';
 import { TimeoutWanderTask } from './TimeoutWanderTask';
 import { KillAndLootTask } from './KillAndLootTask';
-import { PickupItemTask } from './InventoryTask';
+import { PickupItemTask } from './InventoryPickupItemTask';
 import { GetToBlockTask } from './GetToBlockTask';
 
 /**

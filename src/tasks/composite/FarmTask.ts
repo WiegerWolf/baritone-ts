@@ -13,7 +13,7 @@ import type { ITask } from '../interfaces';
 import { MineBlockTask } from '../concrete/MineBlockTask';
 import { PlaceBlockTask } from '../concrete/PlaceBlockTask';
 import { GoToNearTask } from '../concrete/GoToNearTask';
-import { EquipTask, EquipmentSlot } from '../concrete/InventoryTask';
+import { EquipTask, EquipmentSlot } from '../concrete/EquipTask';
 import { GetToolTask } from './GetToolTask';
 
 /**
