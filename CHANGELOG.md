@@ -1,3 +1,26 @@
+# [2.0.0](https://github.com/WiegerWolf/baritone-ts/compare/v1.0.1...v2.0.0) (2026-01-29)
+
+
+### Bug Fixes
+
+* **build:** update broken import paths after movement/task refactoring ([7b8babc](https://github.com/WiegerWolf/baritone-ts/commit/7b8babc19fde0824150d3e0f783aaf8d7df67680))
+
+
+### Build System
+
+* migrate from Jest to Bun test runner ([d3fae3d](https://github.com/WiegerWolf/baritone-ts/commit/d3fae3d4995d73e67893fc1761ad5b38ecdf650b))
+
+
+### Code Refactoring
+
+* **behavior:** rename Process.ts to lowercase process.ts ([048438c](https://github.com/WiegerWolf/baritone-ts/commit/048438c8624e7cf23da00476bc53c6c26c69493a))
+
+
+### BREAKING CHANGES
+
+* **behavior:** Import paths referencing './Process' must be updated to './process
+* Test files now use Bun's testing API instead of Jest's, which changes test syntax and runner behavior.
+
 ## [1.0.1](https://github.com/WiegerWolf/baritone-ts/compare/v1.0.0...v1.0.1) (2026-01-28)
 
 
