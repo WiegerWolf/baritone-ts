@@ -314,7 +314,7 @@ export class EntityTracker extends Tracker {
     const name = entity.name ?? entity.displayName ?? '';
 
     // Check for item
-    if (entity.objectType === 'item' || name === 'item') {
+    if (name === 'item' || entity.displayName === 'Item') {
       return EntityCategory.ITEM;
     }
 

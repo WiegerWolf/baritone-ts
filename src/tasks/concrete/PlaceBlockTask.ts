@@ -192,6 +192,7 @@ export class PlaceBlockTask extends GroundedTask {
 
     // Use startLookingAt for non-blocking smooth look
     this.lookHelper.startLookingAt(lookTarget);
+    this.lookHelper.tick();
 
     // Place the block
     try {

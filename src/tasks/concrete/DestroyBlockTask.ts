@@ -210,13 +210,19 @@ export class DestroyBlockTask extends Task {
     if (this.config.avoidStandingOn && this.isStandingOnTarget()) {
       // Check if dangerous below
       if (this.isDangerousBelow()) {
-        // Move away first
+        // Move to an adjacent block, not on top of target
+        // Pick the cardinal direction furthest from block center
+        const pos = this.bot.entity.position;
+        const dx = pos.x - (this.target.x + 0.5);
+        const dz = pos.z - (this.target.z + 0.5);
+        const offsetX = Math.abs(dx) >= Math.abs(dz) ? (dx >= 0 ? 2 : -2) : 0;
+        const offsetZ = Math.abs(dz) > Math.abs(dx) ? (dz >= 0 ? 2 : -2) : 0;
         return new GoToNearTask(
           this.bot,
-          this.target.x,
+          this.target.x + offsetX,
           this.target.y + 1,
-          this.target.z,
-          3
+          this.target.z + offsetZ,
+          1
         );
       }
     }
@@ -228,6 +234,7 @@ export class DestroyBlockTask extends Task {
   private handleLookingAtBlock(): Task | null {
     const targetVec = new Vec3(this.target.x + 0.5, this.target.y + 0.5, this.target.z + 0.5);
     this.lookHelper.startLookingAt(targetVec);
+    this.lookHelper.tick();
 
     // Check if looking at the block
     const lookingAt = this.isLookingAtTarget();
@@ -249,6 +256,7 @@ export class DestroyBlockTask extends Task {
     // Make sure we're still looking at it
     const targetVec = new Vec3(this.target.x + 0.5, this.target.y + 0.5, this.target.z + 0.5);
     this.lookHelper.startLookingAt(targetVec);
+    this.lookHelper.tick();
 
     if (!this.isLookingAtTarget()) {
       this.state = DestroyState.LOOKING_AT_BLOCK;
@@ -262,12 +270,11 @@ export class DestroyBlockTask extends Task {
 
     // Start/continue mining
     if (!this.isMining) {
-      try {
-        this.bot.dig(block, true);
-        this.isMining = true;
-      } catch (err) {
-        // May already be mining or error
-      }
+      this.isMining = true;
+      this.bot.dig(block, true).catch(() => {
+        // Mining failed (block broken, moved away, etc.)
+        this.isMining = false;
+      });
     }
 
     return null;
@@ -352,7 +359,21 @@ export class DestroyBlockTask extends Task {
     if (!below) return true; // Unknown = dangerous
 
     const dangerous = ['lava', 'fire', 'magma', 'cactus'];
-    return dangerous.some(d => below.name.includes(d)) || below.name === 'air';
+    if (dangerous.some(d => below.name.includes(d))) return true;
+
+    // Air below: only dangerous if fall > 3 blocks (would cause damage)
+    if (below.name === 'air' || below.name === 'cave_air' || below.name === 'void_air') {
+      for (let y = this.target.y - 2; y >= this.target.y - 4; y--) {
+        const block = this.bot.blockAt(new Vec3(this.target.x, y, this.target.z));
+        if (!block) return true; // Unknown = dangerous
+        if (block.name !== 'air' && block.name !== 'cave_air' && block.name !== 'void_air') {
+          return false; // Solid ground within 3 blocks — safe short fall
+        }
+      }
+      return true; // 4+ block fall — dangerous
+    }
+
+    return false;
   }
 
   private isLookingAtTarget(): boolean {

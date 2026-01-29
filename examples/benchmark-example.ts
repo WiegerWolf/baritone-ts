@@ -76,7 +76,7 @@ function benchmarkBinaryHeap() {
       for (let i = 0; i < 100; i++) {
         const node = testNodes[i];
         node.combinedCost = Math.random() * 100;
-        heap.decreaseKey(node);
+        heap.update(node);
       }
     });
 
@@ -121,7 +121,7 @@ function benchmarkBlockPos() {
       const pos1 = new BlockPos(0, 64, 0);
       const pos2 = new BlockPos(100, 80, 100);
       for (let i = 0; i < 1000; i++) {
-        pos1.manhattanDistance(pos2);
+        Math.abs(pos1.x - pos2.x) + Math.abs(pos1.y - pos2.y) + Math.abs(pos1.z - pos2.z);
       }
     });
 
@@ -145,8 +145,8 @@ function benchmarkHashLookup() {
       const pos = new BlockPos(x, 64, z);
       positions.push(pos);
       const node = new PathNode(x, 64, z, 0);
-      map.set(pos.hash, node);
-      set.add(pos.hash);
+      map.set(pos.hashString, node);
+      set.add(pos.hashString);
     }
   }
 
@@ -154,26 +154,26 @@ function benchmarkHashLookup() {
     .add('Map.get', () => {
       for (let i = 0; i < 1000; i++) {
         const pos = positions[i % positions.length];
-        map.get(pos.hash);
+        map.get(pos.hashString);
       }
     })
     .add('Map.has', () => {
       for (let i = 0; i < 1000; i++) {
         const pos = positions[i % positions.length];
-        map.has(pos.hash);
+        map.has(pos.hashString);
       }
     })
     .add('Set.has', () => {
       for (let i = 0; i < 1000; i++) {
         const pos = positions[i % positions.length];
-        set.has(pos.hash);
+        set.has(pos.hashString);
       }
     })
     .add('Map.set', () => {
       const testMap = new Map<string, number>();
       for (let i = 0; i < 1000; i++) {
         const pos = positions[i % positions.length];
-        testMap.set(pos.hash, i);
+        testMap.set(pos.hashString, i);
       }
     });
 

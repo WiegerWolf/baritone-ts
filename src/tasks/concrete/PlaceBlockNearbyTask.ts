@@ -184,6 +184,7 @@ export class PlaceBlockNearbyTask extends Task {
       placeAgainst.block.position.z + 0.5 + placeAgainst.face.z * 0.5
     );
     this.lookHelper.startLookingAt(targetVec);
+    this.lookHelper.tick();
 
     this.state = PlaceNearbyState.PLACING;
     this.placeTimer.reset();

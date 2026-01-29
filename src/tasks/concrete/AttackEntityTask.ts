@@ -58,6 +58,7 @@ export class AttackEntityTask extends Task {
     // Look at entity
     const eyePos = entity.position.offset(0, entity.height * 0.8, 0);
     this.lookHelper.startLookingAt(eyePos);
+    this.lookHelper.tick();
 
     // Attack if cooldown elapsed
     if (this.attackTimer.elapsed()) {

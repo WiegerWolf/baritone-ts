@@ -1,6 +1,9 @@
 /**
  * GoToTask - Abstract base for navigation tasks
  *
+ * Delegates pathfinding to the bot's pathfinder plugin (bot.pathfinder)
+ * which handles A* computation, path execution, and movement control.
+ *
  * Subclasses are in their own files:
  * - GoToBlockTask.ts
  * - GetToBlockTask.ts
@@ -13,21 +16,21 @@ import type { Bot } from 'mineflayer';
 import { Task, GroundedTask } from '../Task';
 import type { ITask } from '../interfaces';
 import { Goal, PathNode } from '../../types';
-import { AStar } from '../../pathing/AStar';
-import { PathExecutor } from '../../pathing/PathExecutor';
-import { CalculationContextImpl } from '../../core/CalculationContext';
 
 /**
- * Base task for all navigation tasks
+ * Base task for all navigation tasks.
+ *
+ * Uses the bot's pathfinder plugin (set up via pathfinder(bot, options))
+ * rather than creating its own A* instance. This ensures the pathfinder
+ * settings (canDig, canPlace, etc.) are consistent and the physics tick
+ * handler drives path execution.
  */
 export abstract class GoToTask extends GroundedTask {
-  protected pathfinder: AStar | null = null;
-  protected pathExecutor: PathExecutor | null = null;
-  protected currentPath: PathNode[] = [];
-  protected pathingTimeout: number = 10000; // 10 seconds
-  protected recalculateInterval: number = 20; // Recalculate every 20 ticks
-  protected ticksSinceRecalc: number = 0;
   protected reachedGoal: boolean = false;
+  private goalSet: boolean = false;
+  /** How often to re-set the goal (ticks). Subclasses can lower for moving targets. */
+  protected recalculateInterval: number = 20;
+  private ticksSinceGoalSet: number = 0;
 
   abstract getGoal(): Goal;
 
@@ -41,9 +44,8 @@ export abstract class GoToTask extends GroundedTask {
 
   onStart(): void {
     this.reachedGoal = false;
-    this.ticksSinceRecalc = this.recalculateInterval; // Force immediate calculation
-    this.currentPath = [];
-    this.pathExecutor = null;
+    this.goalSet = false;
+    this.ticksSinceGoalSet = 0;
   }
 
   onTick(): Task | null {
@@ -53,92 +55,63 @@ export abstract class GoToTask extends GroundedTask {
 
     if (goal.isEnd(Math.floor(pos.x), Math.floor(pos.y), Math.floor(pos.z))) {
       this.reachedGoal = true;
-      this.bot.clearControlStates();
+      this.stopPathfinder();
       return null;
     }
 
-    // Check if we need to recalculate path
-    this.ticksSinceRecalc++;
-    if (this.ticksSinceRecalc >= this.recalculateInterval || this.currentPath.length === 0) {
-      this.calculatePath();
-      this.ticksSinceRecalc = 0;
-    }
-
-    // Execute current path
-    if (this.pathExecutor) {
-      const complete = this.pathExecutor.onTick();
-
-      // Handle path completion or failure
-      if (complete) {
-        this.pathExecutor = null;
-        this.currentPath = [];
-        // Will recalculate next tick
+    // Set/update the goal on the pathfinder plugin
+    const pf = (this.bot as any).pathfinder;
+    if (pf) {
+      this.ticksSinceGoalSet++;
+      if (!this.goalSet || this.ticksSinceGoalSet >= this.recalculateInterval) {
+        pf.setGoal(goal, true); // dynamic=true so it continuously recalculates
+        this.goalSet = true;
+        this.ticksSinceGoalSet = 0;
       }
     }
 
-    return null; // No subtask needed
+    return null; // No subtask needed — pathfinder plugin drives movement
   }
 
   onStop(interruptTask: ITask | null): void {
-    this.bot.clearControlStates();
-    this.pathfinder = null;
-    this.pathExecutor = null;
-    this.currentPath = [];
+    this.stopPathfinder();
   }
 
   isFinished(): boolean {
     return this.reachedGoal;
   }
 
-  /**
-   * Calculate path to goal
-   */
-  protected calculatePath(): void {
-    const pos = this.bot.entity.position;
-    const goal = this.getGoal();
-
-    // Create calculation context
-    const ctx = new CalculationContextImpl(this.bot);
-
-    // Create pathfinder
-    this.pathfinder = new AStar(
-      Math.floor(pos.x),
-      Math.floor(pos.y),
-      Math.floor(pos.z),
-      goal,
-      ctx,
-      this.pathingTimeout,
-      this.pathingTimeout / 2
-    );
-
-    // Compute path synchronously (TODO: make async)
-    const result = this.pathfinder.compute(100); // 100ms computation time
-
-    if (result.path.length > 0) {
-      this.currentPath = result.path;
-      this.pathExecutor = new PathExecutor(this.bot, ctx, result.path);
+  private stopPathfinder(): void {
+    const pf = (this.bot as any).pathfinder;
+    if (pf && this.goalSet) {
+      pf.stop();
+      this.goalSet = false;
     }
+    this.bot.clearControlStates();
   }
 
   /**
    * Check if currently pathing
    */
   isPathing(): boolean {
-    return this.pathExecutor !== null && this.currentPath.length > 0;
+    const pf = (this.bot as any).pathfinder;
+    return pf?.isMoving() ?? false;
   }
 
   /**
    * Get remaining distance estimate
    */
   getRemainingDistance(): number {
-    if (this.currentPath.length === 0) return Infinity;
-    const last = this.currentPath[this.currentPath.length - 1];
     const pos = this.bot.entity.position;
-    return Math.sqrt(
-      Math.pow(last.x - pos.x, 2) +
-      Math.pow(last.y - pos.y, 2) +
-      Math.pow(last.z - pos.z, 2)
-    );
+    const goal = this.getGoal();
+    if ('x' in goal && 'y' in goal && 'z' in goal) {
+      const g = goal as any;
+      return Math.sqrt(
+        Math.pow(g.x - pos.x, 2) +
+        Math.pow(g.y - pos.y, 2) +
+        Math.pow(g.z - pos.z, 2)
+      );
+    }
+    return Infinity;
   }
 }
-

@@ -235,36 +235,40 @@ export class DoToClosestBlockTask extends Task {
       ? this.config.originSupplier()
       : this.bot.entity.position;
 
+    // Use mineflayer's indexed findBlock instead of brute-force nested loops
+    const positions = this.bot.findBlocks({
+      matching: (block: any) => {
+        if (!this.config.blockTypes.some(name =>
+          block.name === name || block.name.includes(name)
+        )) {
+          return false;
+        }
+        if (this.config.blockFilter && !this.config.blockFilter(block)) {
+          return false;
+        }
+        return true;
+      },
+      maxDistance: this.config.searchRadius,
+      count: 64,
+      point: origin,
+    });
+
+    // Find nearest non-blacklisted position
     let nearest: Block | null = null;
     let nearestDist = Infinity;
 
-    for (let r = 1; r <= this.config.searchRadius; r++) {
-      for (let x = -r; x <= r; x++) {
-        for (let y = -Math.min(r, 32); y <= Math.min(r, 32); y++) {
-          for (let z = -r; z <= r; z++) {
-            if (Math.abs(x) !== r && Math.abs(y) !== r && Math.abs(z) !== r) continue;
+    for (const pos of positions) {
+      const vec = new Vec3(pos.x, pos.y, pos.z);
+      if (this.isBlacklisted(vec)) continue;
 
-            const checkPos = new Vec3(
-              Math.floor(origin.x) + x,
-              Math.floor(origin.y) + y,
-              Math.floor(origin.z) + z
-            );
-
-            if (this.isBlacklisted(checkPos)) continue;
-
-            const block = this.bot.blockAt(checkPos);
-            if (block && this.isValidBlock(block)) {
-              const dist = origin.distanceTo(checkPos);
-              if (dist < nearestDist) {
-                nearestDist = dist;
-                nearest = block;
-              }
-            }
-          }
+      const dist = origin.distanceTo(vec);
+      if (dist < nearestDist) {
+        const block = this.bot.blockAt(vec);
+        if (block) {
+          nearestDist = dist;
+          nearest = block;
         }
       }
-
-      if (nearest) break;
     }
 
     return nearest;

@@ -180,7 +180,7 @@ export abstract class ResourceTask extends Task {
         const dropped: Entity[] = [];
 
         for (const entity of Object.values(this.bot.entities)) {
-            if (entity.type !== 'object' || entity.objectType !== 'item') continue;
+            if (entity.type !== 'object' || entity.name !== 'item') continue;
 
             // Get item metadata
             const metadata = entity.metadata;

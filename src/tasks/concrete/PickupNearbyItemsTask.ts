@@ -46,7 +46,7 @@ export class PickupNearbyItemsTask extends Task {
 
     for (const entity of Object.values(this.bot.entities)) {
       if (!entity) continue;
-      if (entity.name !== 'item' && (entity as any).objectType !== 'Item') continue;
+      if (entity.name !== 'item' && (entity as any).displayName !== 'Item') continue;
       if (entity.isValid === false) continue;
 
       const dist = playerPos.distanceTo(entity.position);

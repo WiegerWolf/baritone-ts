@@ -229,6 +229,7 @@ export class ShearSheepTask extends Task {
 
     // Look at the sheep
     this.lookHelper.startLookingAt(this.targetSheep.position.offset(0, 0.5, 0));
+    this.lookHelper.tick();
 
     if (!this.cooldown.elapsed()) {
       return null;

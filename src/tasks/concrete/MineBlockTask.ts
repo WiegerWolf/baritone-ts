@@ -156,6 +156,7 @@ export class MineBlockTask extends GroundedTask {
     );
     // Use startLookingAt for non-blocking smooth look
     this.lookHelper.startLookingAt(blockCenter);
+    this.lookHelper.tick();
 
     // Start/continue digging
     try {

@@ -29,7 +29,7 @@ Welcome to the Baritone-TS documentation! This guide will help you get started w
 ### Reference
 - [API Reference](./api-reference.md) - Complete API documentation
 - [Events](./events.md) - Event system reference
-- [Examples](./examples.md) - Code examples and recipes
+- [Examples](../examples/README.md) - Code examples and recipes
 
 ## Quick Links
 

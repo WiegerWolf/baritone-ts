@@ -89,6 +89,7 @@ export class InteractEntityTask extends Task {
 
   private handleLooking(entity: Entity): Task | null {
     this.lookHelper.startLookingAt(entity.position.offset(0, entity.height / 2, 0));
+    this.lookHelper.tick();
     this.state = InteractState.INTERACTING;
     this.interactTimer.reset();
     return null;

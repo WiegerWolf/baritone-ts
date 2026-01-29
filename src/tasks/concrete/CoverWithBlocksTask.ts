@@ -159,20 +159,12 @@ export class CoverWithBlocksTask extends Task {
    * Find a block type we can collect
    */
   private findCollectableBlock(): string | null {
-    const playerPos = this.bot.entity.position;
-
-    for (let x = -16; x <= 16; x++) {
-      for (let z = -16; z <= 16; z++) {
-        for (let y = -8; y <= 8; y++) {
-          const block = this.bot.blockAt(playerPos.offset(x, y, z));
-          if (block && THROWAWAY_BLOCKS.includes(block.name)) {
-            return block.name;
-          }
-        }
-      }
-    }
-
-    return null;
+    // Use mineflayer's indexed findBlock instead of brute-force nested loops
+    const result = this.bot.findBlock({
+      matching: (block: any) => THROWAWAY_BLOCKS.includes(block.name),
+      maxDistance: 16,
+    });
+    return result?.name ?? null;
   }
 
   /**
@@ -191,30 +183,28 @@ export class CoverWithBlocksTask extends Task {
    * Find lava source to cover
    */
   private findLavaToCover(): BlockPos | null {
+    // Use mineflayer's indexed findBlocks instead of brute-force nested loops
+    const positions = this.bot.findBlocks({
+      matching: (block: any) => block.name === 'lava',
+      maxDistance: 32,
+      count: 64,
+    });
+
     const playerPos = this.bot.entity.position;
     let nearest: BlockPos | null = null;
     let nearestDist = Infinity;
 
-    for (let x = -32; x <= 32; x++) {
-      for (let z = -32; z <= 32; z++) {
-        for (let y = -8; y <= 8; y++) {
-          const pos = playerPos.offset(x, y, z);
-          const block = this.bot.blockAt(pos);
-
-          if (block && block.name === 'lava') {
-            // Check if it's a valid lava to cover
-            if (this.isValidLavaToCover(pos)) {
-              const dist = playerPos.distanceTo(pos);
-              if (dist < nearestDist) {
-                nearestDist = dist;
-                nearest = new BlockPos(
-                  Math.floor(pos.x),
-                  Math.floor(pos.y),
-                  Math.floor(pos.z)
-                );
-              }
-            }
-          }
+    for (const pos of positions) {
+      const vec = new Vec3(pos.x, pos.y, pos.z);
+      if (this.isValidLavaToCover(vec)) {
+        const dist = playerPos.distanceTo(vec);
+        if (dist < nearestDist) {
+          nearestDist = dist;
+          nearest = new BlockPos(
+            Math.floor(pos.x),
+            Math.floor(pos.y),
+            Math.floor(pos.z)
+          );
         }
       }
     }

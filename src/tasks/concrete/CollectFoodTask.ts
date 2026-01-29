@@ -250,7 +250,8 @@ export class CollectFoodTask extends Task {
 
     // 5. Nothing found - wander and search
     this.state = FoodCollectionState.SEARCHING;
-    return new TimeoutWanderTask(this.bot);
+    this.currentSubtask = new TimeoutWanderTask(this.bot);
+    return this.currentSubtask;
   }
 
   /**
@@ -372,17 +373,30 @@ export class CollectFoodTask extends Task {
    * Check if item is dropped nearby
    */
   private findNearbyDroppedItem(itemName: string): boolean {
+    const mcData = require('minecraft-data')(this.bot.version);
     for (const entity of Object.values(this.bot.entities)) {
-      if (entity.name === 'item' || entity.objectType === 'Item') {
-        const itemEntity = entity as any;
-        if (itemEntity.metadata?.[8]?.itemId) {
-          // Check item type
-          const dist = this.bot.entity.position.distanceTo(entity.position);
-          if (dist < this.config.maxSearchRadius) {
-            // Would need to check actual item name from metadata
-            return true;
+      if (entity.name !== 'item' && entity.displayName !== 'Item') continue;
+
+      const metadata = (entity as any).metadata;
+      if (!metadata) continue;
+
+      // Find the item slot in metadata (contains itemId)
+      let droppedName: string | null = null;
+      for (const entry of metadata) {
+        if (entry && typeof entry === 'object' && 'itemId' in entry) {
+          const itemInfo = mcData.items[entry.itemId];
+          if (itemInfo) {
+            droppedName = itemInfo.name;
           }
+          break;
         }
+      }
+
+      if (droppedName !== itemName) continue;
+
+      const dist = this.bot.entity.position.distanceTo(entity.position);
+      if (dist < this.config.maxSearchRadius) {
+        return true;
       }
     }
     return false;
@@ -458,40 +472,15 @@ export class CollectFoodTask extends Task {
   }
 
   /**
-   * Find nearest harvestable crop
+   * Find nearest harvestable crop.
+   * Uses mineflayer's indexed findBlock instead of brute-force iteration.
    */
   private findNearestCropBlock(blockType: string): Vec3 | null {
-    const playerPos = this.bot.entity.position;
-    const radius = this.config.maxSearchRadius;
-
-    let nearest: Vec3 | null = null;
-    let nearestDist = Infinity;
-
-    for (let x = -radius; x <= radius; x += 4) {
-      for (let z = -radius; z <= radius; z += 4) {
-        for (let y = -10; y <= 10; y++) {
-          for (let dx = 0; dx < 4; dx++) {
-            for (let dz = 0; dz < 4; dz++) {
-              const pos = playerPos.offset(x + dx, y, z + dz);
-              const block = this.bot.blockAt(pos);
-
-              if (block && block.name.includes(blockType)) {
-                // Check if crop is mature (for wheat, etc.)
-                if (this.isCropMature(block)) {
-                  const dist = playerPos.distanceTo(pos);
-                  if (dist < nearestDist) {
-                    nearestDist = dist;
-                    nearest = pos;
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-
-    return nearest;
+    const result = this.bot.findBlock({
+      matching: (block: any) => block.name.includes(blockType) && this.isCropMature(block),
+      maxDistance: this.config.maxSearchRadius,
+    });
+    return result ? result.position : null;
   }
 
   /**

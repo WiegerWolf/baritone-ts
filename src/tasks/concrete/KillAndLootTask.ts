@@ -257,7 +257,7 @@ export class KillAndLootTask extends ResourceTask {
 
       // Check if it's an item entity
       const itemEntity = entity as any;
-      if (itemEntity.objectType !== 'Item' && itemEntity.entityType !== 'item') continue;
+      if (itemEntity.displayName !== 'Item' && itemEntity.name !== 'item') continue;
 
       // Check distance
       const dist = playerPos.distanceTo(entity.position);

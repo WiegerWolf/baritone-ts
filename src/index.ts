@@ -6,6 +6,8 @@ import { CalculationContextImpl, ContextOptions } from './core/CalculationContex
 import { AStar } from './pathing/AStar';
 import { PathExecutor } from './pathing/PathExecutor';
 import { Favoring, buildFavoring, createAvoidances } from './pathing/Favoring';
+import { BlockTracker } from './trackers/BlockTracker';
+import { TrackerManager } from './trackers/TrackerManager';
 
 // Re-export types and classes (excluding COST_INF to avoid conflict with ActionCosts)
 export {
@@ -198,6 +200,10 @@ export interface BaritonePathfinder {
   // Settings
   readonly ctx: CalculationContextImpl;
 
+  // Trackers
+  readonly blockTracker: BlockTracker;
+  readonly trackerManager: TrackerManager;
+
   // Pathfinding
   setGoal(goal: Goal | null, dynamic?: boolean): void;
   getGoal(): Goal | null;
@@ -240,6 +246,12 @@ interface PathfinderState {
 export function pathfinder(bot: Bot, options: ContextOptions = {}): void {
   // Create calculation context
   const ctx = new CalculationContextImpl(bot, options);
+
+  // Create tracker manager and block tracker
+  const trackerManager = new TrackerManager(bot);
+  const blockTracker = new BlockTracker(bot);
+  trackerManager.register(blockTracker);
+  trackerManager.start();
 
   // Plugin state
   const state: PathfinderState = {
@@ -368,6 +380,9 @@ export function pathfinder(bot: Bot, options: ContextOptions = {}): void {
    * Physics tick handler
    */
   function onPhysicsTick(): void {
+    // Tick trackers (marks dirty + advances async scans)
+    trackerManager.tick();
+
     // No goal, nothing to do
     if (!state.goal) return;
 
@@ -441,6 +456,8 @@ export function pathfinder(bot: Bot, options: ContextOptions = {}): void {
   // Expose pathfinder API
   (bot as any).pathfinder = {
     ctx,
+    blockTracker,
+    trackerManager,
     setGoal,
     getGoal,
     getPathTo,
@@ -507,6 +524,12 @@ export {
   getSmeltingRecipe,
   type TaskProvider,
   type SmeltingRecipe,
+  // Concrete tasks
+  CraftTask,
+  // Composite tasks
+  CollectWoodTask,
+  MineOresTask,
+  type MineOreConfig,
 } from './tasks';
 
 // ---- Tracker System ----
@@ -543,7 +566,19 @@ export {
   type MLGBucketConfig,
   MobDefenseChain,
   type MobDefenseConfig,
+  DeathMenuChain,
+  type DeathMenuConfig,
 } from './chains';
+
+// ---- Beat Minecraft ----
+export {
+  BeatMinecraftTask,
+  beatMinecraft,
+  speedrunMinecraft,
+  BeatMinecraftState,
+  BEAT_MINECRAFT_DEFAULT_CONFIG,
+  type BeatMinecraftConfig,
+} from './tasks';
 
 // ---- Event System ----
 export {

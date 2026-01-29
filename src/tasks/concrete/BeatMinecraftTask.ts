@@ -18,6 +18,7 @@ import { Task } from '../Task';
 import type { ITask } from '../interfaces';
 import { BlockPos } from '../../types';
 import { TimerGame } from '../../utils/timers/TimerGame';
+import { BlockTracker } from '../../trackers/BlockTracker';
 
 // Import subtasks
 import { GoToDimensionTask } from '../composite/PortalTask';
@@ -174,12 +175,18 @@ export class BeatMinecraftTask extends Task {
   private locateStrongholdTask: GoToStrongholdPortalTask;
   private dragonKillTask: KillEnderDragonTask;
   private ranStrongholdLocator: boolean = false;
-
   constructor(bot: Bot, config: Partial<BeatMinecraftConfig> = {}) {
     super(bot);
     this.config = { ...DEFAULT_CONFIG, ...config };
     this.locateStrongholdTask = new GoToStrongholdPortalTask(bot, this.config.targetEyes);
     this.dragonKillTask = new KillEnderDragonTask(bot);
+  }
+
+  /**
+   * Get the block tracker from the pathfinder plugin.
+   */
+  private get blockTracker(): BlockTracker | null {
+    return (this.bot as any).pathfinder?.blockTracker ?? null;
   }
 
   get displayName(): string {
@@ -191,6 +198,13 @@ export class BeatMinecraftTask extends Task {
     this.endPortalCenter = null;
     this.bedSpawnLocation = null;
     this.ranStrongholdLocator = false;
+
+    // Register block types we need to find with the tracker
+    if (this.blockTracker) {
+      this.blockTracker.trackBlock('end_portal');
+      this.blockTracker.trackBlock('end_portal_frame');
+      this.blockTracker.trackBlock('end_gateway');
+    }
   }
 
   onTick(): Task | null {
@@ -265,8 +279,12 @@ export class BeatMinecraftTask extends Task {
 
     // Get beds before entering nether
     if (this.needsBeds()) {
-      this.state = BeatMinecraftState.GETTING_BEDS;
-      return this.getBedTask();
+      const bedTask = this.getBedTask();
+      if (bedTask) {
+        this.state = BeatMinecraftState.GETTING_BEDS;
+        return bedTask;
+      }
+      // No beds found nearby — fall through to other priorities
     }
 
     // Get food if needed
@@ -277,9 +295,8 @@ export class BeatMinecraftTask extends Task {
 
     // Get basic gear
     if (!this.hasBasicGear()) {
-      this.state = BeatMinecraftState.GETTING_GEAR;
-      // Would return task to get gear
-      return null;
+      // TODO: implement gear acquisition task
+      // For now, fall through to nether to avoid blocking the state machine
     }
 
     // Sleep through night if configured
@@ -423,45 +440,36 @@ export class BeatMinecraftTask extends Task {
   }
 
   /**
-   * Check for end portal in nearby chunks
+   * Check for end portal in nearby chunks.
+   * Uses BlockTracker's async-scanned cache when available.
    */
   private checkForEndPortal(): void {
-    // Search for end portal or end portal frames
-    const portalBlock = this.findNearbyBlock('end_portal');
-    if (portalBlock) {
-      this.endPortalCenter = new BlockPos(portalBlock.x, portalBlock.y, portalBlock.z);
-      return;
-    }
+    if (this.endPortalCenter) return;
 
-    // Try to calculate center from frames
-    const frames: Vec3[] = [];
-    const playerPos = this.bot.entity.position;
+    if (this.blockTracker) {
+      // Use tracker's cached positions (async-scanned, no blocking)
+      const portalPos = this.blockTracker.getNearestBlock('end_portal');
+      if (portalPos) {
+        this.endPortalCenter = new BlockPos(
+          Math.floor(portalPos.x), Math.floor(portalPos.y), Math.floor(portalPos.z)
+        );
+        return;
+      }
 
-    for (let x = -64; x <= 64; x++) {
-      for (let z = -64; z <= 64; z++) {
-        for (let y = -32; y <= 32; y++) {
-          const pos = playerPos.offset(x, y, z);
-          const block = this.bot.blockAt(pos);
-          if (block && block.name === 'end_portal_frame') {
-            frames.push(pos);
-          }
+      const frames = this.blockTracker.getKnownPositions('end_portal_frame', 12);
+      if (frames.length >= 12) {
+        let sumX = 0, sumY = 0, sumZ = 0;
+        for (const pos of frames) {
+          sumX += pos.x;
+          sumY += pos.y;
+          sumZ += pos.z;
         }
+        this.endPortalCenter = new BlockPos(
+          Math.floor(sumX / frames.length),
+          Math.floor(sumY / frames.length),
+          Math.floor(sumZ / frames.length)
+        );
       }
-    }
-
-    if (frames.length >= 12) {
-      // Calculate center
-      let sumX = 0, sumY = 0, sumZ = 0;
-      for (const frame of frames) {
-        sumX += frame.x;
-        sumY += frame.y;
-        sumZ += frame.z;
-      }
-      this.endPortalCenter = new BlockPos(
-        Math.floor(sumX / frames.length),
-        Math.floor(sumY / frames.length),
-        Math.floor(sumZ / frames.length)
-      );
     }
   }
 
@@ -572,24 +580,19 @@ export class BeatMinecraftTask extends Task {
   }
 
   /**
-   * Find nearby block by name
+   * Find nearby block by name.
+   * Uses BlockTracker when available, falls back to mineflayer's findBlock.
    */
   private findNearbyBlock(blockName: string): Vec3 | null {
-    const playerPos = this.bot.entity.position;
-
-    for (let x = -32; x <= 32; x++) {
-      for (let z = -32; z <= 32; z++) {
-        for (let y = -16; y <= 16; y++) {
-          const pos = playerPos.offset(x, y, z);
-          const block = this.bot.blockAt(pos);
-          if (block && block.name.includes(blockName)) {
-            return pos;
-          }
-        }
-      }
+    if (this.blockTracker && this.blockTracker.isTracking(blockName)) {
+      return this.blockTracker.getNearestBlock(blockName);
     }
-
-    return null;
+    // Fallback for block types not registered with the tracker
+    const result = this.bot.findBlock({
+      matching: (block: any) => block.name.includes(blockName),
+      maxDistance: 32,
+    });
+    return result ? result.position : null;
   }
 
   /**
@@ -618,7 +621,12 @@ export class BeatMinecraftTask extends Task {
   }
 
   onStop(interruptTask: ITask | null): void {
-    // Clean up
+    // Unregister tracked block types
+    if (this.blockTracker) {
+      this.blockTracker.stopTracking('end_portal');
+      this.blockTracker.stopTracking('end_portal_frame');
+      this.blockTracker.stopTracking('end_gateway');
+    }
   }
 
   isFinished(): boolean {

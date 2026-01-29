@@ -121,22 +121,23 @@ export class LookHelper {
   }
 
   /**
-   * Look at a position instantly
+   * Look at a position instantly (force=true)
    */
-  async lookAt(target: Vec3): Promise<void> {
-    await this.bot.lookAt(target);
+  lookAt(target: Vec3): void {
+    this.bot.lookAt(target, true);
   }
 
   /**
-   * Look at an entity instantly
+   * Look at an entity instantly (force=true)
    */
-  async lookAtEntity(entity: Entity): Promise<void> {
+  lookAtEntity(entity: Entity): void {
     const targetPos = this.getEntityEyePosition(entity);
-    await this.bot.lookAt(targetPos);
+    this.bot.lookAt(targetPos, true);
   }
 
   /**
-   * Start smoothly looking at a position
+   * Set the look target. Callers must call tick() each game tick
+   * to actually apply and interpolate the rotation.
    */
   startLookingAt(target: Vec3 | Entity): void {
     this.lookingAt = target;
@@ -152,9 +153,10 @@ export class LookHelper {
   }
 
   /**
-   * Update smooth look (call each tick)
+   * Apply rotation toward the current look target (call each game tick).
+   * Uses smooth interpolation when configured.
    */
-  async tick(): Promise<void> {
+  tick(): void {
     if (!this.lookingAt) return;
 
     // Update target rotation
@@ -169,17 +171,17 @@ export class LookHelper {
       ? this.interpolateRotation(current, this.targetRotation)
       : this.targetRotation;
 
-    // Apply rotation
-    await this.setRotation(newRotation);
+    // Apply rotation immediately (force=true)
+    this.setRotation(newRotation);
   }
 
   /**
-   * Set bot rotation directly
+   * Set bot rotation directly (force=true for immediate application)
    */
-  async setRotation(rotation: LookRotation): Promise<void> {
+  setRotation(rotation: LookRotation): void {
     const yawRad = rotation.yaw * (Math.PI / 180);
     const pitchRad = rotation.pitch * (Math.PI / 180);
-    await this.bot.look(yawRad, pitchRad);
+    this.bot.look(yawRad, pitchRad, true);
   }
 
   /**

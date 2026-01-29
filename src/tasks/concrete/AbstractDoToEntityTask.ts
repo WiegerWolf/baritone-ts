@@ -176,6 +176,7 @@ export abstract class AbstractDoToEntityTask extends Task {
     if (dist <= this.config.reachRange) {
       // Look at entity
       this.lookHelper.startLookingAt(entityPos.offset(0, this.targetEntity.height / 2, 0));
+      this.lookHelper.tick();
 
       // Check if looking at entity
       if (this.isLookingAtEntity()) {
@@ -230,6 +231,7 @@ export abstract class AbstractDoToEntityTask extends Task {
     // Now at good distance - try to interact
     if (dist <= this.config.reachRange) {
       this.lookHelper.startLookingAt(entityPos.offset(0, this.targetEntity.height / 2, 0));
+      this.lookHelper.tick();
       this.state = EntityInteractState.INTERACTING;
     } else {
       this.state = EntityInteractState.APPROACHING;

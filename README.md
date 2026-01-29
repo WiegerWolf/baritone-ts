@@ -40,7 +40,7 @@ Baritone-TS is a high-performance pathfinding implementation that brings the adv
 - **[Custom Extensions](./docs/custom-extensions.md)** - Creating custom goals, movements, and tasks
 - **[Debugging](./docs/debugging.md)** - Path visualization and troubleshooting
 - **[API Reference](./docs/api-reference.md)** - Complete API documentation
-- **[Examples](./docs/examples.md)** - Code examples and recipes
+- **[Examples](./examples/README.md)** - Code examples and recipes
 - **[Migration from mineflayer-pathfinder](./docs/migration.md)** - Migration guide
 
 ## Installation
@@ -375,7 +375,7 @@ For comprehensive documentation, see the [docs folder](./docs/README.md):
 - **Automation**: [Processes](./docs/processes.md), [Tasks](./docs/tasks.md), [Survival Chains](./docs/survival-chains.md)
 - **Advanced**: [Async Pathfinding](./docs/async-pathfinding.md), [Special Travel](./docs/special-travel.md), [Trackers](./docs/trackers.md)
 - **Extending**: [Custom Extensions](./docs/custom-extensions.md), [Debugging](./docs/debugging.md)
-- **Reference**: [API Reference](./docs/api-reference.md), [Events](./docs/events.md), [Examples](./docs/examples.md)
+- **Reference**: [API Reference](./docs/api-reference.md), [Events](./docs/events.md), [Examples](./examples/README.md)
 
 Coming from mineflayer-pathfinder? See the [Migration Guide](./docs/migration.md).
 

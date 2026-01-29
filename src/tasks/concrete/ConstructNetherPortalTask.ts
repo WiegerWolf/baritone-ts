@@ -327,27 +327,25 @@ export class ConstructNetherPortalTask extends Task {
    * Find a lava lake nearby
    */
   private findLavaLake(): Vec3 | null {
-    const playerPos = this.bot.entity.position;
     const radius = this.config.lavaSearchRange;
+
+    // Use mineflayer's indexed findBlocks instead of brute-force nested loops
+    const positions = this.bot.findBlocks({
+      matching: (block: any) => block.name === 'lava',
+      maxDistance: radius,
+      count: 128,
+    });
 
     let bestLava: Vec3 | null = null;
     let bestSize = 0;
 
-    for (let x = -radius; x <= radius; x += 8) {
-      for (let z = -radius; z <= radius; z += 8) {
-        for (let y = -20; y <= 10; y++) {
-          const pos = playerPos.offset(x, y, z);
-          const block = this.bot.blockAt(pos);
-
-          if (block && block.name === 'lava') {
-            // Count adjacent lava blocks
-            const size = this.countAdjacentLava(pos);
-            if (size > bestSize && size >= 12) {
-              bestSize = size;
-              bestLava = pos;
-            }
-          }
-        }
+    for (const pos of positions) {
+      const vec = new Vec3(pos.x, pos.y, pos.z);
+      // Count adjacent lava blocks
+      const size = this.countAdjacentLava(vec);
+      if (size > bestSize && size >= 12) {
+        bestSize = size;
+        bestLava = vec;
       }
     }
 

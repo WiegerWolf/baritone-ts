@@ -167,7 +167,6 @@ export class GatherProcess extends BaseProcess {
     // Get all item entities
     for (const entity of Object.values(this.bot.entities)) {
       const isItem = entity.name === 'item' ||
-                     (entity as any).objectType === 'Item' ||
                      (entity as any).displayName === 'Item';
       if (!isItem) {
         continue;

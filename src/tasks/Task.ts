@@ -135,7 +135,9 @@ export abstract class Task implements ITask {
 
     if (newSub !== null) {
       // Check if we need to switch subtasks
-      if (!newSub.isEqual(this.sub)) {
+      // Always replace a finished subtask even if the new one is "equal"
+      const subFinished = this.sub !== null && this.sub.isFinished();
+      if (subFinished || !newSub.isEqual(this.sub)) {
         if (this.canBeInterrupted(this.sub, newSub)) {
           // Stop old subtask
           if (this.sub !== null) {

@@ -131,3 +131,13 @@ export {
   type CombatConfig,
   type SurvivalGoals,
 } from './composite';
+
+// Beat Minecraft task
+export {
+  BeatMinecraftTask,
+  beatMinecraft,
+  speedrunMinecraft,
+  BeatMinecraftState,
+  BEAT_MINECRAFT_DEFAULT_CONFIG,
+  type BeatMinecraftConfig,
+} from './concrete';
