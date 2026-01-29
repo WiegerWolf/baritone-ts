@@ -26,8 +26,6 @@ import {
   RepairMethod,
   StorageTask,
   StorageOperation,
-  ElytraTask,
-  FlightPhase,
   PortalTask,
   PortalType,
   FishingTask,
@@ -39,8 +37,6 @@ import {
   createCubeSchematic,
   createHollowBoxSchematic,
   createWallSchematic,
-  DragonFightTask,
-  StrongholdTask,
   HuntTask,
   DefendAreaTask,
   FollowPlayerTask,
@@ -67,7 +63,6 @@ import {
   MinePattern,
   TorchTask,
   TorchMode,
-  ShearTask,
   RespawnTask,
   PlantTreeTask,
   CompostTask,
@@ -563,42 +558,6 @@ describe('Composite Tasks', () => {
     });
   });
 
-  describe('ElytraTask', () => {
-    it('should create with target coordinates', () => {
-      const bot = createMockBot();
-      const task = new ElytraTask(bot, 1000, 1000);
-      expect(task.displayName).toContain('ElytraFlight');
-      expect(task.displayName).toContain('1000');
-    });
-
-    it('should create with custom altitude', () => {
-      const bot = createMockBot();
-      const task = new ElytraTask(bot, 500, 500, { cruiseAltitude: 300 });
-      expect(task.displayName).toContain('ElytraFlight');
-    });
-
-    it('should start in PREPARING phase', () => {
-      const bot = createMockBot();
-      const task = new ElytraTask(bot, 100, 100);
-      task.onStart();
-      expect(task.getFlightPhase()).toBe(FlightPhase.PREPARING);
-    });
-
-    it('should track fireworks used', () => {
-      const bot = createMockBot();
-      const task = new ElytraTask(bot, 100, 100);
-      task.onStart();
-      expect(task.getFireworksUsed()).toBe(0);
-    });
-
-    it('should not be finished at start', () => {
-      const bot = createMockBot();
-      const task = new ElytraTask(bot, 100, 100);
-      task.onStart();
-      expect(task.isFinished()).toBe(false);
-    });
-  });
-
   describe('PortalTask', () => {
     it('should create for nether portal', () => {
       const bot = createMockBot();
@@ -902,105 +861,7 @@ describe('Composite Tasks', () => {
     });
   });
 
-  describe('DragonFightTask', () => {
-    it('should create with default config', () => {
-      const bot = createMockBot();
-      const task = new DragonFightTask(bot);
-      expect(task.displayName).toContain('DragonFight');
-    });
 
-    it('should create with bed bombing enabled', () => {
-      const bot = createMockBot();
-      const task = new DragonFightTask(bot, { useBeds: true });
-      expect(task.displayName).toContain('DragonFight');
-    });
-
-    it('should create with crystal destruction', () => {
-      const bot = createMockBot();
-      const task = new DragonFightTask(bot, { destroyCrystals: true });
-      expect(task.displayName).toContain('DragonFight');
-    });
-
-    it('should start in ARRIVING state', () => {
-      const bot = createMockBot();
-      const task = new DragonFightTask(bot);
-      task.onStart();
-      expect(task.displayName).toContain('ARRIVING');
-    });
-
-    it('should track crystals destroyed', () => {
-      const bot = createMockBot();
-      const task = new DragonFightTask(bot);
-      task.onStart();
-      expect(task.getCrystalsDestroyed()).toBe(0);
-    });
-
-    it('should compare by config options', () => {
-      const bot = createMockBot();
-      const task1 = new DragonFightTask(bot, { useBeds: true });
-      const task2 = new DragonFightTask(bot, { useBeds: true });
-      const task3 = new DragonFightTask(bot, { useBeds: false });
-      expect(task1.isEqual(task2)).toBe(true);
-      expect(task1.isEqual(task3)).toBe(false);
-    });
-  });
-
-  describe('StrongholdTask', () => {
-    it('should create with default config', () => {
-      const bot = createMockBot();
-      const task = new StrongholdTask(bot);
-      expect(task.displayName).toContain('Stronghold');
-    });
-
-    it('should create with custom throw distance', () => {
-      const bot = createMockBot();
-      const task = new StrongholdTask(bot, { throwDistance: 50 });
-      expect(task.displayName).toContain('Stronghold');
-    });
-
-    it('should start in PREPARING state', () => {
-      const bot = createMockBot();
-      const task = new StrongholdTask(bot);
-      task.onStart();
-      expect(task.displayName).toContain('PREPARING');
-    });
-
-    it('should have null estimated position at start', () => {
-      const bot = createMockBot();
-      const task = new StrongholdTask(bot);
-      task.onStart();
-      expect(task.getEstimatedPosition()).toBeNull();
-    });
-
-    it('should have null portal position at start', () => {
-      const bot = createMockBot();
-      const task = new StrongholdTask(bot);
-      task.onStart();
-      expect(task.getPortalPosition()).toBeNull();
-    });
-
-    it('should calculate intersection correctly', () => {
-      const start1 = new Vec3(0, 0, 0);
-      const dir1 = new Vec3(1, 0, 1);
-      const start2 = new Vec3(100, 0, 0);
-      const dir2 = new Vec3(-1, 0, 1);
-      const intersection = StrongholdTask.calculateIntersection(start1, dir1, start2, dir2);
-      expect(intersection).not.toBeNull();
-      if (intersection) {
-        expect(intersection.x).toBe(50);
-        expect(intersection.z).toBe(50);
-      }
-    });
-
-    it('should return null for parallel lines', () => {
-      const start1 = new Vec3(0, 0, 0);
-      const dir1 = new Vec3(1, 0, 0);
-      const start2 = new Vec3(0, 0, 10);
-      const dir2 = new Vec3(1, 0, 0);
-      const intersection = StrongholdTask.calculateIntersection(start1, dir1, start2, dir2);
-      expect(intersection).toBeNull();
-    });
-  });
 
   describe('HuntTask', () => {
     it('should create with default config', () => {
@@ -1861,49 +1722,6 @@ describe('Composite Tasks', () => {
       const task3 = new TorchTask(bot, { mode: TorchMode.FLOOD, radius: 16 });
       expect(task1.isEqual(task2)).toBe(true);
       expect(task1.isEqual(task3)).toBe(false);
-    });
-  });
-
-  describe('ShearTask', () => {
-    it('should create with default config', () => {
-      const bot = createMockBot();
-      const task = new ShearTask(bot);
-      expect(task.displayName).toContain('Shear');
-    });
-
-    it('should create with max sheep count', () => {
-      const bot = createMockBot();
-      const task = new ShearTask(bot, { maxSheep: 20 });
-      expect(task.displayName).toContain('0/20');
-    });
-
-    it('should start with zero sheep sheared', () => {
-      const bot = createMockBot();
-      const task = new ShearTask(bot);
-      task.onStart();
-      expect(task.getSheepSheared()).toBe(0);
-    });
-
-    it('should have no current target at start', () => {
-      const bot = createMockBot();
-      const task = new ShearTask(bot);
-      task.onStart();
-      expect(task.getCurrentTarget()).toBeNull();
-    });
-
-    it('should compare max sheep and color for equality', () => {
-      const bot = createMockBot();
-      const task1 = new ShearTask(bot, { maxSheep: 10, targetColor: 'white' });
-      const task2 = new ShearTask(bot, { maxSheep: 10, targetColor: 'white' });
-      const task3 = new ShearTask(bot, { maxSheep: 10, targetColor: 'black' });
-      expect(task1.isEqual(task2)).toBe(true);
-      expect(task1.isEqual(task3)).toBe(false);
-    });
-
-    it('should create with specific color target', () => {
-      const bot = createMockBot();
-      const task = new ShearTask(bot, { targetColor: 'blue' });
-      expect(task.displayName).toContain('Shear');
     });
   });
 

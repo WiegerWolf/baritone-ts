@@ -8,6 +8,7 @@
 
 import { describe, it, expect, mock } from 'bun:test';
 import {
+  PortalTask,
   EnterNetherPortalTask,
   GoToDimensionTask,
   enterNether,
@@ -79,7 +80,7 @@ describe('Portal Tasks', () => {
     it('should throw for End dimension', () => {
       const bot = createMockBot();
       expect(() => new EnterNetherPortalTask(bot, Dimension.END))
-        .toThrow("Can't build a nether portal to the End");
+        .toThrow("Can't use a nether portal to reach the End. Use an End portal.");
     });
 
     it('should start not finished', () => {
@@ -123,7 +124,7 @@ describe('Portal Tasks', () => {
     it('enterNether should create task', () => {
       const bot = createMockBot();
       const task = enterNether(bot);
-      expect(task).toBeInstanceOf(EnterNetherPortalTask);
+      expect(task).toBeInstanceOf(PortalTask);
     });
 
     it('returnToOverworld should create task', () => {

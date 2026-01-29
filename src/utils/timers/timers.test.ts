@@ -65,6 +65,66 @@ describe('TimerGame', () => {
     // getProgress gives us 0.4 (40 ticks / 100 ticks for 5 seconds)
     expect(timer.getProgress()).toBeCloseTo(0.4, 1);
   });
+
+  test('should get current ticks', () => {
+    const timer = new TimerGame(mockBot, 1.0);
+    mockBot.time.age = 42;
+    expect(timer.getCurrentTicks()).toBe(42);
+  });
+
+  test('should get interval in ticks', () => {
+    const timer = new TimerGame(mockBot, 2.5); // 2.5 seconds = 50 ticks
+    expect(timer.getIntervalTicks()).toBe(50);
+  });
+
+  test('should set interval in ticks', () => {
+    const timer = new TimerGame(mockBot, 1.0);
+    timer.setIntervalTicks(60); // 60 ticks = 3 seconds
+    expect(timer.getInterval()).toBe(3.0);
+    expect(timer.getIntervalTicks()).toBe(60);
+  });
+
+  test('should get elapsed time', () => {
+    const timer = new TimerGame(mockBot, 5.0);
+    mockBot.time.age = 40; // 2 seconds
+    expect(timer.getElapsedTime()).toBeCloseTo(2.0, 1);
+  });
+
+  test('should get remaining time', () => {
+    const timer = new TimerGame(mockBot, 5.0);
+    mockBot.time.age = 40; // 2 seconds elapsed
+    expect(timer.getRemainingTime()).toBeCloseTo(3.0, 1);
+  });
+
+  test('should return 0 remaining time when elapsed', () => {
+    const timer = new TimerGame(mockBot, 1.0);
+    mockBot.time.age = 100; // 5 seconds elapsed, interval is 1s
+    expect(timer.getRemainingTime()).toBe(0);
+  });
+
+  test('should force elapsed', () => {
+    const timer = new TimerGame(mockBot, 10.0);
+    expect(timer.elapsed()).toBe(false);
+    timer.forceElapsed();
+    expect(timer.elapsed()).toBe(true);
+  });
+
+  test('should reset with new interval', () => {
+    const timer = new TimerGame(mockBot, 1.0);
+    timer.resetWithInterval(3.0);
+    expect(timer.getInterval()).toBe(3.0);
+    expect(timer.elapsed()).toBe(false);
+    mockBot.time.age = 60; // 3 seconds
+    expect(timer.elapsed()).toBe(true);
+  });
+
+  test('should set interval without resetting', () => {
+    const timer = new TimerGame(mockBot, 1.0);
+    mockBot.time.age = 10; // 0.5 seconds
+    timer.setInterval(0.3); // Set to 0.3 seconds (6 ticks)
+    // Elapsed time is still 0.5s, which is > 0.3s
+    expect(timer.elapsed()).toBe(true);
+  });
 });
 
 describe('TimerReal', () => {
