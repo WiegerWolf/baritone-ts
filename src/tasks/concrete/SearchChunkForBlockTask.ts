@@ -80,32 +80,30 @@ export class SearchChunkForBlockTask extends SearchChunksExploreTask {
   }
 
   private scanChunkForBlocks(chunk: ChunkPos): boolean {
-    const startX = chunk.x * 16;
-    const startZ = chunk.z * 16;
-    let found = false;
+    // Use mineflayer's indexed findBlocks instead of brute-force Y-column scan
+    const chunkCenter = new Vec3(chunk.x * 16 + 8, 64, chunk.z * 16 + 8);
+    const remaining = this.maxResults - this.foundPositions.length;
 
-    // Scan the chunk
-    for (let x = startX; x < startX + 16; x++) {
-      for (let z = startZ; z < startZ + 16; z++) {
-        // Use typical Minecraft Y range (-64 to 320 for 1.18+, or 0-255 for older)
-        const minY = (this.bot.game as any).minY ?? -64;
-        const maxY = (this.bot.game as any).maxY ?? 320;
-        for (let y = minY; y <= maxY; y++) {
-          const block = this.bot.blockAt(new Vec3(x, y, z));
+    const positions = this.bot.findBlocks({
+      matching: (block: any) => this.targetBlocks.has(block.name),
+      maxDistance: 24, // covers a 16x16 chunk from center
+      count: remaining,
+      point: chunkCenter,
+    });
 
-          if (block && this.targetBlocks.has(block.name)) {
-            this.foundPositions.push(new Vec3(x, y, z));
-            found = true;
-
-            if (this.foundPositions.length >= this.maxResults) {
-              return true;
-            }
-          }
+    for (const pos of positions) {
+      // Verify position is within this chunk
+      const cx = Math.floor(pos.x / 16);
+      const cz = Math.floor(pos.z / 16);
+      if (cx === chunk.x && cz === chunk.z) {
+        this.foundPositions.push(new Vec3(pos.x, pos.y, pos.z));
+        if (this.foundPositions.length >= this.maxResults) {
+          return true;
         }
       }
     }
 
-    return found;
+    return positions.length > 0;
   }
 
   private findNearestFoundPosition(): Vec3 | null {

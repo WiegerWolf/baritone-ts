@@ -307,37 +307,12 @@ export class CraftTask extends Task {
    * Find nearest crafting table
    */
   private findNearestCraftingTable(): Vec3 | null {
-    const playerPos = this.bot.entity.position;
-    const maxRange = 32;
-
-    let nearest: Vec3 | null = null;
-    let nearestDist = Infinity;
-
-    for (let x = -maxRange; x <= maxRange; x += 4) {
-      for (let y = -maxRange; y <= maxRange; y += 4) {
-        for (let z = -maxRange; z <= maxRange; z += 4) {
-          // Check a smaller area within this chunk
-          for (let dx = 0; dx < 4; dx++) {
-            for (let dy = 0; dy < 4; dy++) {
-              for (let dz = 0; dz < 4; dz++) {
-                const pos = playerPos.offset(x + dx, y + dy, z + dz);
-                const block = this.bot.blockAt(pos);
-
-                if (block && block.name === 'crafting_table') {
-                  const dist = playerPos.distanceTo(pos);
-                  if (dist < nearestDist) {
-                    nearestDist = dist;
-                    nearest = pos;
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    }
-
-    return nearest;
+    // Use mineflayer's indexed findBlock instead of brute-force 6-deep nested loops
+    const result = this.bot.findBlock({
+      matching: (block: any) => block.name === 'crafting_table',
+      maxDistance: 32,
+    });
+    return result?.position ?? null;
   }
 
   isEqual(other: ITask | null): boolean {

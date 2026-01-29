@@ -83,29 +83,28 @@ class EscapeLavaTask extends Task {
   }
 
   private findNearestSafeGround(): Vec3 | null {
-    const playerPos = this.bot.entity.position;
-    const searchRadius = 10;
+    // Use mineflayer's indexed findBlocks to find air blocks, then validate
+    const positions = this.bot.findBlocks({
+      matching: (block: any) => block.name === 'air',
+      maxDistance: 10,
+      count: 128,
+    });
 
+    const playerPos = this.bot.entity.position;
     let nearest: Vec3 | null = null;
     let nearestDist = Infinity;
 
-    for (let dx = -searchRadius; dx <= searchRadius; dx++) {
-      for (let dy = -3; dy <= 3; dy++) {
-        for (let dz = -searchRadius; dz <= searchRadius; dz++) {
-          const pos = playerPos.offset(dx, dy, dz);
-          const block = this.bot.blockAt(pos);
-          const below = this.bot.blockAt(pos.offset(0, -1, 0));
+    for (const pos of positions) {
+      const vec = new Vec3(pos.x, pos.y, pos.z);
+      const below = this.bot.blockAt(vec.offset(0, -1, 0));
 
-          // Check for safe solid ground that's not in lava
-          if (block && block.name === 'air' &&
-              below && below.boundingBox !== 'empty' &&
-              !this.isLava(below) && !this.isLava(block)) {
-            const dist = pos.distanceTo(playerPos);
-            if (dist < nearestDist) {
-              nearestDist = dist;
-              nearest = pos;
-            }
-          }
+      // Check for safe solid ground that's not in lava
+      if (below && below.boundingBox !== 'empty' &&
+          !this.isLava(below)) {
+        const dist = vec.distanceTo(playerPos);
+        if (dist < nearestDist) {
+          nearestDist = dist;
+          nearest = vec;
         }
       }
     }
@@ -172,22 +171,12 @@ class ExtinguishFireTask extends Task {
   }
 
   private findNearestWater(): Vec3 | null {
-    const playerPos = this.bot.entity.position;
-    const searchRadius = 20;
-
-    for (let dx = -searchRadius; dx <= searchRadius; dx++) {
-      for (let dy = -5; dy <= 5; dy++) {
-        for (let dz = -searchRadius; dz <= searchRadius; dz++) {
-          const pos = playerPos.offset(dx, dy, dz);
-          const block = this.bot.blockAt(pos);
-          if (block && (block.name === 'water' || block.name === 'flowing_water')) {
-            return pos;
-          }
-        }
-      }
-    }
-
-    return null;
+    // Use mineflayer's indexed findBlock instead of brute-force nested loops
+    const result = this.bot.findBlock({
+      matching: (block: any) => block.name === 'water' || block.name === 'flowing_water',
+      maxDistance: 20,
+    });
+    return result?.position ?? null;
   }
 
   private moveToward(target: Vec3): void {
