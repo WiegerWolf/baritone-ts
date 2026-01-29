@@ -15,8 +15,8 @@ import type { ITask } from '../interfaces';
 import { ResourceTask, ItemTarget, itemTarget } from './ResourceTask';
 import { DoToClosestEntityTask } from './EntityTask';
 import { PickupItemTask } from './InventoryTask';
-import { TimeoutWanderTask } from './MovementUtilTask';
-import { FollowEntityTask } from './GoToTask';
+import { TimeoutWanderTask } from './TimeoutWanderTask';
+import { FollowEntityTask } from './FollowEntityTask';
 import { TimerGame } from '../../utils/timers/TimerGame';
 
 /**

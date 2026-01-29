@@ -11,7 +11,7 @@ import { Vec3 } from 'vec3';
 import { Task } from '../Task';
 import type { ITask } from '../interfaces';
 import { InteractBlockTask } from './InteractTask';
-import { TimeoutWanderTask } from './MovementUtilTask';
+import { TimeoutWanderTask } from './TimeoutWanderTask';
 import { ContainerType } from './DoStuffInContainerTask';
 import { BlockPos } from '../../types';
 

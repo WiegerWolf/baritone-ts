@@ -15,7 +15,7 @@ import { ItemTarget } from '../../utils/ItemTarget';
 import { MineBlockTask, MineBlockTypeTask } from '../concrete/MineBlockTask';
 import { PickupItemTask } from '../concrete/InventoryTask';
 import { CraftTask } from '../concrete/CraftTask';
-import { GoToNearTask } from '../concrete/GoToTask';
+import { GoToNearTask } from '../concrete/GoToNearTask';
 import { CollectWoodTask } from './CollectWoodTask';
 import { GetToolTask, type ToolType } from './GetToolTask';
 

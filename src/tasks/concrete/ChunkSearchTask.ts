@@ -12,8 +12,8 @@ import type { Block } from 'prismarine-block';
 import { Vec3 } from 'vec3';
 import { Task } from '../Task';
 import type { ITask } from '../interfaces';
-import { TimeoutWanderTask } from './MovementUtilTask';
-import { GoToNearTask } from './GoToTask';
+import { TimeoutWanderTask } from './TimeoutWanderTask';
+import { GoToNearTask } from './GoToNearTask';
 
 /**
  * Chunk position (chunk coordinates, not block coordinates)

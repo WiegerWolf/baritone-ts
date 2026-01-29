@@ -13,8 +13,8 @@ import type { Block } from 'prismarine-block';
 import { Vec3 } from 'vec3';
 import { Task } from '../Task';
 import type { ITask } from '../interfaces';
-import { GoToNearTask } from './GoToTask';
-import { TimeoutWanderTask } from './MovementUtilTask';
+import { GoToNearTask } from './GoToNearTask';
+import { TimeoutWanderTask } from './TimeoutWanderTask';
 import { MovementProgressChecker } from '../../utils/progress/MovementProgressChecker';
 
 /**
@@ -322,36 +322,4 @@ export function doToClosestBlock(
   ...blockTypes: string[]
 ): DoToClosestBlockTask {
   return new DoToClosestBlockTask(bot, taskFactory, blockTypes);
-}
-
-/**
- * Helper to get within range of a block
- */
-export function getWithinRangeOf(
-  bot: Bot,
-  x: number,
-  y: number,
-  z: number,
-  range: number
-): import('./BlockSearchTask').GetWithinRangeOfBlockTask {
-  const { GetWithinRangeOfBlockTask } = require('./BlockSearchTask');
-  return new GetWithinRangeOfBlockTask(bot, x, y, z, range);
-}
-
-/**
- * Helper to move in a direction
- */
-export function goInDirection(
-  bot: Bot,
-  dirX: number,
-  dirZ: number,
-  distance: number = 100
-): import('./BlockSearchTask').GoInDirectionXZTask {
-  const { GoInDirectionXZTask } = require('./BlockSearchTask');
-  return new GoInDirectionXZTask(
-    bot,
-    bot.entity.position,
-    new Vec3(dirX, 0, dirZ),
-    distance
-  );
 }

@@ -19,7 +19,7 @@ import type { Bot } from 'mineflayer';
 import { Vec3 } from 'vec3';
 import { Task } from '../Task';
 import type { ITask } from '../interfaces';
-import { TimeoutWanderTask } from './MovementUtilTask';
+import { TimeoutWanderTask } from './TimeoutWanderTask';
 
 /**
  * Cached heuristic data for a potential target

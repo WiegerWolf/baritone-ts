@@ -16,7 +16,7 @@ import type { Bot } from 'mineflayer';
 import { Vec3 } from 'vec3';
 import { Task } from '../Task';
 import type { ITask } from '../interfaces';
-import { GoToNearTask } from './GoToTask';
+import { GoToNearTask } from './GoToNearTask';
 import { MovementProgressChecker } from '../../utils/progress/MovementProgressChecker';
 import { blockToChunk, ChunkPos, chunkToBlock } from './ChunkSearchTask';
 

@@ -14,8 +14,8 @@ import type { ITask } from '../interfaces';
 import { BlockPos } from '../../types';
 import { DestroyBlockTask, PlaceBlockNearbyTask, ClearLiquidTask } from './ConstructionTask';
 import { InteractWithBlockTask, Direction } from './InteractWithBlockTask';
-import { TimeoutWanderTask } from './MovementUtilTask';
-import { GetToBlockTask } from './GoToTask';
+import { TimeoutWanderTask } from './TimeoutWanderTask';
+import { GetToBlockTask } from './GetToBlockTask';
 import { MovementProgressChecker } from '../../utils/progress/MovementProgressChecker';
 
 /**

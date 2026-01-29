@@ -10,10 +10,10 @@ import type { Bot } from 'mineflayer';
 import { Vec3 } from 'vec3';
 import { Task } from '../Task';
 import type { ITask } from '../interfaces';
-import { GoToNearTask } from '../concrete/GoToTask';
-import { TimeoutWanderTask } from '../concrete/MovementUtilTask';
+import { GoToNearTask } from '../concrete/GoToNearTask';
+import { TimeoutWanderTask } from '../concrete/TimeoutWanderTask';
 import { TimerGame } from '../../utils/timers/TimerGame';
-import { Dimension } from './PortalTask';
+import { Dimension } from './PortalNavTask';
 
 /**
  * State for EnterNetherPortalTask

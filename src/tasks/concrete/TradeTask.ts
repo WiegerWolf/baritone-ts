@@ -14,7 +14,7 @@ import { Task } from '../Task';
 import type { ITask } from '../interfaces';
 import { ResourceTask, ItemTarget, itemTarget, Dimension } from './ResourceTask';
 import { AbstractDoToEntityTask } from './EntityTask';
-import { TimeoutWanderTask } from './MovementUtilTask';
+import { TimeoutWanderTask } from './TimeoutWanderTask';
 import { TimerGame } from '../../utils/timers/TimerGame';
 
 /**

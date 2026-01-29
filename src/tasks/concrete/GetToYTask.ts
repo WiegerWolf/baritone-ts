@@ -10,7 +10,7 @@ import { Task } from '../Task';
 import type { ITask } from '../interfaces';
 import { defaultGroundedShouldForce } from '../interfaces';
 import { MovementProgressChecker } from '../../utils/progress/MovementProgressChecker';
-import { TimeoutWanderTask } from './MovementUtilTask';
+import { TimeoutWanderTask } from './TimeoutWanderTask';
 
 /**
  * Interface for tasks that require being grounded (simplified for this file)

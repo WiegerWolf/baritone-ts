@@ -1,6 +1,6 @@
 import { describe, it, expect, mock, test } from 'bun:test';
 import { Vec3 } from 'vec3';
-import { TimeoutWanderTask } from './MovementUtilTask';
+import { TimeoutWanderTask } from './TimeoutWanderTask';
 
 /**
  * Create a mock bot for testing

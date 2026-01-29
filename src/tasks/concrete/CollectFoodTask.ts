@@ -18,7 +18,7 @@ import type { Entity } from 'prismarine-entity';
 import { Vec3 } from 'vec3';
 import { Task } from '../Task';
 import type { ITask } from '../interfaces';
-import { TimeoutWanderTask } from './MovementUtilTask';
+import { TimeoutWanderTask } from './TimeoutWanderTask';
 import { KillAndLootTask } from './KillAndLootTask';
 import { DestroyBlockTask } from './ConstructionTask';
 import { DoToClosestBlockTask } from './BlockSearchTask';

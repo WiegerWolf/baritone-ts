@@ -10,7 +10,7 @@ import type { Entity } from 'prismarine-entity';
 import { Vec3 } from 'vec3';
 import { Task } from '../Task';
 import type { ITask } from '../interfaces';
-import { GoToNearTask } from '../concrete/GoToTask';
+import { GoToNearTask } from '../concrete/GoToNearTask';
 import { InteractEntityTask } from '../concrete/InteractTask';
 import { TimerGame } from '../../utils/timers/TimerGame';
 

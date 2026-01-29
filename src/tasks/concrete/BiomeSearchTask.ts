@@ -11,8 +11,8 @@ import { Vec3 } from 'vec3';
 import { Task } from '../Task';
 import type { ITask } from '../interfaces';
 import { SearchChunksExploreTask, ChunkPos, blockToChunk } from './ChunkSearchTask';
-import { GoToBlockTask } from './GoToTask';
-import { TimeoutWanderTask } from './MovementUtilTask';
+import { GoToBlockTask } from './GoToBlockTask';
+import { TimeoutWanderTask } from './TimeoutWanderTask';
 
 /**
  * Common Minecraft biomes

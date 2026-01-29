@@ -1,6 +1,6 @@
 import { describe, test, expect, mock } from 'bun:test';
 import { Vec3 } from 'vec3';
-import { LookAtBlockTask } from './MovementUtilTask';
+import { LookAtBlockTask } from './LookAtBlockTask';
 
 /**
  * Create a mock bot for testing

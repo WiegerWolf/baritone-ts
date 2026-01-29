@@ -13,8 +13,8 @@ import { Vec3 } from 'vec3';
 import { Task } from '../Task';
 import type { ITask } from '../interfaces';
 import { ResourceTask, ItemTarget, itemTarget, Dimension } from './ResourceTask';
-import { GoToNearTask } from './GoToTask';
-import { TimeoutWanderTask } from './MovementUtilTask';
+import { GoToNearTask } from './GoToNearTask';
+import { TimeoutWanderTask } from './TimeoutWanderTask';
 import { TimerGame } from '../../utils/timers/TimerGame';
 import { MovementProgressChecker } from '../../utils/progress/MovementProgressChecker';
 

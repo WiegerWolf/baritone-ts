@@ -6,14 +6,12 @@
  */
 
 // Navigation tasks
-export {
-  GoToTask,
-  GoToBlockTask,
-  GetToBlockTask,
-  GoToNearTask,
-  GoToXZTask,
-  FollowEntityTask,
-} from './GoToTask';
+export { GoToTask } from './GoToTask';
+export { GoToBlockTask } from './GoToBlockTask';
+export { GetToBlockTask } from './GetToBlockTask';
+export { GoToNearTask } from './GoToNearTask';
+export { GoToXZTask } from './GoToXZTask';
+export { FollowEntityTask } from './FollowEntityTask';
 
 // Mining tasks
 export {
@@ -76,14 +74,12 @@ export {
 export type { ItemMatcher } from './SlotTask';
 
 // Movement utility tasks
-export {
-  TimeoutWanderTask,
-  IdleTask,
-  GetToYTask,
-  SafeRandomShimmyTask,
-  WaitTask,
-  LookAtBlockTask,
-} from './MovementUtilTask';
+export { TimeoutWanderTask } from './TimeoutWanderTask';
+export { IdleTask } from './IdleTask';
+export { GetToYTask } from './GetToYTask';
+export { SafeRandomShimmyTask } from './SafeRandomShimmyTask';
+export { WaitTask } from './WaitTask';
+export { LookAtBlockTask } from './LookAtBlockTask';
 
 // Container interaction tasks
 export {
@@ -497,14 +493,11 @@ export {
 } from './PickupItemTask';
 
 // Flee from entities tasks
-export {
-  RunAwayFromEntitiesTask,
-  RunAwayFromHostilesTask as FleeFromHostilesTask,
-  RunAwayFromPlayersTask as FleeFromPlayersTask,
-  RunAwayFromCreepersTask as FleeFromCreepersTask,
-  DodgeProjectilesTask as FleeFromProjectilesTask,
-} from './FleeFromEntitiesTask';
-export type { EntitySupplier } from './FleeFromEntitiesTask';
+export { RunAwayFromEntitiesTask, type EntitySupplier } from './RunAwayFromEntitiesTask';
+export { FleeFromHostilesTask } from './FleeFromHostilesTask';
+export { FleeFromPlayersTask } from './FleeFromPlayersTask';
+export { FleeFromCreepersTask } from './FleeFromCreepersTask';
+export { FleeFromProjectilesTask } from './FleeFromProjectilesTask';
 
 // Ender pearl throwing tasks
 export {

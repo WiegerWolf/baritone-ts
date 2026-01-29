@@ -13,7 +13,7 @@ import type { ITask } from '../interfaces';
 import { PlaceBlockTask } from './PlaceBlockTask';
 import { MineAndCollectTask } from './MineAndCollectTask';
 import { GoToDimensionTask } from '../composite/PortalTask';
-import { TimeoutWanderTask } from './MovementUtilTask';
+import { TimeoutWanderTask } from './TimeoutWanderTask';
 import { BlockPos } from '../../types';
 import { Dimension, itemTarget } from './ResourceTask';
 import { TimerGame } from '../../utils/timers/TimerGame';

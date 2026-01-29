@@ -11,7 +11,8 @@ import type { Block } from 'prismarine-block';
 import { Vec3 } from 'vec3';
 import { Task } from '../Task';
 import type { ITask } from '../interfaces';
-import { GoToNearTask, GetToBlockTask } from '../concrete/GoToTask';
+import { GetToBlockTask } from '../concrete/GetToBlockTask';
+import { GoToNearTask } from '../concrete/GoToNearTask';
 import { InteractBlockTask } from '../concrete/InteractTask';
 import { TimerGame } from '../../utils/timers/TimerGame';
 

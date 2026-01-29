@@ -11,10 +11,10 @@ import type { Bot } from 'mineflayer';
 import { Task } from '../Task';
 import type { ITask } from '../interfaces';
 import { itemTarget } from './ResourceTask';
-import { TimeoutWanderTask } from './MovementUtilTask';
+import { TimeoutWanderTask } from './TimeoutWanderTask';
 import { KillAndLootTask } from './KillAndLootTask';
 import { PickupItemTask } from './InventoryTask';
-import { GetToBlockTask } from './GoToTask';
+import { GetToBlockTask } from './GetToBlockTask';
 
 /**
  * Hostile mob types to hunt

@@ -9,7 +9,7 @@
 import type { Bot } from 'mineflayer';
 import { Task } from '../Task';
 import type { ITask } from '../interfaces';
-import { Dimension } from './PortalTask';
+import { Dimension } from './PortalNavTask';
 import { EnterNetherPortalTask } from './EnterNetherPortalTask';
 
 /**

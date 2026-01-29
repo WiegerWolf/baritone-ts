@@ -14,7 +14,8 @@ import type { Entity } from 'prismarine-entity';
 import type { Item } from 'prismarine-item';
 import { Task } from '../Task';
 import type { ITask } from '../interfaces';
-import { GoToNearTask, FollowEntityTask } from './GoToTask';
+import { FollowEntityTask } from './FollowEntityTask';
+import { GoToNearTask } from './GoToNearTask';
 import { TimerGame } from '../../utils/timers/TimerGame';
 import { LookHelper } from '../../utils/LookHelper';
 

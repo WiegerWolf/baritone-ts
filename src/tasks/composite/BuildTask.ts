@@ -12,7 +12,7 @@ import { Task } from '../Task';
 import type { ITask } from '../interfaces';
 import { PlaceBlockTask } from '../concrete/PlaceBlockTask';
 import { MineBlockTask } from '../concrete/MineBlockTask';
-import { GetToBlockTask } from '../concrete/GoToTask';
+import { GetToBlockTask } from '../concrete/GetToBlockTask';
 import { TimerGame } from '../../utils/timers/TimerGame';
 
 /**

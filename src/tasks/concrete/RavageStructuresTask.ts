@@ -19,7 +19,7 @@ import { Task } from '../Task';
 import type { ITask } from '../interfaces';
 import { LootDesertTempleTask } from './LootDesertTempleTask';
 import { LootContainerTask } from './StorageContainerTask';
-import { TimeoutWanderTask } from './MovementUtilTask';
+import { TimeoutWanderTask } from './TimeoutWanderTask';
 import { SearchChunkForBlockTask } from './ChunkSearchTask';
 import { BlockPos } from '../../types';
 import { Dimension } from './ResourceTask';

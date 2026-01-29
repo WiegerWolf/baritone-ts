@@ -1,6 +1,6 @@
 import { describe, test, expect, mock } from 'bun:test';
 import { Vec3 } from 'vec3';
-import { SafeRandomShimmyTask } from './MovementUtilTask';
+import { SafeRandomShimmyTask } from './SafeRandomShimmyTask';
 
 /**
  * Create a mock bot for testing

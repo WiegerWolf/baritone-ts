@@ -13,10 +13,10 @@ import { Vec3 } from 'vec3';
 import { Task } from '../Task';
 import type { ITask } from '../interfaces';
 import { ResourceTask, ItemTarget, itemTarget } from './ResourceTask';
-import { GoToNearTask } from './GoToTask';
+import { GoToNearTask } from './GoToNearTask';
 import { MineBlockTask } from './MineBlockTask';
 import { PickupItemTask } from './InventoryTask';
-import { TimeoutWanderTask } from './MovementUtilTask';
+import { TimeoutWanderTask } from './TimeoutWanderTask';
 import { TimerGame } from '../../utils/timers/TimerGame';
 import { MovementProgressChecker } from '../../utils/progress/MovementProgressChecker';
 

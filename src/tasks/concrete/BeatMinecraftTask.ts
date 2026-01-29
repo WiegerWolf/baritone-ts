@@ -34,7 +34,8 @@ import { PickupItemTask } from './InventoryTask';
 import { KillAndLootTask } from './KillAndLootTask';
 import { Dimension, itemTarget } from './ResourceTask';
 import { InteractWithBlockTask, Direction } from './InteractWithBlockTask';
-import { GoToBlockTask, GetToBlockTask } from './GoToTask';
+import { GetToBlockTask } from './GetToBlockTask';
+import { GoToBlockTask } from './GoToBlockTask';
 import { SearchChunkForBlockTask } from './ChunkSearchTask';
 
 /**

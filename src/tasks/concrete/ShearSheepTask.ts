@@ -13,7 +13,7 @@ import type { Entity } from 'prismarine-entity';
 import { Task } from '../Task';
 import type { ITask } from '../interfaces';
 import { AbstractDoToEntityTask, EntityTaskConfig } from './EntityTask';
-import { GoToNearTask } from './GoToTask';
+import { GoToNearTask } from './GoToNearTask';
 import { LookHelper } from '../../utils/LookHelper';
 import { TimerGame } from '../../utils/timers/TimerGame';
 

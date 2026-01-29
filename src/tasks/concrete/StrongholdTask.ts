@@ -24,7 +24,7 @@ import { SearchChunkForBlockTask } from './ChunkSearchTask';
 import { FastTravelTask } from './FastTravelTask';
 import { PickupItemTask } from './InventoryTask';
 import { UseItemTask } from './InteractTask';
-import { TimeoutWanderTask } from './MovementUtilTask';
+import { TimeoutWanderTask } from './TimeoutWanderTask';
 import { BlockPos } from '../../types';
 import { Dimension } from './ResourceTask';
 import { TimerGame } from '../../utils/timers/TimerGame';

@@ -8,8 +8,9 @@ import type { Entity } from 'prismarine-entity';
 import { Vec3 } from 'vec3';
 import { Task } from '../Task';
 import type { ITask } from '../interfaces';
-import { GoToNearTask, FollowEntityTask } from './GoToTask';
-import { TimeoutWanderTask } from './MovementUtilTask';
+import { FollowEntityTask } from './FollowEntityTask';
+import { GoToNearTask } from './GoToNearTask';
+import { TimeoutWanderTask } from './TimeoutWanderTask';
 import { LookHelper } from '../../utils/LookHelper';
 import { MovementProgressChecker } from '../../utils/progress/MovementProgressChecker';
 

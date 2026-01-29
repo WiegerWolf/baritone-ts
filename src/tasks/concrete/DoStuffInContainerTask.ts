@@ -11,7 +11,7 @@ import type { Block } from 'prismarine-block';
 import { Vec3 } from 'vec3';
 import { Task } from '../Task';
 import type { ITask } from '../interfaces';
-import { GetToBlockTask } from './GoToTask';
+import { GetToBlockTask } from './GetToBlockTask';
 import { InteractBlockTask } from './InteractTask';
 import { TimerGame } from '../../utils/timers/TimerGame';
 import { BlockPos } from '../../types';

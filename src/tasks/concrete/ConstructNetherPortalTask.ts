@@ -18,7 +18,7 @@ import { Vec3 } from 'vec3';
 import { Task } from '../Task';
 import type { ITask } from '../interfaces';
 import { DestroyBlockTask, ClearLiquidTask } from './ConstructionTask';
-import { TimeoutWanderTask } from './MovementUtilTask';
+import { TimeoutWanderTask } from './TimeoutWanderTask';
 import { InteractWithBlockTask, Direction } from './InteractWithBlockTask';
 import { BlockPos } from '../../types';
 import { MovementProgressChecker } from '../../utils/progress/MovementProgressChecker';

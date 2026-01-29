@@ -8,8 +8,8 @@ import type { Entity } from 'prismarine-entity';
 import { Vec3 } from 'vec3';
 import { Task } from '../Task';
 import type { ITask } from '../interfaces';
-import { TimeoutWanderTask } from './MovementUtilTask';
-import { FollowEntityTask } from './GoToTask';
+import { TimeoutWanderTask } from './TimeoutWanderTask';
+import { FollowEntityTask } from './FollowEntityTask';
 import { TimerGame } from '../../utils/timers/TimerGame';
 import type { EntityFilter, EntityTaskFactory } from './AbstractDoToEntityTask';
 

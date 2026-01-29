@@ -19,7 +19,7 @@ import { Task } from '../Task';
 import type { ITask } from '../interfaces';
 import { ResourceTask, ItemTarget, itemTarget } from './ResourceTask';
 import { MineAndCollectTask } from './MineAndCollectTask';
-import { TimeoutWanderTask } from './MovementUtilTask';
+import { TimeoutWanderTask } from './TimeoutWanderTask';
 import { BlockPos } from '../../types';
 import { TimerGame } from '../../utils/timers/TimerGame';
 

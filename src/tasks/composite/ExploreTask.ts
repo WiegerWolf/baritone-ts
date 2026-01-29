@@ -10,7 +10,8 @@ import type { Bot } from 'mineflayer';
 import { Vec3 } from 'vec3';
 import { Task } from '../Task';
 import type { ITask } from '../interfaces';
-import { GoToTask, GoToNearTask } from '../concrete/GoToTask';
+import { GoToNearTask } from '../concrete/GoToNearTask';
+import { GoToTask } from '../concrete/GoToTask';
 import { TimerGame } from '../../utils/timers/TimerGame';
 
 /**
