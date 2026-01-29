@@ -11,6 +11,7 @@
  * Tests focus on INTENT (WHY these tasks exist) not just HOW they work.
  */
 
+import { describe, it, expect, mock, test } from 'bun:test';
 import { Vec3 } from 'vec3';
 import {
   ClickSlotTask,
@@ -49,8 +50,8 @@ function createMockBot(options: {
       slots: Array(46).fill(null),
       firstEmptyInventorySlot: () => options.emptySlot !== undefined ? options.emptySlot : 10,
     },
-    clickWindow: jest.fn().mockResolvedValue(undefined),
-    clearControlStates: jest.fn(),
+    clickWindow: mock().mockResolvedValue(undefined),
+    clearControlStates: mock(),
   };
 
   // Set up inventory slots from items

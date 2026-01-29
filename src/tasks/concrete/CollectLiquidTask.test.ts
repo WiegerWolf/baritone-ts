@@ -6,6 +6,7 @@
  * - INTENT: Validate state machines, edge cases, and helper functions.
  */
 
+import { describe, it, expect, mock } from 'bun:test';
 import {
   LiquidType,
   CollectBucketLiquidTask,
@@ -35,13 +36,13 @@ function createMockBot(overrides: Record<string, any> = {}): any {
     health: 20,
     food: 20,
     game: { dimension: 'minecraft:overworld' },
-    setControlState: jest.fn(),
-    clearControlStates: jest.fn(),
-    look: jest.fn(),
-    lookAt: jest.fn(),
-    equip: jest.fn(),
-    activateBlock: jest.fn(),
-    wake: jest.fn(),
+    setControlState: mock(),
+    clearControlStates: mock(),
+    look: mock(),
+    lookAt: mock(),
+    equip: mock(),
+    activateBlock: mock(),
+    wake: mock(),
     isSleeping: false,
     ...overrides,
   };

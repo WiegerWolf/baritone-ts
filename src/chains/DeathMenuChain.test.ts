@@ -8,6 +8,7 @@
  * not just the mechanics (HOW they work).
  */
 
+import { describe, it, expect, mock, beforeEach, test } from 'bun:test';
 import { Vec3 } from 'vec3';
 import { EventEmitter } from 'events';
 import { DeathMenuChain, DeathState } from './DeathMenuChain';
@@ -56,19 +57,19 @@ function createMockBot(options: {
   };
 
   bot._client = {
-    write: jest.fn(),
+    write: mock(),
   };
 
-  bot.chat = jest.fn();
-  bot.equip = jest.fn().mockResolvedValue(undefined);
-  bot.activateItem = jest.fn();
-  bot.deactivateItem = jest.fn();
-  bot.tossStack = jest.fn().mockResolvedValue(undefined);
-  bot.clickWindow = jest.fn().mockResolvedValue(undefined);
-  bot.setControlState = jest.fn();
-  bot.getControlState = jest.fn().mockReturnValue(false);
-  bot.clearControlStates = jest.fn();
-  bot.blockAt = jest.fn().mockReturnValue(null);
+  bot.chat = mock();
+  bot.equip = mock().mockResolvedValue(undefined);
+  bot.activateItem = mock();
+  bot.deactivateItem = mock();
+  bot.tossStack = mock().mockResolvedValue(undefined);
+  bot.clickWindow = mock().mockResolvedValue(undefined);
+  bot.setControlState = mock();
+  bot.getControlState = mock().mockReturnValue(false);
+  bot.clearControlStates = mock();
+  bot.blockAt = mock().mockReturnValue(null);
 
   return bot;
 }
@@ -78,11 +79,6 @@ describe('DeathMenuChain', () => {
 
   beforeEach(() => {
     bot = createMockBot();
-    jest.useFakeTimers();
-  });
-
-  afterEach(() => {
-    jest.useRealTimers();
   });
 
   describe('Intent: Auto-respawn prevents player from being stuck on death screen', () => {
@@ -131,7 +127,7 @@ describe('DeathMenuChain', () => {
     });
 
     test('should call onDeath callback for external notifications', () => {
-      const onDeath = jest.fn();
+      const onDeath = mock();
       const chain = new DeathMenuChain(bot, { onDeath });
 
       bot.emit('death');

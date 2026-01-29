@@ -7,6 +7,7 @@
  * 3. Edge Cases: Error handling, interruption
  */
 
+import { describe, it, expect, mock } from 'bun:test';
 import { Vec3 } from 'vec3';
 import {
   Biomes,
@@ -27,11 +28,11 @@ const createMockBot = (overrides: any = {}) => ({
     items: () => [],
   },
   blockAt: () => null,
-  setControlState: jest.fn(),
-  lookAt: jest.fn(),
-  equip: jest.fn(),
-  activateItem: jest.fn(),
-  activateBlock: jest.fn(),
+  setControlState: mock(),
+  lookAt: mock(),
+  equip: mock(),
+  activateItem: mock(),
+  activateBlock: mock(),
   entities: {},
   ...overrides,
 });

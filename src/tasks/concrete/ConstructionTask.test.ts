@@ -9,6 +9,7 @@
  *   interaction with the game world.
  */
 
+import { describe, it, expect, mock } from 'bun:test';
 import {
   DestroyBlockTask,
   PlaceBlockNearbyTask,
@@ -36,15 +37,15 @@ function createMockBot(overrides: Record<string, any> = {}): any {
     food: 20,
     heldItem: null,
     pathfinder: {
-      setGoal: jest.fn(),
-      goto: jest.fn(),
+      setGoal: mock(),
+      goto: mock(),
       isMoving: () => false,
     },
-    dig: jest.fn().mockResolvedValue(undefined),
-    stopDigging: jest.fn(),
-    placeBlock: jest.fn().mockResolvedValue(undefined),
-    equip: jest.fn().mockResolvedValue(undefined),
-    look: jest.fn(),
+    dig: mock().mockResolvedValue(undefined),
+    stopDigging: mock(),
+    placeBlock: mock().mockResolvedValue(undefined),
+    equip: mock().mockResolvedValue(undefined),
+    look: mock(),
     ...overrides,
   };
 
@@ -152,7 +153,7 @@ describe('Construction Tasks', () => {
        * and start mining.
        */
       it('should mine when in range', () => {
-        const digMock = jest.fn();
+        const digMock = mock();
         const bot = createMockBot({
           blockAt: () => ({ name: 'stone', boundingBox: 'block', position: new Vec3(2, 64, 2), material: 'rock' }),
           blockAtCursor: () => ({ position: { x: 2, y: 64, z: 2 } }),
@@ -231,7 +232,7 @@ describe('Construction Tasks', () => {
        * efficient mining. Pickaxe for stone, axe for wood, etc.
        */
       it('should equip pickaxe for stone blocks', () => {
-        const equipMock = jest.fn();
+        const equipMock = mock();
         const bot = createMockBot({
           blockAt: () => ({
             name: 'stone',
@@ -268,7 +269,7 @@ describe('Construction Tasks', () => {
        * The task should select the best available tool material.
        */
       it('should prefer higher tier tools', () => {
-        const equipMock = jest.fn();
+        const equipMock = mock();
         const bot = createMockBot({
           blockAt: () => ({
             name: 'stone',
@@ -326,7 +327,7 @@ describe('Construction Tasks', () => {
        * prevent unintended block destruction.
        */
       it('should stop digging on task stop', () => {
-        const stopDigging = jest.fn();
+        const stopDigging = mock();
         const bot = createMockBot({ stopDigging });
 
         const task = new DestroyBlockTask(bot, 10, 64, 10);

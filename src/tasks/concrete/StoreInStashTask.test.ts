@@ -8,7 +8,7 @@
  * - Tracks what's been deposited to avoid duplicates
  */
 
-import { describe, it, expect, beforeEach } from '@jest/globals';
+import { describe, it, expect, beforeEach, mock } from 'bun:test';
 import { Bot } from 'mineflayer';
 import { Vec3 } from 'vec3';
 import { BlockPos } from '../../types';
@@ -29,17 +29,17 @@ function createMockBot(): Bot {
       velocity: new Vec3(0, 0, 0),
     },
     inventory: {
-      items: jest.fn().mockReturnValue([]),
+      items: mock().mockReturnValue([]),
       slots: {},
     },
-    blockAt: jest.fn().mockReturnValue(null),
+    blockAt: mock().mockReturnValue(null),
     game: {
       dimension: 'minecraft:overworld',
     },
-    on: jest.fn(),
-    removeListener: jest.fn(),
-    once: jest.fn(),
-    emit: jest.fn(),
+    on: mock(),
+    removeListener: mock(),
+    once: mock(),
+    emit: mock(),
   } as unknown as Bot;
 
   return mockBot;
@@ -104,7 +104,7 @@ describe('StoreInStashTask', () => {
 
     it('WHY: Finishes when no items to store', () => {
       // No items in inventory
-      (bot.inventory.items as ReturnType<typeof jest.fn>).mockReturnValue([]);
+      (bot.inventory.items as ReturnType<typeof mock>).mockReturnValue([]);
 
       const task = new StoreInStashTask(bot, {
         items: [itemTarget('diamond', 10)],
@@ -121,10 +121,10 @@ describe('StoreInStashTask', () => {
 
     it('WHY: Returns to TRAVELING_TO_STASH when no container found', () => {
       // Has items but no containers
-      (bot.inventory.items as ReturnType<typeof jest.fn>).mockReturnValue([
+      (bot.inventory.items as ReturnType<typeof mock>).mockReturnValue([
         { name: 'diamond', count: 10 },
       ]);
-      (bot.blockAt as ReturnType<typeof jest.fn>).mockReturnValue(null);
+      (bot.blockAt as ReturnType<typeof mock>).mockReturnValue(null);
 
       const task = new StoreInStashTask(bot, {
         items: [itemTarget('diamond', 10)],
@@ -154,13 +154,13 @@ describe('StoreInStashTask', () => {
     it('WHY: Finds container within stash range', () => {
       // Place a chest in the stash range
       const chestPos = new Vec3(110, 65, 110);
-      (bot.blockAt as ReturnType<typeof jest.fn>).mockImplementation((pos: Vec3) => {
+      (bot.blockAt as ReturnType<typeof mock>).mockImplementation((pos: Vec3) => {
         if (pos.x === 110 && pos.y === 65 && pos.z === 110) {
           return { name: 'chest' };
         }
         return null;
       });
-      (bot.inventory.items as ReturnType<typeof jest.fn>).mockReturnValue([
+      (bot.inventory.items as ReturnType<typeof mock>).mockReturnValue([
         { name: 'diamond', count: 10 },
       ]);
 

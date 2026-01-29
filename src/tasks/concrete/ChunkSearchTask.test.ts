@@ -7,6 +7,7 @@
  * 3. Edge Cases - Error handling and boundary conditions
  */
 
+import { describe, it, expect, mock } from 'bun:test';
 import { Vec3 } from 'vec3';
 import {
   blockToChunk,
@@ -38,14 +39,14 @@ function createMockBot(overrides: Record<string, any> = {}): any {
       dimension: 'minecraft:overworld',
     },
     blockAt: () => null,
-    lookAt: jest.fn(),
-    look: jest.fn(),
-    setControlState: jest.fn(),
-    clearControlStates: jest.fn(),
-    equip: jest.fn(),
-    activateBlock: jest.fn(),
-    useOn: jest.fn(),
-    wake: jest.fn(),
+    lookAt: mock(),
+    look: mock(),
+    setControlState: mock(),
+    clearControlStates: mock(),
+    equip: mock(),
+    activateBlock: mock(),
+    useOn: mock(),
+    wake: mock(),
   };
 
   // Deep merge overrides

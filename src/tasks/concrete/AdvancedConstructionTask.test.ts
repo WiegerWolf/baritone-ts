@@ -10,7 +10,7 @@
  * These automate tedious multi-step construction operations.
  */
 
-import { describe, it, expect, beforeEach } from '@jest/globals';
+import { describe, it, expect, beforeEach, mock } from 'bun:test';
 import { Bot } from 'mineflayer';
 import { Vec3 } from 'vec3';
 import { BlockPos } from '../../types';
@@ -52,23 +52,23 @@ function createMockBot(): Bot {
       yaw: 0,
     },
     inventory: {
-      items: jest.fn().mockReturnValue([]),
+      items: mock().mockReturnValue([]),
       slots: {},
     },
-    blockAt: jest.fn().mockReturnValue({ name: 'air' }),
+    blockAt: mock().mockReturnValue({ name: 'air' }),
     entities: {},
     game: {
       dimension: 'minecraft:overworld',
     },
-    look: jest.fn(),
-    lookAt: jest.fn(),
-    attack: jest.fn(),
-    equip: jest.fn(),
-    activateItem: jest.fn(),
-    on: jest.fn(),
-    removeListener: jest.fn(),
-    once: jest.fn(),
-    emit: jest.fn(),
+    look: mock(),
+    lookAt: mock(),
+    attack: mock(),
+    equip: mock(),
+    activateItem: mock(),
+    on: mock(),
+    removeListener: mock(),
+    once: mock(),
+    emit: mock(),
   } as unknown as Bot;
 
   return mockBot;
@@ -161,7 +161,7 @@ describe('PlaceSignTask', () => {
 
   it('WHY: Returns null if no sign available', () => {
     const task = new PlaceSignTask(bot, 'Test');
-    (bot.inventory.items as jest.Mock).mockReturnValue([]);
+    (bot.inventory.items as any).mockReturnValue([]);
 
     task.onStart();
     const subtask = task.onTick();
@@ -211,7 +211,7 @@ describe('ClearRegionTask', () => {
 
   it('WHY: Returns subtask to destroy non-air blocks', () => {
     const task = new ClearRegionTask(bot, new BlockPos(0, 60, 0), new BlockPos(2, 62, 2));
-    (bot.blockAt as jest.Mock).mockReturnValue({ name: 'stone' });
+    (bot.blockAt as any).mockReturnValue({ name: 'stone' });
 
     task.onStart();
     const subtask = task.onTick();
@@ -222,7 +222,7 @@ describe('ClearRegionTask', () => {
 
   it('WHY: Returns null when region is all air', () => {
     const task = new ClearRegionTask(bot, new BlockPos(0, 60, 0), new BlockPos(2, 62, 2));
-    (bot.blockAt as jest.Mock).mockReturnValue({ name: 'air' });
+    (bot.blockAt as any).mockReturnValue({ name: 'air' });
 
     task.onStart();
     const subtask = task.onTick();
@@ -233,7 +233,7 @@ describe('ClearRegionTask', () => {
 
   it('WHY: isFinished returns true when region is cleared', () => {
     const task = new ClearRegionTask(bot, new BlockPos(0, 60, 0), new BlockPos(2, 62, 2));
-    (bot.blockAt as jest.Mock).mockReturnValue({ name: 'air' });
+    (bot.blockAt as any).mockReturnValue({ name: 'air' });
 
     expect(task.isFinished()).toBe(true);
   });
@@ -290,7 +290,7 @@ describe('CoverWithBlocksTask', () => {
 
   it('WHY: Needs blocks before covering', () => {
     const task = new CoverWithBlocksTask(bot);
-    (bot.inventory.items as jest.Mock).mockReturnValue([]);
+    (bot.inventory.items as any).mockReturnValue([]);
 
     task.onStart();
     task.onTick();
@@ -301,12 +301,12 @@ describe('CoverWithBlocksTask', () => {
   it('WHY: Covers lava when has enough blocks', () => {
     const task = new CoverWithBlocksTask(bot);
     // Give bot plenty of cobblestone
-    (bot.inventory.items as jest.Mock).mockReturnValue([
+    (bot.inventory.items as any).mockReturnValue([
       { name: 'cobblestone', count: 256 },
     ]);
 
     // Mock finding lava
-    (bot.blockAt as jest.Mock).mockImplementation((pos: Vec3) => {
+    (bot.blockAt as any).mockImplementation((pos: Vec3) => {
       if (pos.x === 5 && pos.y === 60 && pos.z === 5) {
         return { name: 'lava' };
       }
@@ -365,7 +365,7 @@ describe('ConstructIronGolemTask', () => {
 
   it('WHY: Requires 4 iron blocks and 1 carved pumpkin', () => {
     const task = new ConstructIronGolemTask(bot);
-    (bot.inventory.items as jest.Mock).mockReturnValue([]);
+    (bot.inventory.items as any).mockReturnValue([]);
 
     task.onStart();
     task.onTick();
@@ -383,11 +383,11 @@ describe('ConstructIronGolemTask', () => {
 
   it('WHY: Finds position if not specified', () => {
     const task = new ConstructIronGolemTask(bot);
-    (bot.inventory.items as jest.Mock).mockReturnValue([
+    (bot.inventory.items as any).mockReturnValue([
       { name: 'iron_block', count: 4 },
       { name: 'carved_pumpkin', count: 1 },
     ]);
-    (bot.blockAt as jest.Mock).mockReturnValue({ name: 'air' });
+    (bot.blockAt as any).mockReturnValue({ name: 'air' });
 
     task.onStart();
     task.onTick();
@@ -399,11 +399,11 @@ describe('ConstructIronGolemTask', () => {
   it('WHY: Places iron blocks in correct pattern for golem', () => {
     const pos = new BlockPos(0, 65, 0);
     const task = new ConstructIronGolemTask(bot, pos);
-    (bot.inventory.items as jest.Mock).mockReturnValue([
+    (bot.inventory.items as any).mockReturnValue([
       { name: 'iron_block', count: 4 },
       { name: 'carved_pumpkin', count: 1 },
     ]);
-    (bot.blockAt as jest.Mock).mockReturnValue({ name: 'air' });
+    (bot.blockAt as any).mockReturnValue({ name: 'air' });
 
     task.onStart();
     const subtask = task.onTick();
@@ -596,9 +596,9 @@ describe('PlaceStructureBlockTask', () => {
 
     it('WHY: Selects block from inventory', () => {
       // Ensure position is empty so we proceed to block selection
-      (bot.blockAt as jest.Mock).mockReturnValue({ name: 'air', boundingBox: 'empty' });
+      (bot.blockAt as any).mockReturnValue({ name: 'air', boundingBox: 'empty' });
       // Mock inventory with cobblestone
-      (bot.inventory.items as jest.Mock).mockReturnValue([
+      (bot.inventory.items as any).mockReturnValue([
         { name: 'cobblestone', count: 64 },
       ]);
 
@@ -612,9 +612,9 @@ describe('PlaceStructureBlockTask', () => {
 
     it('WHY: Fails when no throwaway blocks available', () => {
       // Ensure position is empty so we proceed to block selection
-      (bot.blockAt as jest.Mock).mockReturnValue({ name: 'air', boundingBox: 'empty' });
+      (bot.blockAt as any).mockReturnValue({ name: 'air', boundingBox: 'empty' });
       // Mock inventory with no throwaway blocks
-      (bot.inventory.items as jest.Mock).mockReturnValue([
+      (bot.inventory.items as any).mockReturnValue([
         { name: 'diamond', count: 64 },
       ]);
 
@@ -629,7 +629,7 @@ describe('PlaceStructureBlockTask', () => {
 
   describe('Completion', () => {
     it('WHY: Finishes when block already placed at position', () => {
-      (bot.blockAt as jest.Mock).mockReturnValue({ name: 'stone', boundingBox: 'block' });
+      (bot.blockAt as any).mockReturnValue({ name: 'stone', boundingBox: 'block' });
 
       const task = new PlaceStructureBlockTask(bot, new BlockPos(0, 65, 0));
       task.onStart();
@@ -676,8 +676,8 @@ describe('PlaceStructureBlockTask', () => {
   describe('Block Selection', () => {
     it('WHY: Uses first matching throwaway block found in inventory', () => {
       // Ensure position is air so we proceed to block selection
-      (bot.blockAt as jest.Mock).mockReturnValue({ name: 'air', boundingBox: 'empty' });
-      (bot.inventory.items as jest.Mock).mockReturnValue([
+      (bot.blockAt as any).mockReturnValue({ name: 'air', boundingBox: 'empty' });
+      (bot.inventory.items as any).mockReturnValue([
         { name: 'dirt', count: 64 },
         { name: 'cobblestone', count: 64 },
       ]);
@@ -693,8 +693,8 @@ describe('PlaceStructureBlockTask', () => {
 
     it('WHY: Uses any throwaway block', () => {
       // Ensure position is air so we proceed to block selection
-      (bot.blockAt as jest.Mock).mockReturnValue({ name: 'air', boundingBox: 'empty' });
-      (bot.inventory.items as jest.Mock).mockReturnValue([
+      (bot.blockAt as any).mockReturnValue({ name: 'air', boundingBox: 'empty' });
+      (bot.inventory.items as any).mockReturnValue([
         { name: 'netherrack', count: 64 },
       ]);
 

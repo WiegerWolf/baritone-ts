@@ -8,6 +8,7 @@
  * not just the mechanics (HOW they work).
  */
 
+import { describe, it, expect, mock, beforeEach, test } from 'bun:test';
 import { Vec3 } from 'vec3';
 import { EventEmitter } from 'events';
 import { PlayerInteractionFixChain } from './PlayerInteractionFixChain';
@@ -56,19 +57,19 @@ function createMockBot(options: {
   };
 
   bot._client = {
-    write: jest.fn(),
+    write: mock(),
   };
 
-  bot.chat = jest.fn();
-  bot.equip = jest.fn().mockResolvedValue(undefined);
-  bot.activateItem = jest.fn();
-  bot.deactivateItem = jest.fn();
-  bot.tossStack = jest.fn().mockResolvedValue(undefined);
-  bot.clickWindow = jest.fn().mockResolvedValue(undefined);
-  bot.setControlState = jest.fn();
-  bot.getControlState = jest.fn().mockReturnValue(false);
-  bot.clearControlStates = jest.fn();
-  bot.blockAt = jest.fn().mockReturnValue(null);
+  bot.chat = mock();
+  bot.equip = mock().mockResolvedValue(undefined);
+  bot.activateItem = mock();
+  bot.deactivateItem = mock();
+  bot.tossStack = mock().mockResolvedValue(undefined);
+  bot.clickWindow = mock().mockResolvedValue(undefined);
+  bot.setControlState = mock();
+  bot.getControlState = mock().mockReturnValue(false);
+  bot.clearControlStates = mock();
+  bot.blockAt = mock().mockReturnValue(null);
 
   return bot;
 }
@@ -94,7 +95,7 @@ describe('PlayerInteractionFixChain', () => {
         name: 'stone',
         position: new Vec3(0, 64, 0)
       };
-      bot.blockAt = jest.fn().mockReturnValue(stoneBlock);
+      bot.blockAt = mock().mockReturnValue(stoneBlock);
 
       // Simulate breaking stone (called externally since mineflayer lacks this event)
       chain.onDiggingStarted(stoneBlock as any);
@@ -115,7 +116,7 @@ describe('PlayerInteractionFixChain', () => {
       });
 
       const stoneBlock = { name: 'stone', position: new Vec3(0, 64, 0) };
-      bot.blockAt = jest.fn().mockReturnValue(stoneBlock);
+      bot.blockAt = mock().mockReturnValue(stoneBlock);
 
       chain.onDiggingStarted(stoneBlock as any);
       chain.onTick();
@@ -134,7 +135,7 @@ describe('PlayerInteractionFixChain', () => {
       });
 
       const logBlock = { name: 'oak_log', position: new Vec3(0, 64, 0) };
-      bot.blockAt = jest.fn().mockReturnValue(logBlock);
+      bot.blockAt = mock().mockReturnValue(logBlock);
 
       chain.onDiggingStarted(logBlock as any);
       chain.onTick();
@@ -152,7 +153,7 @@ describe('PlayerInteractionFixChain', () => {
       });
 
       const dirtBlock = { name: 'dirt', position: new Vec3(0, 64, 0) };
-      bot.blockAt = jest.fn().mockReturnValue(dirtBlock);
+      bot.blockAt = mock().mockReturnValue(dirtBlock);
 
       chain.onDiggingStarted(dirtBlock as any);
       chain.onTick();
@@ -168,7 +169,7 @@ describe('PlayerInteractionFixChain', () => {
       const chain = new PlayerInteractionFixChain(bot);
 
       const stoneBlock = { name: 'stone', position: new Vec3(0, 64, 0) };
-      bot.blockAt = jest.fn().mockReturnValue(stoneBlock);
+      bot.blockAt = mock().mockReturnValue(stoneBlock);
 
       chain.onDiggingStarted(stoneBlock as any);
       chain.onTick();
@@ -179,7 +180,7 @@ describe('PlayerInteractionFixChain', () => {
 
   describe('Intent: Release stuck shift key to prevent movement issues', () => {
     test('should release shift after timeout when held too long', () => {
-      bot.getControlState = jest.fn().mockReturnValue(true); // Sneaking
+      bot.getControlState = mock().mockReturnValue(true); // Sneaking
 
       const chain = new PlayerInteractionFixChain(bot, {
         fixStuckShift: true,
@@ -198,7 +199,7 @@ describe('PlayerInteractionFixChain', () => {
     });
 
     test('should reset timer when shift is released normally', () => {
-      bot.getControlState = jest.fn()
+      bot.getControlState = mock()
         .mockReturnValueOnce(true)
         .mockReturnValueOnce(false);
 

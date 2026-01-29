@@ -6,6 +6,7 @@
  * or structure finding. More lenient than exact block navigation.
  */
 
+import { describe, it, expect, mock, beforeEach } from 'bun:test';
 import type { Bot } from 'mineflayer';
 import { Vec3 } from 'vec3';
 
@@ -41,13 +42,13 @@ function createMockBot(overrides: Record<string, any> = {}): any {
     heldItem: null,
     game: { dimension: 'minecraft:overworld' },
     pathfinder: {
-      setGoal: jest.fn(),
-      goto: jest.fn(),
+      setGoal: mock(),
+      goto: mock(),
       isMoving: () => false,
     },
-    setControlState: jest.fn(),
-    clearControlStates: jest.fn(),
-    look: jest.fn(),
+    setControlState: mock(),
+    clearControlStates: mock(),
+    look: mock(),
     ...overrides,
   };
 

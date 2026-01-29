@@ -2,6 +2,7 @@
  * Unit tests for EventBus system
  */
 
+import { describe, it, expect, mock, beforeEach, test } from 'bun:test';
 import { Vec3 } from 'vec3';
 import { EventBus, HandlerPriority, createEventBus } from './index';
 
@@ -14,7 +15,7 @@ describe('EventBus', () => {
 
   describe('subscribe', () => {
     test('should register handler', () => {
-      const handler = jest.fn();
+      const handler = mock();
       eventBus.subscribe('player_move', handler);
 
       expect(eventBus.hasHandlers('player_move')).toBe(true);
@@ -22,16 +23,16 @@ describe('EventBus', () => {
     });
 
     test('should return handler ID', () => {
-      const handler = jest.fn();
+      const handler = mock();
       const id = eventBus.subscribe('player_move', handler);
 
       expect(typeof id).toBe('number');
     });
 
     test('should allow multiple handlers', () => {
-      eventBus.subscribe('player_move', jest.fn());
-      eventBus.subscribe('player_move', jest.fn());
-      eventBus.subscribe('player_move', jest.fn());
+      eventBus.subscribe('player_move', mock());
+      eventBus.subscribe('player_move', mock());
+      eventBus.subscribe('player_move', mock());
 
       expect(eventBus.getHandlerCount('player_move')).toBe(3);
     });
@@ -39,7 +40,7 @@ describe('EventBus', () => {
 
   describe('publish', () => {
     test('should call handler with data', () => {
-      const handler = jest.fn();
+      const handler = mock();
       eventBus.subscribe('player_move', handler);
 
       const data = { pos: new Vec3(10, 64, 20) };
@@ -49,8 +50,8 @@ describe('EventBus', () => {
     });
 
     test('should call all handlers', () => {
-      const handler1 = jest.fn();
-      const handler2 = jest.fn();
+      const handler1 = mock();
+      const handler2 = mock();
       eventBus.subscribe('player_move', handler1);
       eventBus.subscribe('player_move', handler2);
 
@@ -67,10 +68,10 @@ describe('EventBus', () => {
     });
 
     test('should handle errors in handlers gracefully', () => {
-      const errorHandler = jest.fn(() => {
+      const errorHandler = mock(() => {
         throw new Error('Test error');
       });
-      const goodHandler = jest.fn();
+      const goodHandler = mock();
 
       eventBus.subscribe('player_move', errorHandler);
       eventBus.subscribe('player_move', goodHandler);
@@ -114,7 +115,7 @@ describe('EventBus', () => {
 
   describe('once', () => {
     test('should only fire once', () => {
-      const handler = jest.fn();
+      const handler = mock();
       eventBus.once('player_move', handler);
 
       eventBus.publish('player_move', { pos: new Vec3(0, 0, 0) });
@@ -124,7 +125,7 @@ describe('EventBus', () => {
     });
 
     test('should be removed after firing', () => {
-      const handler = jest.fn();
+      const handler = mock();
       eventBus.once('player_move', handler);
 
       eventBus.publish('player_move', { pos: new Vec3(0, 0, 0) });
@@ -135,7 +136,7 @@ describe('EventBus', () => {
 
   describe('unsubscribe', () => {
     test('should remove handler by ID', () => {
-      const handler = jest.fn();
+      const handler = mock();
       const id = eventBus.subscribe('player_move', handler);
 
       const removed = eventBus.unsubscribe(id);
@@ -150,7 +151,7 @@ describe('EventBus', () => {
     });
 
     test('handler should not be called after unsubscribe', () => {
-      const handler = jest.fn();
+      const handler = mock();
       const id = eventBus.subscribe('player_move', handler);
 
       eventBus.unsubscribe(id);
@@ -162,9 +163,9 @@ describe('EventBus', () => {
 
   describe('unsubscribeAll', () => {
     test('should remove all handlers for event', () => {
-      eventBus.subscribe('player_move', jest.fn());
-      eventBus.subscribe('player_move', jest.fn());
-      eventBus.subscribe('player_move', jest.fn());
+      eventBus.subscribe('player_move', mock());
+      eventBus.subscribe('player_move', mock());
+      eventBus.subscribe('player_move', mock());
 
       eventBus.unsubscribeAll('player_move');
 
@@ -172,8 +173,8 @@ describe('EventBus', () => {
     });
 
     test('should not affect other events', () => {
-      eventBus.subscribe('player_move', jest.fn());
-      eventBus.subscribe('player_health', jest.fn());
+      eventBus.subscribe('player_move', mock());
+      eventBus.subscribe('player_health', mock());
 
       eventBus.unsubscribeAll('player_move');
 
@@ -183,9 +184,9 @@ describe('EventBus', () => {
 
   describe('clear', () => {
     test('should remove all handlers', () => {
-      eventBus.subscribe('player_move', jest.fn());
-      eventBus.subscribe('player_health', jest.fn());
-      eventBus.subscribe('entity_spawn', jest.fn());
+      eventBus.subscribe('player_move', mock());
+      eventBus.subscribe('player_health', mock());
+      eventBus.subscribe('entity_spawn', mock());
 
       eventBus.clear();
 
@@ -201,16 +202,16 @@ describe('EventBus', () => {
     });
 
     test('should return true for event with handlers', () => {
-      eventBus.subscribe('player_move', jest.fn());
+      eventBus.subscribe('player_move', mock());
       expect(eventBus.hasHandlers('player_move')).toBe(true);
     });
   });
 
   describe('getDebugInfo', () => {
     test('should return debug string', () => {
-      eventBus.subscribe('player_move', jest.fn());
-      eventBus.subscribe('player_move', jest.fn());
-      eventBus.subscribe('player_health', jest.fn());
+      eventBus.subscribe('player_move', mock());
+      eventBus.subscribe('player_move', mock());
+      eventBus.subscribe('player_health', mock());
 
       const info = eventBus.getDebugInfo();
 
@@ -236,7 +237,7 @@ describe('Event Types', () => {
   });
 
   test('should handle block events', () => {
-    const handler = jest.fn();
+    const handler = mock();
     eventBus.subscribe('block_update', handler);
 
     eventBus.publish('block_update', {
@@ -249,7 +250,7 @@ describe('Event Types', () => {
   });
 
   test('should handle player events', () => {
-    const handler = jest.fn();
+    const handler = mock();
     eventBus.subscribe('player_health', handler);
 
     eventBus.publish('player_health', {
@@ -261,7 +262,7 @@ describe('Event Types', () => {
   });
 
   test('should handle task events', () => {
-    const handler = jest.fn();
+    const handler = mock();
     eventBus.subscribe('task_finish', handler);
 
     eventBus.publish('task_finish', {

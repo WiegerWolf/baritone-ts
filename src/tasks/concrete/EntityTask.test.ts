@@ -9,6 +9,7 @@
  *   and proper state machine transitions.
  */
 
+import { describe, it, expect, mock } from 'bun:test';
 import {
   AbstractDoToEntityTask,
   DoToClosestEntityTask,
@@ -41,16 +42,16 @@ function createMockBot(overrides: Record<string, any> = {}): any {
     food: 20,
     heldItem: null,
     pathfinder: {
-      setGoal: jest.fn(),
-      goto: jest.fn(),
+      setGoal: mock(),
+      goto: mock(),
       isMoving: () => false,
     },
-    attack: jest.fn(),
-    useOn: jest.fn(),
-    toss: jest.fn(),
-    setControlState: jest.fn(),
-    clearControlStates: jest.fn(),
-    look: jest.fn(),
+    attack: mock(),
+    useOn: mock(),
+    toss: mock(),
+    setControlState: mock(),
+    clearControlStates: mock(),
+    look: mock(),
     ...overrides,
   };
 
@@ -347,7 +348,7 @@ describe('Entity Tasks', () => {
     });
 
     it('should attack when in range', () => {
-      const attackMock = jest.fn();
+      const attackMock = mock();
       const enemy = createMockEntity(1, 'player', 2, 64, 2);
       enemy.username = 'Enemy';
 
@@ -383,7 +384,7 @@ describe('Entity Tasks', () => {
      * mounting, and other entity-specific actions.
      */
     it('should call useOn when in range', () => {
-      const useOnMock = jest.fn();
+      const useOnMock = mock();
       const villager = createMockEntity(1, 'villager', 2, 64, 2);
 
       const bot = createMockBot({

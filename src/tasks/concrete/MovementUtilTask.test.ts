@@ -12,6 +12,7 @@
  * Tests focus on INTENT (WHY these tasks exist) not just HOW they work.
  */
 
+import { describe, it, expect, mock, test } from 'bun:test';
 import { Vec3 } from 'vec3';
 import {
   TimeoutWanderTask,
@@ -46,12 +47,12 @@ function createMockBot(options: {
       slots: Array(46).fill(null),
       firstEmptyInventorySlot: () => 10,
     },
-    clickWindow: jest.fn().mockResolvedValue(undefined),
-    setControlState: jest.fn(),
-    getControlState: jest.fn().mockReturnValue(false),
-    clearControlStates: jest.fn(),
-    lookAt: jest.fn(),
-    blockAt: jest.fn().mockReturnValue({ name: 'stone' }),
+    clickWindow: mock().mockResolvedValue(undefined),
+    setControlState: mock(),
+    getControlState: mock().mockReturnValue(false),
+    clearControlStates: mock(),
+    lookAt: mock(),
+    blockAt: mock().mockReturnValue({ name: 'stone' }),
   };
 
   return bot;
@@ -125,7 +126,7 @@ describe('TimeoutWanderTask', () => {
   describe('Intent: Escape nether portals automatically', () => {
     test('should sneak forward when in nether portal', () => {
       const bot = createMockBot();
-      bot.blockAt = jest.fn().mockReturnValue({ name: 'nether_portal' });
+      bot.blockAt = mock().mockReturnValue({ name: 'nether_portal' });
 
       const task = new TimeoutWanderTask(bot);
       task.tick();

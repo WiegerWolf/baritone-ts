@@ -13,7 +13,7 @@
  *   - Helps prepare for nether entry
  */
 
-import { describe, it, expect, beforeEach } from '@jest/globals';
+import { describe, it, expect, beforeEach, mock } from 'bun:test';
 import { Bot } from 'mineflayer';
 import { Vec3 } from 'vec3';
 import {
@@ -34,17 +34,17 @@ function createMockBot(): Bot {
       velocity: new Vec3(0, 0, 0),
     },
     inventory: {
-      items: jest.fn().mockReturnValue([]),
+      items: mock().mockReturnValue([]),
       slots: {},
     },
-    blockAt: jest.fn().mockReturnValue(null),
+    blockAt: mock().mockReturnValue(null),
     game: {
       dimension: 'minecraft:overworld',
     },
-    on: jest.fn(),
-    removeListener: jest.fn(),
-    once: jest.fn(),
-    emit: jest.fn(),
+    on: mock(),
+    removeListener: mock(),
+    once: mock(),
+    emit: mock(),
   } as unknown as Bot;
 
   return mockBot;
@@ -106,7 +106,7 @@ describe('RavageDesertTemplesTask', () => {
     });
 
     it('WHY: Returns search task when no temple found', () => {
-      (bot.blockAt as ReturnType<typeof jest.fn>).mockReturnValue(null);
+      (bot.blockAt as ReturnType<typeof mock>).mockReturnValue(null);
 
       const task = new RavageDesertTemplesTask(bot);
       task.onStart();
@@ -127,7 +127,7 @@ describe('RavageDesertTemplesTask', () => {
   describe('Temple Detection', () => {
     it('WHY: Identifies temple by stone pressure plate', () => {
       const pressurePlatePos = new Vec3(8, 45, 8); // Within search range
-      (bot.blockAt as ReturnType<typeof jest.fn>).mockImplementation((pos: Vec3) => {
+      (bot.blockAt as ReturnType<typeof mock>).mockImplementation((pos: Vec3) => {
         if (Math.abs(pos.x - 8) < 1 && Math.abs(pos.y - 45) < 1 && Math.abs(pos.z - 8) < 1) {
           return { name: 'stone_pressure_plate' };
         }
@@ -240,7 +240,7 @@ describe('RavageRuinedPortalsTask', () => {
 
       // Without a matching chest+netherrack combo in the search area,
       // the task will wander to find structures
-      (bot.blockAt as ReturnType<typeof jest.fn>).mockReturnValue(null);
+      (bot.blockAt as ReturnType<typeof mock>).mockReturnValue(null);
 
       const task = new RavageRuinedPortalsTask(bot);
       task.onStart();
@@ -255,7 +255,7 @@ describe('RavageRuinedPortalsTask', () => {
       // Chest with water above = ocean ruin/shipwreck
       const chestPos = new Vec3(8, 65, 8);
 
-      (bot.blockAt as ReturnType<typeof jest.fn>).mockImplementation((pos: Vec3) => {
+      (bot.blockAt as ReturnType<typeof mock>).mockImplementation((pos: Vec3) => {
         if (Math.abs(pos.x - 8) < 1 && Math.abs(pos.y - 65) < 1 && Math.abs(pos.z - 8) < 1) {
           return { name: 'chest' };
         }
@@ -278,7 +278,7 @@ describe('RavageRuinedPortalsTask', () => {
       (bot.entity as any).position = new Vec3(0, 40, 0);
 
       // Chest at y=40 - below threshold
-      (bot.blockAt as ReturnType<typeof jest.fn>).mockImplementation((pos: Vec3) => {
+      (bot.blockAt as ReturnType<typeof mock>).mockImplementation((pos: Vec3) => {
         if (Math.abs(pos.x) < 1 && Math.abs(pos.y - 40) < 1 && Math.abs(pos.z) < 1) {
           return { name: 'chest' };
         }

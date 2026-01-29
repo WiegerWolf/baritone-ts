@@ -7,6 +7,7 @@
  * - INTENT: Validate block search, approach logic, and directional movement.
  */
 
+import { describe, it, expect, mock } from 'bun:test';
 import {
   DoToClosestBlockTask,
   GetWithinRangeOfBlockTask,
@@ -35,9 +36,9 @@ function createMockBot(overrides: Record<string, any> = {}): any {
     time: { timeOfDay: 6000, age: 0 },
     health: 20,
     food: 20,
-    setControlState: jest.fn(),
-    clearControlStates: jest.fn(),
-    look: jest.fn(),
+    setControlState: mock(),
+    clearControlStates: mock(),
+    look: mock(),
     targetDigBlock: null,
     currentWindow: null,
     player: {},

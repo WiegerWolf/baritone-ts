@@ -6,6 +6,7 @@
  * - INTENT: Validate entity finding, filtering, and convenience functions.
  */
 
+import { describe, it, expect, mock } from 'bun:test';
 import {
   KillAndLootTask,
   killAndLoot,
@@ -33,10 +34,10 @@ function createMockBot(overrides: Record<string, any> = {}): any {
     health: 20,
     food: 20,
     game: { dimension: 'minecraft:overworld' },
-    attack: jest.fn(),
-    setControlState: jest.fn(),
-    clearControlStates: jest.fn(),
-    look: jest.fn(),
+    attack: mock(),
+    setControlState: mock(),
+    clearControlStates: mock(),
+    look: mock(),
     targetDigBlock: null,
     currentWindow: null,
     player: {},

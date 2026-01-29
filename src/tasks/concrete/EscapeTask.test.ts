@@ -8,6 +8,7 @@
  *   and proper completion when safe.
  */
 
+import { describe, it, expect, mock } from 'bun:test';
 import {
   EscapeFromLavaTask,
   RunAwayFromCreepersTask,
@@ -38,13 +39,13 @@ function createMockBot(overrides: Record<string, any> = {}): any {
     food: 20,
     heldItem: null,
     pathfinder: {
-      setGoal: jest.fn(),
-      goto: jest.fn(),
+      setGoal: mock(),
+      goto: mock(),
       isMoving: () => false,
     },
-    setControlState: jest.fn(),
-    clearControlStates: jest.fn(),
-    look: jest.fn(),
+    setControlState: mock(),
+    clearControlStates: mock(),
+    look: mock(),
     ...overrides,
   };
 
@@ -146,7 +147,7 @@ describe('Escape Tasks', () => {
        * using sprint and jump for faster movement.
        */
       it('should escape when in lava', () => {
-        const setControlState = jest.fn();
+        const setControlState = mock();
         const bot = createMockBot({
           blockAt: (pos: Vec3) => {
             if (pos.y === 64) return { name: 'lava', boundingBox: 'empty' };
@@ -187,7 +188,7 @@ describe('Escape Tasks', () => {
        * even though it causes more damage. Getting out quickly is better.
        */
       it('should sprint through lava when configured', () => {
-        const setControlState = jest.fn();
+        const setControlState = mock();
         const bot = createMockBot({
           blockAt: (pos: Vec3) => {
             if (Math.floor(pos.x) === 0 && Math.floor(pos.z) === 0 && Math.floor(pos.y) === 64) {
@@ -209,7 +210,7 @@ describe('Escape Tasks', () => {
       });
 
       it('should jump through lava when configured', () => {
-        const setControlState = jest.fn();
+        const setControlState = mock();
         const bot = createMockBot({
           blockAt: (pos: Vec3) => {
             if (Math.floor(pos.x) === 0 && Math.floor(pos.z) === 0 && Math.floor(pos.y) === 64) {
@@ -233,7 +234,7 @@ describe('Escape Tasks', () => {
        * to prevent the player from continuing to sprint/jump.
        */
       it('should clear controls on stop', () => {
-        const setControlState = jest.fn();
+        const setControlState = mock();
         const bot = createMockBot({ setControlState });
 
         const task = new EscapeFromLavaTask(bot);
@@ -379,7 +380,7 @@ describe('Escape Tasks', () => {
       });
 
       it('should sprint when configured', () => {
-        const setControlState = jest.fn();
+        const setControlState = mock();
         const creeper = createMockEntity(1, 'creeper', 5, 64, 5);
         const bot = createMockBot({
           entities: { 1: creeper },
@@ -564,7 +565,7 @@ describe('Escape Tasks', () => {
       });
 
       it('should clear controls on stop', () => {
-        const setControlState = jest.fn();
+        const setControlState = mock();
         const bot = createMockBot({ setControlState });
 
         const task = new RunAwayFromHostilesTask(bot);

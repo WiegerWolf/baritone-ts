@@ -12,7 +12,7 @@
  *   - Searches for stone bricks to find actual structure
  */
 
-import { describe, it, expect, beforeEach } from '@jest/globals';
+import { describe, it, expect, beforeEach, mock } from 'bun:test';
 import { Bot } from 'mineflayer';
 import { Vec3 } from 'vec3';
 import {
@@ -39,23 +39,23 @@ function createMockBot(): Bot {
       yaw: 0,
     },
     inventory: {
-      items: jest.fn().mockReturnValue([]),
+      items: mock().mockReturnValue([]),
       slots: {},
     },
-    blockAt: jest.fn().mockReturnValue(null),
+    blockAt: mock().mockReturnValue(null),
     entities: {},
     game: {
       dimension: 'minecraft:the_end',
     },
-    look: jest.fn(),
-    lookAt: jest.fn(),
-    attack: jest.fn(),
-    equip: jest.fn(),
-    activateItem: jest.fn(),
-    on: jest.fn(),
-    removeListener: jest.fn(),
-    once: jest.fn(),
-    emit: jest.fn(),
+    look: mock(),
+    lookAt: mock(),
+    attack: mock(),
+    equip: mock(),
+    activateItem: mock(),
+    on: mock(),
+    removeListener: mock(),
+    once: mock(),
+    emit: mock(),
   } as unknown as Bot;
 
   return mockBot;

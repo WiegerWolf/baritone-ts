@@ -2,6 +2,7 @@
  * Unit tests for AltoClef/BaritonePlus Task System
  */
 
+import { describe, it, expect, mock, spyOn, beforeEach, test } from 'bun:test';
 import { Vec3 } from 'vec3';
 import {
   Task,
@@ -72,8 +73,8 @@ function createMockBot(options: {
       cursor: null,
     },
     blockAt: () => null,
-    setQuickBarSlot: jest.fn(),
-    clearControlStates: jest.fn(),
+    setQuickBarSlot: mock(),
+    clearControlStates: mock(),
   };
 }
 
@@ -155,7 +156,7 @@ describe('Task', () => {
 
   test('should execute onStart on first tick', () => {
     const task = new CounterTask(bot);
-    const onStartSpy = jest.spyOn(task, 'onStart');
+    const onStartSpy = spyOn(task, 'onStart');
 
     task.tick();
     expect(onStartSpy).toHaveBeenCalledTimes(1);
@@ -199,7 +200,7 @@ describe('Task', () => {
 
   test('should call onStop when stopped', () => {
     const task = new CounterTask(bot);
-    const onStopSpy = jest.spyOn(task, 'onStop');
+    const onStopSpy = spyOn(task, 'onStop');
 
     task.tick();
     task.stop(null);
@@ -373,7 +374,7 @@ describe('TaskRunner', () => {
 
   test('should emit chain_changed event', () => {
     const runner = new TaskRunner(bot);
-    const callback = jest.fn();
+    const callback = mock();
 
     runner.on('chain_changed', callback);
 

@@ -8,6 +8,7 @@
  *   handling of edge cases like blocked chests or missing containers.
  */
 
+import { describe, it, expect, mock } from 'bun:test';
 import {
   ContainerType,
   getContainerBlocks,
@@ -52,11 +53,11 @@ function createMockBot(overrides: Record<string, any> = {}): any {
     heldItem: null,
     currentWindow: null,
     pathfinder: {
-      setGoal: jest.fn(),
-      goto: jest.fn(),
+      setGoal: mock(),
+      goto: mock(),
       isMoving: () => false,
     },
-    closeWindow: jest.fn(),
+    closeWindow: mock(),
     ...overrides,
   };
 }
@@ -293,7 +294,7 @@ describe('Container Tasks', () => {
      * closing any open windows.
      */
     it('should close window on stop', () => {
-      const closeWindow = jest.fn();
+      const closeWindow = mock();
       const bot = createMockBot({
         currentWindow: { type: 'chest' },
         closeWindow,

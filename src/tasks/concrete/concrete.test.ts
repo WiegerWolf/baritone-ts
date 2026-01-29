@@ -2,6 +2,7 @@
  * Tests for Concrete Tasks
  */
 
+import { describe, it, expect, mock } from 'bun:test';
 import {
   GoToBlockTask,
   GetToBlockTask,
@@ -53,22 +54,22 @@ function createMockBot(): any {
     food: 20,
     heldItem: null,
     pathfinder: {
-      setGoal: jest.fn(),
-      goto: jest.fn(),
+      setGoal: mock(),
+      goto: mock(),
       isMoving: () => false,
     },
-    dig: jest.fn(),
-    placeBlock: jest.fn(),
-    equip: jest.fn(),
-    attack: jest.fn(),
-    activateItem: jest.fn(),
-    deactivateItem: jest.fn(),
-    activateBlock: jest.fn(),
-    activateEntity: jest.fn(),
-    toss: jest.fn(),
-    clickWindow: jest.fn(),
-    look: jest.fn(),
-    craft: jest.fn(),
+    dig: mock(),
+    placeBlock: mock(),
+    equip: mock(),
+    attack: mock(),
+    activateItem: mock(),
+    deactivateItem: mock(),
+    activateBlock: mock(),
+    activateEntity: mock(),
+    toss: mock(),
+    clickWindow: mock(),
+    look: mock(),
+    craft: mock(),
   };
 }
 

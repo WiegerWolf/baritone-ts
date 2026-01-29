@@ -11,6 +11,7 @@
  *    as it auto-fills the crafting grid.
  */
 
+import { describe, it, expect, mock, beforeEach } from 'bun:test';
 import type { Bot } from 'mineflayer';
 import { Vec3 } from 'vec3';
 
@@ -32,15 +33,15 @@ function createMockBot(overrides: Record<string, any> = {}): any {
     food: 20,
     heldItem: null,
     pathfinder: {
-      setGoal: jest.fn(),
-      goto: jest.fn(),
+      setGoal: mock(),
+      goto: mock(),
       isMoving: () => false,
     },
-    setControlState: jest.fn(),
-    clearControlStates: jest.fn(),
-    look: jest.fn(),
-    clickWindow: jest.fn(),
-    closeWindow: jest.fn(),
+    setControlState: mock(),
+    clearControlStates: mock(),
+    look: mock(),
+    clickWindow: mock(),
+    closeWindow: mock(),
     ...overrides,
   };
 

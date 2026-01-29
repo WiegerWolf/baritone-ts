@@ -11,7 +11,7 @@
  * to achieve a complete game completion.
  */
 
-import { describe, it, expect, beforeEach } from '@jest/globals';
+import { describe, it, expect, beforeEach, mock } from 'bun:test';
 import { Bot } from 'mineflayer';
 import { Vec3 } from 'vec3';
 import { BlockPos } from '../../types';
@@ -34,10 +34,10 @@ function createMockBot(): Bot {
       yaw: 0,
     },
     inventory: {
-      items: jest.fn().mockReturnValue([]),
+      items: mock().mockReturnValue([]),
       slots: {},
     },
-    blockAt: jest.fn().mockReturnValue({ name: 'air' }),
+    blockAt: mock().mockReturnValue({ name: 'air' }),
     entities: {},
     game: {
       dimension: 'minecraft:overworld',
@@ -45,15 +45,15 @@ function createMockBot(): Bot {
     time: {
       timeOfDay: 1000, // Day time
     },
-    look: jest.fn(),
-    lookAt: jest.fn(),
-    attack: jest.fn(),
-    equip: jest.fn(),
-    activateItem: jest.fn(),
-    on: jest.fn(),
-    removeListener: jest.fn(),
-    once: jest.fn(),
-    emit: jest.fn(),
+    look: mock(),
+    lookAt: mock(),
+    attack: mock(),
+    equip: mock(),
+    activateItem: mock(),
+    on: mock(),
+    removeListener: mock(),
+    once: mock(),
+    emit: mock(),
   } as unknown as Bot;
 
   return mockBot;
@@ -239,7 +239,7 @@ describe('BeatMinecraftTask', () => {
 
   describe('Resource Tracking', () => {
     it('WHY: Tracks ender eye count for portal opening', () => {
-      (bot.inventory.items as jest.Mock).mockReturnValue([
+      (bot.inventory.items as any).mockReturnValue([
         { name: 'ender_eye', count: 12 },
       ]);
 
@@ -252,7 +252,7 @@ describe('BeatMinecraftTask', () => {
 
     it('WHY: Tracks blaze rods and powder for eye crafting', () => {
       (bot as any).game = { dimension: 'minecraft:the_nether' };
-      (bot.inventory.items as jest.Mock).mockReturnValue([
+      (bot.inventory.items as any).mockReturnValue([
         { name: 'blaze_rod', count: 3 },
         { name: 'blaze_powder', count: 2 },
       ]);
@@ -267,7 +267,7 @@ describe('BeatMinecraftTask', () => {
 
     it('WHY: Tracks ender pearls for eye crafting', () => {
       (bot as any).game = { dimension: 'minecraft:the_nether' };
-      (bot.inventory.items as jest.Mock).mockReturnValue([
+      (bot.inventory.items as any).mockReturnValue([
         { name: 'blaze_rod', count: 10 },
         { name: 'ender_pearl', count: 5 },
       ]);
@@ -396,7 +396,7 @@ describe('Integration Concepts', () => {
 
     it('WHY: Must have gear before nether (safety)', () => {
       // Give bot food
-      (bot.inventory.items as jest.Mock).mockReturnValue([
+      (bot.inventory.items as any).mockReturnValue([
         { name: 'cooked_beef', count: 64 },
         { name: 'iron_pickaxe', count: 1 },
       ]);
@@ -414,7 +414,7 @@ describe('Integration Concepts', () => {
 
     it('WHY: Must have blaze rods before ender pearls (crafting order)', () => {
       (bot as any).game = { dimension: 'minecraft:the_nether' };
-      (bot.inventory.items as jest.Mock).mockReturnValue([]);
+      (bot.inventory.items as any).mockReturnValue([]);
 
       const task = new BeatMinecraftTask(bot);
       task.onStart();

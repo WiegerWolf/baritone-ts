@@ -2,6 +2,7 @@
  * Unit tests for Timer utilities
  */
 
+import { describe, test, expect, beforeEach, afterEach, setSystemTime } from 'bun:test';
 import { TimerGame, TimerReal, Stopwatch } from './index';
 
 describe('TimerGame', () => {
@@ -67,12 +68,15 @@ describe('TimerGame', () => {
 });
 
 describe('TimerReal', () => {
+  let now: number;
+
   beforeEach(() => {
-    jest.useFakeTimers();
+    now = 1000000;
+    setSystemTime(new Date(now));
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    setSystemTime();
   });
 
   test('should not be elapsed initially', () => {
@@ -83,30 +87,35 @@ describe('TimerReal', () => {
   test('should be elapsed after duration', () => {
     const timer = new TimerReal(1.0);
 
-    jest.advanceTimersByTime(1000); // 1 second
+    now += 1000; // 1 second
+    setSystemTime(new Date(now));
     expect(timer.elapsed()).toBe(true);
   });
 
   test('should reset timer', () => {
     const timer = new TimerReal(1.0);
 
-    jest.advanceTimersByTime(1000);
+    now += 1000;
+    setSystemTime(new Date(now));
     expect(timer.elapsed()).toBe(true);
 
     timer.reset();
     expect(timer.elapsed()).toBe(false);
 
-    jest.advanceTimersByTime(1000);
+    now += 1000;
+    setSystemTime(new Date(now));
     expect(timer.elapsed()).toBe(true);
   });
 
   test('should calculate progress', () => {
     const timer = new TimerReal(2.0);
 
-    jest.advanceTimersByTime(1000); // Half way
+    now += 1000; // Half way
+    setSystemTime(new Date(now));
     expect(timer.getProgress()).toBeCloseTo(0.5, 1);
 
-    jest.advanceTimersByTime(1000); // Full
+    now += 1000; // Full
+    setSystemTime(new Date(now));
     expect(timer.getProgress()).toBeCloseTo(1.0, 1);
   });
 
@@ -114,12 +123,15 @@ describe('TimerReal', () => {
 
 
 describe('Stopwatch', () => {
+  let now: number;
+
   beforeEach(() => {
-    jest.useFakeTimers();
+    now = 1000000;
+    setSystemTime(new Date(now));
   });
 
   afterEach(() => {
-    jest.useRealTimers();
+    setSystemTime();
   });
 
   test('should start at zero', () => {
@@ -132,7 +144,8 @@ describe('Stopwatch', () => {
     const stopwatch = new Stopwatch();
     stopwatch.start();
 
-    jest.advanceTimersByTime(2500); // 2.5 seconds
+    now += 2500; // 2.5 seconds
+    setSystemTime(new Date(now));
     expect(stopwatch.getElapsedSeconds()).toBeCloseTo(2.5, 1);
   });
 
@@ -140,7 +153,8 @@ describe('Stopwatch', () => {
     const stopwatch = new Stopwatch();
     stopwatch.start();
 
-    jest.advanceTimersByTime(5000);
+    now += 5000;
+    setSystemTime(new Date(now));
     stopwatch.reset();
 
     expect(stopwatch.getElapsedSeconds()).toBeCloseTo(0, 2);
@@ -150,14 +164,17 @@ describe('Stopwatch', () => {
     const stopwatch = new Stopwatch();
     stopwatch.start();
 
-    jest.advanceTimersByTime(1000);
+    now += 1000;
+    setSystemTime(new Date(now));
     stopwatch.stop();
 
-    jest.advanceTimersByTime(5000); // Time passes while stopped
+    now += 5000; // Time passes while stopped
+    setSystemTime(new Date(now));
     expect(stopwatch.getElapsedSeconds()).toBeCloseTo(1.0, 1);
 
     stopwatch.start();
-    jest.advanceTimersByTime(1000);
+    now += 1000;
+    setSystemTime(new Date(now));
     expect(stopwatch.getElapsedSeconds()).toBeCloseTo(2.0, 1);
   });
 

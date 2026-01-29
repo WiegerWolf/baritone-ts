@@ -15,7 +15,7 @@
  *   - Alternative to mining obsidian with diamond pickaxe
  */
 
-import { describe, it, expect, beforeEach } from '@jest/globals';
+import { describe, it, expect, beforeEach, mock } from 'bun:test';
 import { Bot } from 'mineflayer';
 import { Vec3 } from 'vec3';
 import { BlockPos } from '../../types';
@@ -45,24 +45,24 @@ function createMockBot(): Bot {
       yaw: 0,
     },
     inventory: {
-      items: jest.fn().mockReturnValue([]),
+      items: mock().mockReturnValue([]),
       slots: {},
     },
-    blockAt: jest.fn().mockReturnValue({ name: 'air' }),
+    blockAt: mock().mockReturnValue({ name: 'air' }),
     entities: {},
     game: {
       dimension: 'minecraft:overworld',
     },
     food: 20,
-    look: jest.fn(),
-    lookAt: jest.fn(),
-    attack: jest.fn(),
-    equip: jest.fn(),
-    activateItem: jest.fn(),
-    on: jest.fn(),
-    removeListener: jest.fn(),
-    once: jest.fn(),
-    emit: jest.fn(),
+    look: mock(),
+    lookAt: mock(),
+    attack: mock(),
+    equip: mock(),
+    activateItem: mock(),
+    on: mock(),
+    removeListener: mock(),
+    once: mock(),
+    emit: mock(),
   } as unknown as Bot;
 
   return mockBot;
@@ -268,7 +268,7 @@ describe('PlaceObsidianBucketTask', () => {
       const task = new PlaceObsidianBucketTask(bot, pos);
 
       // Mock obsidian at position, no water above
-      (bot.blockAt as jest.Mock).mockImplementation((blockPos: Vec3) => {
+      (bot.blockAt as any).mockImplementation((blockPos: Vec3) => {
         if (blockPos.y === 60) return { name: 'obsidian' };
         return { name: 'air' };
       });
@@ -281,7 +281,7 @@ describe('PlaceObsidianBucketTask', () => {
       const task = new PlaceObsidianBucketTask(bot, pos);
 
       // Mock obsidian with water above
-      (bot.blockAt as jest.Mock).mockImplementation((blockPos: Vec3) => {
+      (bot.blockAt as any).mockImplementation((blockPos: Vec3) => {
         if (blockPos.y === 60) return { name: 'obsidian' };
         if (blockPos.y === 61) return { name: 'water' };
         return { name: 'air' };

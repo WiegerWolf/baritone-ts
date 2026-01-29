@@ -7,7 +7,7 @@
  * - Containment checks for positions
  */
 
-import { describe, it, expect, beforeEach } from '@jest/globals';
+import { describe, it, expect, beforeEach } from 'bun:test';
 import { Vec3 } from 'vec3';
 import { BlockRange, blockRange, blockRangeAround } from './BlockRange';
 import { BlockPos } from '../types';
