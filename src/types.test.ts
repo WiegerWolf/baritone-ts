@@ -230,4 +230,96 @@ describe('MutableMoveResult', () => {
     expect(result.z).toBe(0);
     expect(result.cost).toBe(Infinity);
   });
+
+  it('should support repeated set/reset cycles (object pooling)', () => {
+    const result = new MutableMoveResult();
+    for (let i = 0; i < 10; i++) {
+      result.set(i, i * 2, i * 3, i * 0.5);
+      expect(result.x).toBe(i);
+      expect(result.cost).toBe(i * 0.5);
+      result.reset();
+      expect(result.cost).toBe(Infinity);
+    }
+  });
+
+  it('should handle negative coordinates', () => {
+    const result = new MutableMoveResult();
+    result.set(-100, -64, -200, 999);
+    expect(result.x).toBe(-100);
+    expect(result.y).toBe(-64);
+    expect(result.z).toBe(-200);
+  });
+});
+
+describe('BlockPos.longHash edge cases', () => {
+  it('should produce consistent hashes for negative coordinates', () => {
+    const h1 = BlockPos.longHash(-100, -64, -200);
+    const h2 = BlockPos.longHash(-100, -64, -200);
+    expect(h1).toBe(h2);
+  });
+
+  it('should produce different hashes for mirrored coordinates', () => {
+    const h1 = BlockPos.longHash(10, 20, 30);
+    const h2 = BlockPos.longHash(-10, -20, -30);
+    expect(h1).not.toBe(h2);
+  });
+
+  it('should produce different hashes for swapped coordinates', () => {
+    const h1 = BlockPos.longHash(1, 2, 3);
+    const h2 = BlockPos.longHash(3, 2, 1);
+    const h3 = BlockPos.longHash(2, 1, 3);
+    expect(h1).not.toBe(h2);
+    expect(h1).not.toBe(h3);
+    expect(h2).not.toBe(h3);
+  });
+
+  it('should handle zero coordinates', () => {
+    const h = BlockPos.longHash(0, 0, 0);
+    expect(typeof h).toBe('bigint');
+  });
+
+  it('should handle large coordinates (world border)', () => {
+    const h1 = BlockPos.longHash(30000000, 320, 30000000);
+    const h2 = BlockPos.longHash(30000000, 320, 30000001);
+    expect(h1).not.toBe(h2);
+  });
+
+  it('should handle bitwise OR truncation for floats', () => {
+    // x | 0 truncates to 32-bit integer
+    const h1 = BlockPos.longHash(10.7, 64.3, 20.9);
+    const h2 = BlockPos.longHash(10, 64, 20);
+    expect(h1).toBe(h2);
+  });
+});
+
+describe('PathNode edge cases', () => {
+  it('should initialize combinedCost to Infinity', () => {
+    const node = new PathNode(0, 0, 0, 50);
+    expect(node.combinedCost).toBe(Infinity);
+  });
+
+  it('should initialize heapPosition to -1', () => {
+    const node = new PathNode(0, 0, 0, 50);
+    expect(node.heapPosition).toBe(-1);
+  });
+
+  it('should initialize toBreak and toPlace as empty arrays', () => {
+    const node = new PathNode(0, 0, 0, 50);
+    expect(node.toBreak).toEqual([]);
+    expect(node.toPlace).toEqual([]);
+  });
+
+  it('should generate hash matching coordinate string format', () => {
+    const node = new PathNode(-5, 300, 42, 0);
+    expect(node.hash).toBe('-5,300,42');
+  });
+
+  it('should create BlockPos via getPos', () => {
+    const node = new PathNode(10, 64, 20, 0);
+    const pos = node.getPos();
+    expect(pos.x).toBe(10);
+    expect(pos.y).toBe(64);
+    expect(pos.z).toBe(20);
+    expect(pos).toBeInstanceOf(BlockPos);
+  });
 });

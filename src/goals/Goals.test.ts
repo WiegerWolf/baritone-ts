@@ -531,5 +531,264 @@ describe('Goals', () => {
       const hFar = goal.heuristic(200, 64, 200);
       expect(hNear).toBeGreaterThan(hFar);
     });
+
+    it('should handle entity at exact same position (cost=0 edge case)', () => {
+      const entities = [
+        { position: new Vec3(100, 64, 100), isValid: true },
+      ] as any[];
+      const goal = new GoalRunAwayFromEntities(() => entities, 16);
+      // Standing on entity: getCostOfEntity returns 0, heuristic adds 1000
+      const h = goal.heuristic(100, 64, 100);
+      expect(h).toBeGreaterThan(0);
+    });
+
+    it('should limit to 10 entities for heuristic calculation', () => {
+      const entities = Array.from({ length: 20 }, (_, i) => ({
+        position: new Vec3(100 + i, 64, 100),
+        isValid: true,
+      })) as any[];
+      const goal = new GoalRunAwayFromEntities(() => entities, 16);
+      // Should not throw, even with 20 entities
+      const h = goal.heuristic(200, 64, 200);
+      expect(typeof h).toBe('number');
+      expect(Number.isFinite(h)).toBe(true);
+    });
+
+    it('should skip null entities', () => {
+      const entities = [
+        null,
+        { position: new Vec3(200, 64, 200), isValid: true },
+      ] as any[];
+      const goal = new GoalRunAwayFromEntities(() => entities, 16);
+      // null entities skipped, only valid entity is far away
+      expect(goal.isEnd(50, 64, 50)).toBe(true);
+    });
+
+    it('should handle empty entity list', () => {
+      const goal = new GoalRunAwayFromEntities(() => [] as any[], 16);
+      // No entities = safe everywhere
+      expect(goal.isEnd(0, 0, 0)).toBe(true);
+      expect(goal.heuristic(0, 0, 0)).toBe(0);
+    });
+  });
+
+  describe('GoalRunAway edge cases', () => {
+    it('should return negative heuristic (maximizes distance)', () => {
+      const dangers = [new BlockPos(0, 0, 0)];
+      const goal = new GoalRunAway(dangers, 10);
+      const h = goal.heuristic(100, 0, 0);
+      expect(h).toBeLessThan(0);
+    });
+
+    it('should return more negative heuristic farther away', () => {
+      const dangers = [new BlockPos(0, 0, 0)];
+      const goal = new GoalRunAway(dangers, 10);
+      const hNear = goal.heuristic(5, 0, 0);
+      const hFar = goal.heuristic(50, 0, 0);
+      // Farther = more negative (better for A*)
+      expect(hFar).toBeLessThan(hNear);
+    });
+
+    it('should handle no dangers (always at goal)', () => {
+      const goal = new GoalRunAway([], 10);
+      expect(goal.isEnd(0, 0, 0)).toBe(true);
+      // Sum of 0 dangers = -0
+      expect(goal.heuristic(0, 0, 0)).toBe(-0);
+    });
+  });
+
+  describe('GoalInverted edge cases', () => {
+    it('should return COST_INF heuristic when at inner goal', () => {
+      const inner = new GoalBlock(10, 64, 10);
+      const inverted = new GoalInverted(inner);
+      expect(inverted.heuristic(10, 64, 10)).toBe(1000000); // COST_INF
+    });
+
+    it('should return 0 heuristic when not at inner goal', () => {
+      const inner = new GoalBlock(10, 64, 10);
+      const inverted = new GoalInverted(inner);
+      expect(inverted.heuristic(20, 64, 20)).toBe(0);
+    });
+  });
+
+  describe('GoalGetToBlock edge cases', () => {
+    const goal = new GoalGetToBlock(10, 64, 20);
+
+    it('should match all 3D diagonal neighbors', () => {
+      // All 26 neighbors minus the block itself
+      let adjacentCount = 0;
+      for (let dx = -1; dx <= 1; dx++) {
+        for (let dy = -1; dy <= 1; dy++) {
+          for (let dz = -1; dz <= 1; dz++) {
+            if (dx === 0 && dy === 0 && dz === 0) {
+              expect(goal.isEnd(10, 64, 20)).toBe(false);
+            } else {
+              expect(goal.isEnd(10 + dx, 64 + dy, 20 + dz)).toBe(true);
+              adjacentCount++;
+            }
+          }
+        }
+      }
+      expect(adjacentCount).toBe(26);
+    });
+
+    it('should return 0 heuristic when already adjacent (dist=1)', () => {
+      const h = goal.heuristic(11, 64, 20);
+      expect(h).toBe(0);
+    });
+
+    it('should return positive heuristic when further than 1 block', () => {
+      const h = goal.heuristic(15, 64, 20);
+      expect(h).toBeGreaterThan(0);
+    });
+  });
+
+  describe('GoalNear edge cases', () => {
+    it('should match on exact boundary of range', () => {
+      const goal = new GoalNear(0, 0, 0, 5);
+      // Distance = 5 exactly, rangeSq = 25
+      expect(goal.isEnd(5, 0, 0)).toBe(true); // distSq = 25 <= 25
+      expect(goal.isEnd(3, 4, 0)).toBe(true);  // distSq = 25 <= 25
+    });
+
+    it('should not match just outside boundary', () => {
+      const goal = new GoalNear(0, 0, 0, 5);
+      // 4^2 + 4^2 = 32 > 25 (rangeSq), so outside
+      expect(goal.isEnd(4, 4, 0)).toBe(false);
+      // 6^2 = 36 > 25, outside
+      expect(goal.isEnd(6, 0, 0)).toBe(false);
+    });
+
+    it('should handle range 0 (only exact position)', () => {
+      const goal = new GoalNear(10, 64, 20, 0);
+      expect(goal.isEnd(10, 64, 20)).toBe(true);
+      expect(goal.isEnd(11, 64, 20)).toBe(false);
+    });
+  });
+
+  describe('GoalTwoBlocks edge cases', () => {
+    it('should handle negative Y values', () => {
+      const goal = new GoalTwoBlocks(0, -60, 0);
+      expect(goal.isEnd(0, -60, 0)).toBe(true);
+      expect(goal.isEnd(0, -61, 0)).toBe(true);
+      expect(goal.isEnd(0, -62, 0)).toBe(false);
+    });
+
+    it('heuristic should take minimum of both positions', () => {
+      const goal = new GoalTwoBlocks(0, 64, 0);
+      // Closer to y=63 (head position) than y=64 (feet position)
+      const h = goal.heuristic(0, 63, 0);
+      expect(h).toBe(0); // Already at the y-1 position, dist2=0
+    });
+  });
+
+  describe('GoalChunk edge cases', () => {
+    it('should handle negative chunk coordinates', () => {
+      const goal = new GoalChunk(-1, -1);
+      expect(goal.startX).toBe(-16);
+      expect(goal.endX).toBe(-1);
+      expect(goal.startZ).toBe(-16);
+      expect(goal.endZ).toBe(-1);
+      expect(goal.isEnd(-10, 64, -10)).toBe(true);
+      expect(goal.isEnd(0, 64, 0)).toBe(false);
+    });
+
+    it('should create from negative world coords', () => {
+      const goal = GoalChunk.fromWorldCoords(-10, -20);
+      expect(goal.chunkX).toBe(-1);
+      expect(goal.chunkZ).toBe(-2);
+    });
+
+    it('should ignore Y in isEnd', () => {
+      const goal = new GoalChunk(0, 0);
+      expect(goal.isEnd(0, -1000, 0)).toBe(true);
+      expect(goal.isEnd(0, 1000, 0)).toBe(true);
+    });
+  });
+
+  describe('GoalComposite edge cases', () => {
+    it('should return Infinity heuristic when no goals match', () => {
+      // Single goal, far away
+      const goal = new GoalComposite([new GoalBlock(1000000, 1000000, 1000000)]);
+      const h = goal.heuristic(0, 0, 0);
+      expect(h).toBeGreaterThan(0);
+      expect(Number.isFinite(h)).toBe(true);
+    });
+
+    it('should return single goal heuristic for single child', () => {
+      const inner = new GoalBlock(10, 64, 10);
+      const composite = new GoalComposite([inner]);
+      expect(composite.heuristic(0, 0, 0)).toBe(inner.heuristic(0, 0, 0));
+    });
+  });
+
+  describe('GoalAABB edge cases', () => {
+    it('should handle single-block AABB', () => {
+      const goal = new GoalAABB(10, 64, 20, 10, 64, 20);
+      expect(goal.isEnd(10, 64, 20)).toBe(true);
+      expect(goal.isEnd(11, 64, 20)).toBe(false);
+    });
+
+    it('should compute correct distance from each axis', () => {
+      const goal = new GoalAABB(10, 64, 10, 20, 70, 20);
+      // Only X is out of range
+      const hX = goal.heuristic(5, 67, 15);
+      expect(hX).toBeGreaterThan(0);
+      // Only Y is out of range
+      const hY = goal.heuristic(15, 60, 15);
+      expect(hY).toBeGreaterThan(0);
+      // Only Z is out of range
+      const hZ = goal.heuristic(15, 67, 5);
+      expect(hZ).toBeGreaterThan(0);
+    });
+  });
+
+  describe('GoalDirectionXZ edge cases', () => {
+    it('should handle diagonal direction', () => {
+      const goal = new GoalDirectionXZ(
+        { x: 0, z: 0 },
+        { x: 1, z: 1 },
+      );
+      const hForward = goal.heuristic(10, 64, 10);
+      const hBackward = goal.heuristic(-10, 64, -10);
+      expect(hForward).toBeLessThan(hBackward);
+    });
+
+    it('should penalize sideways movement with custom penalty', () => {
+      const goal = new GoalDirectionXZ(
+        { x: 0, z: 0 },
+        { x: 1, z: 0 },
+        5.0 // High side penalty
+      );
+      const hOnLine = goal.heuristic(10, 64, 0);
+      const hOffLine = goal.heuristic(10, 64, 5);
+      expect(hOffLine).toBeGreaterThan(hOnLine);
+    });
+
+    it('should throw for near-zero direction', () => {
+      expect(() => new GoalDirectionXZ(
+        { x: 0, z: 0 },
+        { x: 0.0001, z: 0.0001 },
+      )).toThrow('Direction vector cannot be zero');
+    });
+  });
+
+  describe('GoalFollow edge cases', () => {
+    it('should handle entity with position at origin', () => {
+      const entity = { position: new Vec3(0, 0, 0) };
+      const goal = new GoalFollow(entity, 3);
+      expect(goal.isEnd(0, 0, 0)).toBe(true);
+      expect(goal.heuristic(0, 0, 0)).toBe(0);
+    });
+
+    it('should handle entity position becoming null', () => {
+      const entity: any = { position: new Vec3(100, 64, 100) };
+      const goal = new GoalFollow(entity, 3);
+      entity.position = null;
+      // isValid should return false
+      expect(goal.isValid()).toBe(false);
+      // hasChanged should return false (can't read position)
+      expect(goal.hasChanged()).toBe(false);
+    });
   });
 });

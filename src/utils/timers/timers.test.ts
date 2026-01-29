@@ -197,6 +197,90 @@ describe('TimerReal', () => {
 });
 
 
+describe('TimerGame edge cases', () => {
+  let mockBot: any;
+
+  beforeEach(() => {
+    mockBot = {
+      time: { age: 0 },
+    };
+  });
+
+  test('should handle zero interval (always elapsed)', () => {
+    const timer = new TimerGame(mockBot, 0);
+    expect(timer.elapsed()).toBe(true);
+  });
+
+  test('should handle forceElapsed then reset cycle', () => {
+    const timer = new TimerGame(mockBot, 10.0);
+    timer.forceElapsed();
+    expect(timer.elapsed()).toBe(true);
+
+    timer.reset();
+    expect(timer.elapsed()).toBe(false);
+
+    mockBot.time.age = 200; // 10 seconds
+    expect(timer.elapsed()).toBe(true);
+  });
+
+  test('should handle exact boundary (elapsed at exactly interval)', () => {
+    const timer = new TimerGame(mockBot, 1.0); // 20 ticks
+    mockBot.time.age = 19;
+    expect(timer.elapsed()).toBe(false); // 0.95s < 1.0s
+
+    mockBot.time.age = 20;
+    expect(timer.elapsed()).toBe(true); // 1.0s >= 1.0s (inclusive)
+  });
+
+  test('should handle very small interval', () => {
+    const timer = new TimerGame(mockBot, 0.05); // 1 tick
+    mockBot.time.age = 1;
+    expect(timer.elapsed()).toBe(true);
+  });
+
+  test('getProgress with zero interval should return Infinity', () => {
+    const timer = new TimerGame(mockBot, 0);
+    mockBot.time.age = 20;
+    // elapsed / 0 = Infinity
+    expect(timer.getProgress()).toBe(Infinity);
+  });
+});
+
+describe('TimerReal edge cases', () => {
+  let now: number;
+
+  beforeEach(() => {
+    now = 1000000;
+    setSystemTime(new Date(now));
+  });
+
+  afterEach(() => {
+    setSystemTime();
+  });
+
+  test('should handle zero interval (always elapsed)', () => {
+    const timer = new TimerReal(0);
+    expect(timer.elapsed()).toBe(true);
+  });
+
+  test('should handle forceElapsed', () => {
+    const timer = new TimerReal(100.0);
+    timer.forceElapsed();
+    expect(timer.elapsed()).toBe(true);
+  });
+
+  test('should handle exact boundary', () => {
+    const timer = new TimerReal(1.0);
+    now += 999;
+    setSystemTime(new Date(now));
+    expect(timer.elapsed()).toBe(false);
+
+    now += 1;
+    setSystemTime(new Date(now));
+    expect(timer.elapsed()).toBe(true);
+  });
+});
+
 describe('Stopwatch', () => {
   let now: number;
 
@@ -263,5 +347,86 @@ describe('Stopwatch', () => {
 
     stopwatch.stop();
     expect(stopwatch.isRunning()).toBe(false);
+  });
+
+  test('double start should not reset accumulated time', () => {
+    const stopwatch = new Stopwatch();
+    stopwatch.start();
+
+    now += 1000;
+    setSystemTime(new Date(now));
+
+    // Second start while running should be a no-op
+    stopwatch.start();
+
+    now += 1000;
+    setSystemTime(new Date(now));
+
+    expect(stopwatch.getElapsedMillis()).toBe(2000);
+  });
+
+  test('double stop should not lose accumulated time', () => {
+    const stopwatch = new Stopwatch();
+    stopwatch.start();
+
+    now += 1000;
+    setSystemTime(new Date(now));
+    stopwatch.stop();
+
+    // Second stop while already stopped should be a no-op
+    now += 5000;
+    setSystemTime(new Date(now));
+    stopwatch.stop();
+
+    expect(stopwatch.getElapsedMillis()).toBe(1000);
+  });
+
+  test('getElapsedMillis when stopped should return accumulated only', () => {
+    const stopwatch = new Stopwatch();
+    stopwatch.start();
+
+    now += 500;
+    setSystemTime(new Date(now));
+    stopwatch.stop();
+
+    // Time passes but stopwatch is stopped
+    now += 10000;
+    setSystemTime(new Date(now));
+    expect(stopwatch.getElapsedMillis()).toBe(500);
+  });
+
+  test('reset while running should reset start time', () => {
+    const stopwatch = new Stopwatch();
+    stopwatch.start();
+
+    now += 3000;
+    setSystemTime(new Date(now));
+    stopwatch.reset();
+
+    // After reset, accumulated = 0, startTime = now
+    // But note: reset doesn't stop, so it's still not running
+    // (reset sets accumulated=0, startTime=now, but doesn't change running)
+    expect(stopwatch.getElapsedMillis()).toBeCloseTo(0, 0);
+  });
+
+  test('multiple stop/start cycles accumulate correctly', () => {
+    const stopwatch = new Stopwatch();
+
+    stopwatch.start();
+    now += 100;
+    setSystemTime(new Date(now));
+    stopwatch.stop();
+
+    stopwatch.start();
+    now += 200;
+    setSystemTime(new Date(now));
+    stopwatch.stop();
+
+    stopwatch.start();
+    now += 300;
+    setSystemTime(new Date(now));
+    stopwatch.stop();
+
+    expect(stopwatch.getElapsedMillis()).toBe(600);
   });
 });
