@@ -543,7 +543,19 @@ export {
   type MLGBucketConfig,
   MobDefenseChain,
   type MobDefenseConfig,
+  DeathMenuChain,
+  type DeathMenuConfig,
 } from './chains';
+
+// ---- Beat Minecraft ----
+export {
+  BeatMinecraftTask,
+  beatMinecraft,
+  speedrunMinecraft,
+  BeatMinecraftState,
+  BEAT_MINECRAFT_DEFAULT_CONFIG,
+  type BeatMinecraftConfig,
+} from './tasks';
 
 // ---- Event System ----
 export {
