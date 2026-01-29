@@ -359,5 +359,5 @@ bot.pathfinder.ctx.settings.canDig = false;
 ## Getting Help
 
 - Check the [documentation](./README.md)
-- Look at [examples](./examples.md)
+- Look at [examples](../examples/README.md)
 - Review [API reference](./api-reference.md)
