@@ -11,7 +11,7 @@ export {
   canReachBlock,
   calculateLookRotation,
   calculateFaceVector
-} from './BlockInteraction';
+} from './block';
 export {
   RotationHelper,
   getRotationHelper,

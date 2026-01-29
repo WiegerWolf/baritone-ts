@@ -87,9 +87,8 @@ export {
   ArmorSlot,
   OffhandSlot,
   ContainerSlot,
-  createSlotHandler,
   type SlotHandlerConfig,
-} from './SlotHandler';
+} from './slot';
 
 // Timers
 export * from './timers';

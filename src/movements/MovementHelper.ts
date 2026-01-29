@@ -7,7 +7,7 @@ import {
   findReferenceBlock,
   canReachBlock,
   calculateLookRotation
-} from '../core/BlockInteraction';
+} from '../core/block';
 
 /**
  * MovementHelper provides shared functionality for movement execution
