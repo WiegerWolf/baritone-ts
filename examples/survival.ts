@@ -27,7 +27,7 @@ bot.once('spawn', () => {
   // Create runner and register survival chains
   const runner = createTaskRunner(bot);
   runner.registerChain(new WorldSurvivalChain(bot));
-  runner.registerChain(new MobDefenseChain(bot, { mode: 'smart' }));
+  runner.registerChain(new MobDefenseChain(bot));
   runner.registerChain(new MLGBucketChain(bot));
   runner.registerChain(new FoodChain(bot));
 
@@ -51,7 +51,7 @@ bot.on('chat', (username, message) => {
     runner.setUserTask(
       new MineOresTask(bot, {
         targetOres: ['diamond_ore', 'deepslate_diamond_ore'],
-        quantity: 10,
+        targetCount: 10,
       }),
     );
     bot.chat('Mining diamonds with survival protection!');

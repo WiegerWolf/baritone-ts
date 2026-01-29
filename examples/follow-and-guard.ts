@@ -28,7 +28,7 @@ bot.on('chat', (username, message) => {
       target: player,
       minDistance: 2,
       maxDistance: 4,
-      sprint: true,
+      allowSprint: true,
     });
 
     (bot as any).pathfinder.processManager.register('follow', follower);
@@ -63,9 +63,13 @@ function createGuardBot() {
     (guard as any).pathfinder.processManager.register('combat', combat, { priority: 100 });
     (guard as any).pathfinder.processManager.activate('combat');
 
-    combat.on('target_killed', (entity: any) => {
-      guard.chat(`Killed ${entity.name}!`);
-    });
+    // Poll combat state
+    setInterval(() => {
+      const kills = combat.getKillCount();
+      if (kills > 0) {
+        guard.chat(`Kills: ${kills}`);
+      }
+    }, 5000);
   });
 
   guard.on('chat', (username, message) => {

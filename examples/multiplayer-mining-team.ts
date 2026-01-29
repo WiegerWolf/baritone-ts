@@ -18,11 +18,15 @@ leader.once('spawn', () => {
     searchRadius: 32,
   });
 
-  miner.on('block_found', (block: any) => {
-    leader.chat(
-      `/msg MineHelper found ${block.position.x} ${block.position.y} ${block.position.z}`,
-    );
-  });
+  // Poll for current target and share with helper
+  setInterval(() => {
+    const target = miner.getCurrentTarget();
+    if (target) {
+      leader.chat(
+        `/msg MineHelper found ${target.position.x} ${target.position.y} ${target.position.z}`,
+      );
+    }
+  }, 5000);
 });
 
 // --- Helper bot: navigates to ore locations ---

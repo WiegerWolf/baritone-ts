@@ -24,18 +24,14 @@ bot.once('spawn', () => {
   const miner = new MineProcess(bot, (bot as any).pathfinder, {
     blockNames: ['diamond_ore', 'deepslate_diamond_ore'],
     searchRadius: 64,
-    collectDrops: true,
   });
 
   (bot as any).pathfinder.processManager.register('mine', miner);
 
-  miner.on('block_mined', (block: any) => {
-    console.log(`Mined ${block.name}!`);
-  });
-
-  miner.on('complete', () => {
-    console.log('No more ores found');
-  });
+  // Poll mining progress
+  setInterval(() => {
+    console.log(`Blocks mined: ${miner.getBlocksMined()}`);
+  }, 5000);
 });
 
 // Start mining on command
@@ -72,13 +68,12 @@ function createSmartMiner() {
         'coal_ore', 'deepslate_coal_ore',
       ],
       searchRadius: 48,
-      collectDrops: true,
     });
 
     (smartBot as any).pathfinder.processManager.register('mine', miner);
 
-    // Check inventory after each block mined
-    miner.on('block_mined', async () => {
+    // Check inventory periodically
+    setInterval(async () => {
       const usedSlots = smartBot.inventory.slots.filter((s: any) => s !== null).length;
 
       if (usedSlots >= INVENTORY_THRESHOLD && chestLocation) {
@@ -87,7 +82,7 @@ function createSmartMiner() {
         await depositItems();
         (smartBot as any).pathfinder.processManager.activate('mine');
       }
-    });
+    }, 5000);
   });
 
   async function depositItems() {

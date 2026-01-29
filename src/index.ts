@@ -507,6 +507,12 @@ export {
   getSmeltingRecipe,
   type TaskProvider,
   type SmeltingRecipe,
+  // Concrete tasks
+  CraftTask,
+  // Composite tasks
+  CollectWoodTask,
+  MineOresTask,
+  type MineOreConfig,
 } from './tasks';
 
 // ---- Tracker System ----

@@ -19,9 +19,7 @@ bot.once('spawn', () => {
   pathfinder(bot, {
     canDig: true,
     canPlace: true,
-    scaffoldingBlocks: ['cobblestone', 'dirt'],
     allowParkour: true,
-    maxFallHeight: 3,
   });
 
   // Navigate to specific coordinates

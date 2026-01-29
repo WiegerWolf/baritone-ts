@@ -15,19 +15,15 @@ bot.once('spawn', () => {
     cropTypes: ['wheat', 'carrots', 'potatoes'],
     searchRadius: 32,
     replant: true,
-    harvestOnlyMature: true,
-    collectDrops: true,
+    minGrowthStage: 7,
   });
 
   (bot as any).pathfinder.processManager.register('farm', farmer);
 
-  farmer.on('crop_harvested', (block: any) => {
-    console.log(`Harvested ${block.name}`);
-  });
-
-  farmer.on('crop_planted', (pos: any, type: string) => {
-    console.log(`Planted ${type}`);
-  });
+  // Poll progress
+  setInterval(() => {
+    console.log(`Harvested: ${farmer.getCropsHarvested()}, Planted: ${farmer.getCropsPlanted()}`);
+  }, 10000);
 });
 
 bot.on('chat', (username, message) => {

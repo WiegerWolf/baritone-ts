@@ -47,8 +47,6 @@ bot.once('spawn', () => {
     canPlace: true,
     allowParkour: true,
     allowWaterBucket: true,
-    maxFallHeight: 3,
-    scaffoldingBlocks: ['cobblestone', 'dirt', 'netherrack'],
   });
 
   // Create task runner (automatically creates a UserTaskChain)
@@ -58,9 +56,9 @@ bot.once('spawn', () => {
   // Higher priority chains interrupt lower ones automatically.
   runner.registerChain(new DeathMenuChain(bot));          // priority 1000 — auto-respawn
   runner.registerChain(new WorldSurvivalChain(bot));       // priority  100 — escape lava/fire/drowning
-  runner.registerChain(new MobDefenseChain(bot, { mode: 'smart' })); // priority 100 — fight/flee mobs
+  runner.registerChain(new MobDefenseChain(bot));                     // priority 100 — fight/flee mobs
   runner.registerChain(new MLGBucketChain(bot));           // priority  100 — water bucket clutch
-  runner.registerChain(new FoodChain(bot, { minHunger: 14 }));       // priority   55 — auto-eat
+  runner.registerChain(new FoodChain(bot, { eatWhenHunger: 14 }));   // priority   55 — auto-eat
 
   // Log chain switches
   runner.on('chain_changed', (newChain, oldChain) => {

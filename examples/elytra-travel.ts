@@ -27,10 +27,7 @@ bot.on('chat', async (username, message) => {
 
   bot.chat(`Flying to ${x}, ${z}...`);
 
-  const elytra = new ElytraController(bot, (bot as any).pathfinder.ctx, {
-    useFireworks: true,
-    cruiseAltitude: 100,
-  });
+  const elytra = new ElytraController(bot, (bot as any).pathfinder.ctx);
 
   if (elytra.startFlight(destination)) {
     const interval = setInterval(() => {

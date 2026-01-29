@@ -33,10 +33,7 @@ bot.on('chat', (username, message) => {
 
   if (message === 'get wood') {
     runner.setUserTask(
-      new CollectWoodTask(bot, {
-        woodType: 'any',
-        quantity: 32,
-      }),
+      new CollectWoodTask(bot, 32),
     );
     bot.chat('Getting wood!');
   }
@@ -45,7 +42,7 @@ bot.on('chat', (username, message) => {
     // Chain: get wood -> make pick -> mine iron
     // Each task runs to completion before the next starts
     runner.setUserTask(
-      new CollectWoodTask(bot, { woodType: 'any', quantity: 8 }),
+      new CollectWoodTask(bot, 8),
     );
     bot.chat('Starting iron gathering expedition!');
   }
